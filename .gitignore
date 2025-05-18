@@ -6,6 +6,9 @@
 .pnp.js
 .yarn/install-state.gz
 
+# pnpm lockfile (ignore it to avoid pushing)
+pnpm-lock.yaml
+
 # testing
 /coverage
 
