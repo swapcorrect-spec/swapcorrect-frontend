@@ -1,8 +1,8 @@
 import { Card, CardContent } from "@/components/ui/card";
-import Image from "next/image";
-import HotPick from "@/app/assets/images/hot_pick.svg";
 import Rating from "@/app/assets/images/star_rating.svg";
+import HotPick from "@/app/assets/images/hot_pick.svg";
 import { Button } from "@/components/ui/button";
+import Image from "next/image";
 import { Heart } from "lucide-react";
 interface iWantList {
   name: string;
@@ -17,7 +17,7 @@ interface iProps {
   price?: string | number;
 }
 
-const ItemSliderContent: React.FC<iProps> = ({
+const ProductDetails: React.FC<iProps> = ({
   imgUrl,
   rating,
   vendorName,
@@ -26,7 +26,7 @@ const ItemSliderContent: React.FC<iProps> = ({
   price,
 }) => {
   return (
-    <Card className="bg-white max-w-[388px] w-full h-full flex p-2 cursor-pointer">
+    <Card className="bg-white w-full flex p-2 cursor-pointer">
       <CardContent className="h-full flex flex-col flex-grow p-0">
         <div className="mb-4 w-full h-[355px] relative">
           <Image
@@ -90,4 +90,4 @@ const ItemSliderContent: React.FC<iProps> = ({
   );
 };
 
-export default ItemSliderContent;
+export default ProductDetails;
