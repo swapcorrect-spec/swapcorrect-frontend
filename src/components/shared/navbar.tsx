@@ -16,7 +16,7 @@ import { Input } from "../ui/input";
 
 const Navbar: React.FC = () => {
   return (
-    <section className="border-[#E9E9E9] bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10">
+    <section className="shadow-lg border-[#E9E9E9] bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10">
       <div className="flex justify-center">
         <Logo />
       </div>
