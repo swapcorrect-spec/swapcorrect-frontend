@@ -3,7 +3,7 @@ export const PATHS = {
   SIGNUP: "signup",
   FORGOT_PASSWORD: "forgot-password",
   DASHBOARD: "/dashboard",
-  SAVES: "/dashboard/save",
+  SAVES: "/saved-items",
   CHAT: "/dashboard/chat",
   CATEGORY: "/dashboard/category",
 };
