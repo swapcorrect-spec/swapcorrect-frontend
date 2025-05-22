@@ -17,7 +17,7 @@ export default function AuthLayout({
     <>
       <section className={cn("flex w-full")}>
         <Sidebar />
-        <section className="bg-[#F9F9F9] flex-1 h-screen overflow-y-auto">
+        <section className="flex-1 h-screen overflow-y-auto">
           <Navbar />
           {children}
         </section>

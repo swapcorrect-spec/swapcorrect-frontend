@@ -16,11 +16,11 @@ import { Input } from "../ui/input";
 
 const Navbar: React.FC = () => {
   return (
-    <section className="shadow-lg border-[#E9E9E9] bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10">
+    <section className="shadow-lg border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10 w-full">
       <div className="flex justify-center">
         <Logo />
       </div>
-      <div className="max-w-[749px] w-full">
+      <div className="max-w-[749px] w-full me-auto">
         <Input
           startIcon={<Search />}
           className="w-full !h-11 rounded-[2rem]"
