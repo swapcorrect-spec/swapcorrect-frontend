@@ -28,7 +28,7 @@ const ProductDetails: React.FC<iProps> = ({
   return (
     <Card className="bg-white w-full flex p-2 cursor-pointer">
       <CardContent className="h-full flex flex-col flex-grow p-0">
-        <div className="mb-4 w-full h-[355px] relative">
+        <div className="mb-4 w-full h-[255px] relative">
           <Image
             alt="Testimony person image"
             fill

@@ -4,6 +4,6 @@ export const PATHS = {
   FORGOT_PASSWORD: "forgot-password",
   DASHBOARD: "/dashboard",
   SAVES: "/saved-items",
-  CHAT: "/dashboard/chat",
+  CHAT: "/chat",
   CATEGORY: "/dashboard/category",
 };
