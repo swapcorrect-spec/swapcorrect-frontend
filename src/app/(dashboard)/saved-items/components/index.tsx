@@ -30,9 +30,7 @@ const SavedItems: React.FC = () => {
   ];
   return (
     <section className="p-6">
-      <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xl">
-        SAVED SWAPS
-      </h6>
+      <h6 className="text-[#007AFF] font-medium mb-3 text-xl">SAVED SWAPS</h6>
       <p className="text-xl font-medium text-[#222222] mb-8">
         All the items you've marked to trade later
       </p>

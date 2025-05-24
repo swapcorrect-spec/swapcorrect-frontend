@@ -18,6 +18,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Input } from "../ui/input";
 import Notification from "../widget/notification";
+import Link from "next/link";
 
 const Navbar: React.FC = () => {
   const mockNotifications = [
@@ -168,6 +169,9 @@ const Navbar: React.FC = () => {
           <DropdownMenuContent className="w-40">
             <DropdownMenuGroup>
               <DropdownMenuItem>Profile</DropdownMenuItem>
+              <DropdownMenuItem asChild>
+                <Link href="/settings">Settings</Link>
+              </DropdownMenuItem>
               <DropdownMenuItem>Logout</DropdownMenuItem>
             </DropdownMenuGroup>
           </DropdownMenuContent>
