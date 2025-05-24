@@ -35,12 +35,17 @@ const Navbar: React.FC = () => {
         >
           Upgrade to Swapper <SwapperUpgradeLogo />
         </Button>
-        <div className="relative">
-          <Bell />
-          <div className="absolute top-[-3px] right-[-2px] text-white bg-[#E42222] w-4 h-4 rounded-full items-center justify-center flex text-xs">
-            4
-          </div>
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <div className="relative">
+              <Bell />
+              <div className="absolute top-[-3px] right-[-2px] text-white bg-[#E42222] w-4 h-4 rounded-full items-center justify-center flex text-xs">
+                4
+              </div>
+            </div>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent className="w-[625px]"></DropdownMenuContent>
+        </DropdownMenu>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <button className="flex items-center !border-0 gap-2">
