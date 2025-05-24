@@ -15,6 +15,7 @@ interface iProps {
   rating?: number;
   vendorName?: string;
   price?: string | number;
+  showHotpick?: boolean;
 }
 
 const ProductDetails: React.FC<iProps> = ({
@@ -24,6 +25,7 @@ const ProductDetails: React.FC<iProps> = ({
   wantList,
   productName,
   price,
+  showHotpick = true,
 }) => {
   return (
     <Card className="bg-white w-full flex p-2 cursor-pointer">
@@ -35,12 +37,14 @@ const ProductDetails: React.FC<iProps> = ({
             src={imgUrl}
             className="rounded-xl object-cover"
           />
-          <div className=" px-4 w-full absolute top-[16px] flex justify-between">
-            <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
-              <HotPick />
-              <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
-            </div>
-            <div className="bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center">
+          <div className=" px-4 w-full absolute top-[16px] flex">
+            {showHotpick && (
+              <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
+                <HotPick />
+                <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
+              </div>
+            )}
+            <div className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center">
               <Heart fill="#E42222" color="#E42222" size={16} />
             </div>
           </div>
