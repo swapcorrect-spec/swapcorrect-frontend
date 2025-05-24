@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 
 const ProductOverview: React.FC = () => {
   const productTabList = [
@@ -134,14 +135,16 @@ const ProductOverview: React.FC = () => {
                   <p>27 swaps</p>
                 </div>
               </div>
-              <div className="border border-[#E9E9E9] rounded-[6px] gap-1 p-[6px] flex items-center">
-                <p className="font-medium text-xs text-[#222222]">
-                  View profile
-                </p>
-                <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
-                  <ArrowRight size={12} color="#fff" />
-                </span>
-              </div>
+              <Link href="/profile/1">
+                <div className="border border-[#E9E9E9] rounded-[6px] gap-1 p-[6px] flex items-center">
+                  <p className="font-medium text-xs text-[#222222]">
+                    View profile
+                  </p>
+                  <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
+                    <ArrowRight size={12} color="#fff" />
+                  </span>
+                </div>
+              </Link>
             </CardContent>
           </Card>
           <Card className="bg-[#F0FFF6]">
@@ -156,8 +159,9 @@ const ProductOverview: React.FC = () => {
                 variant={"default"}
                 className="rounded-full font-medium text-sm py-3 w-full"
                 size={"lg"}
+                asChild
               >
-                Negotiate
+                <Link href="/chat">Negotiate</Link>
               </Button>
             </CardContent>
           </Card>

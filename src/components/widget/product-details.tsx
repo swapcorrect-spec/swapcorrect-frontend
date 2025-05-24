@@ -1,9 +1,11 @@
+"use client";
 import { Card, CardContent } from "@/components/ui/card";
 import Rating from "@/app/assets/images/star_rating.svg";
 import HotPick from "@/app/assets/images/hot_pick.svg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Heart } from "lucide-react";
+import { useRouter } from "next/navigation";
 interface iWantList {
   name: string;
 }
@@ -27,8 +29,12 @@ const ProductDetails: React.FC<iProps> = ({
   price,
   showHotpick = true,
 }) => {
+  const router = useRouter();
   return (
-    <Card className="bg-white w-full flex p-2 cursor-pointer">
+    <Card
+      className="bg-white w-full flex p-2 cursor-pointer"
+      onClick={() => router.push("/product-overview/1")}
+    >
       <CardContent className="h-full flex flex-col flex-grow p-0">
         <div className="mb-4 w-full h-[255px] relative">
           <Image
