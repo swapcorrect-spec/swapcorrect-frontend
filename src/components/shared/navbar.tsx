@@ -50,7 +50,7 @@ const Navbar: React.FC = () => {
               <ArrowDown />
             </button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56">
+          <DropdownMenuContent className="w-40">
             <DropdownMenuGroup>
               <DropdownMenuItem>Profile</DropdownMenuItem>
               <DropdownMenuItem>Logout</DropdownMenuItem>

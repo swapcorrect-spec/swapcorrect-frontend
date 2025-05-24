@@ -1,9 +1,33 @@
-import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+"use client";
+
 import SavedItemsEmptyState from "./empty-state";
 import ProductDetails from "@/components/widget/product-details";
+import FilterMenu from "@/components/shared/filters/menu-dropdown";
+import { useState } from "react";
 
 const SavedItems: React.FC = () => {
+  const [category, setCategory] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const categoryList = [
+    {
+      text: "Electronics",
+      value: "electronics",
+    },
+    {
+      text: "Textiles",
+      value: "textiles",
+    },
+  ];
+  const locationList = [
+    {
+      text: "Lagos",
+      value: "lagos",
+    },
+    {
+      text: "Abuja",
+      value: "abuja",
+    },
+  ];
   return (
     <section className="p-6">
       <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xl">
@@ -13,13 +37,12 @@ const SavedItems: React.FC = () => {
         All the items you've marked to trade later
       </p>
       <div>
-        <div className="max-w-[749px] w-full">
-          <Input
-            startIcon={<Search />}
-            className="w-full !h-9 rounded-lg"
-            placeholder="Search items..."
-          />
-        </div>
+        <FilterMenu
+          categoryList={categoryList}
+          locationList={locationList}
+          setCategory={setCategory}
+          setLocation={setLocation}
+        />
       </div>
       <SavedItemsEmptyState />
       <div className="grid grid-cols-3 gap-4">
