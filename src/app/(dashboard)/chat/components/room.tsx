@@ -10,10 +10,20 @@ import { Button } from "@/components/ui/button";
 import Gallery from "@/app/assets/images/Gallery.svg";
 import Smiley from "@/app/assets/images/smiley.svg";
 
+type ChatListProps = {
+  id: string;
+  message: string;
+  time: string;
+  isText: boolean;
+  fileUrl?: {
+    imgUrl: string;
+  }[];
+};
+
 const MessageRoom: React.FC = () => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [swapType, setSwapType] = useState<string>("");
-  const chatList = [
+  const chatList: ChatListProps[] = [
     {
       id: "2",
       message: "Yo bro, you dey?",
@@ -156,7 +166,7 @@ const MessageRoom: React.FC = () => {
         ) : (
           <div>
             <div className="flex flex-col">
-              {chatList.map((chat: any, index: number) => {
+              {chatList.map((chat, index: number) => {
                 const user = chat.id === "1";
                 const isLastFromSender =
                   index === chatList.length - 1 ||

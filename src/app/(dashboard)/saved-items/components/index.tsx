@@ -6,8 +6,8 @@ import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
 
 const SavedItems: React.FC = () => {
-  const [category, setCategory] = useState<string>("");
-  const [location, setLocation] = useState<string>("");
+  const [, setCategory] = useState<string>("");
+  const [, setLocation] = useState<string>("");
   const categoryList = [
     {
       text: "Electronics",
@@ -32,7 +32,7 @@ const SavedItems: React.FC = () => {
     <section className="p-6">
       <h6 className="text-[#007AFF] font-medium mb-3 text-xl">SAVED SWAPS</h6>
       <p className="text-xl font-medium text-[#222222] mb-8">
-        All the items you've marked to trade later
+        All the items you&apos;ve marked to trade later
       </p>
       <div>
         <FilterMenu
