@@ -58,8 +58,11 @@ const Onboarding: FC = () => {
           </p>
         </div>
         <div className="flex justify-between w-[80%] mx-auto gap-10">
-          {USER_TYPE.map(({ user, banner, items, variant }) => (
-            <div className="bg-white w-[fit-content] p-[14px] rounded-xl">
+          {USER_TYPE.map(({ user, banner, items, variant }, index: number) => (
+            <div
+              className="bg-white w-[fit-content] p-[14px] rounded-xl"
+              key={index}
+            >
               <p className="text-[#000000] text-xl font-medium">{user}</p>
               <Image
                 src={banner}
@@ -67,7 +70,7 @@ const Onboarding: FC = () => {
                 className="my-4"
               />
               {items.map((item, index) => (
-                <div className="flex flex-row gap-2 mb-4">
+                <div className="flex flex-row gap-2 mb-4" key={index}>
                   <CheckIcon style={{ width: "25px", height: "25px" }} />
                   <p key={index} className="text-[#737373] text-sm font-normal">
                     {item}

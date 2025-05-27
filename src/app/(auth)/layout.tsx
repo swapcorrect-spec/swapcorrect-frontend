@@ -14,8 +14,10 @@ const AuthLayout = ({
   children: React.ReactNode;
 }>) => {
   const progressCircle = useRef<SVGCircleElement | null>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const progressContent: any = useRef(null);
-  const onAutoplayTimeLeft = (s: any, time: any, progress: any) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const onAutoplayTimeLeft = (s: any, time: number, progress: number) => {
     if (progressCircle.current) {
       progressCircle.current.style.setProperty("--progress", `${1 - progress}`);
     }

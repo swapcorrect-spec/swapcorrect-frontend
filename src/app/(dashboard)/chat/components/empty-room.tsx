@@ -1,7 +1,5 @@
 "use client";
 
-import Link from "next/link";
-
 export default function EmptyChatRoom() {
   return (
     <div className="flex h-full w-full flex-col items-center justify-center text-center">
