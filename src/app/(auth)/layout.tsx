@@ -45,7 +45,7 @@ const AuthLayout = ({
             className="mySwiper"
           >
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/Banner_one.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/banner_one.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
                     Turn Your Items Into Instant Value!
@@ -58,7 +58,7 @@ const AuthLayout = ({
               </div>
             </SwiperSlide>
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/Banner_three.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/banner_three.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
                     Swap. Shop. Shine!
@@ -71,7 +71,7 @@ const AuthLayout = ({
               </div>
             </SwiperSlide>
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/Banner_two.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/banner_two.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[76%]">
                     Join The Elite Team of Swappers
