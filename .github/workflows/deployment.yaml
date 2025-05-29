@@ -29,7 +29,8 @@ jobs:
       # - name: Run tests
       #   run: npm test
 
-      - name: Deploy to Render
-        run: curl "$RENDER_DEPLOY_HOOK"
+      - name: Deploy to render
         env:
-          RENDER_DEPLOY_HOOK: ${{ secrets.RENDER_DEPLOY_HOOK }}
+          deploy_url: ${{ secrets.RENDER_DEPLOY_HOOK }}
+        run: |
+          curl "$deploy_url"
