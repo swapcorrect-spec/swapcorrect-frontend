@@ -1,7 +1,7 @@
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import React from "react";
-import ShieldStar from "@/app/assets/images/shield_star.svg";
-import CircleStar from "@/app/assets/images/star_circle.svg";
+import ShieldStar from "@/app/assets/images/svgs/shield_star.svg";
+import CircleStar from "@/app/assets/images/svgs/star_circle.svg";
 import { Button } from "@/components/ui/button";
 
 interface iProps {

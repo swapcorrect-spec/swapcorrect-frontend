@@ -1,5 +1,5 @@
 import { Card, CardContent } from "@/components/ui/card";
-import Rating from "@/app/assets/images/star_rating.svg";
+import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowRight } from "lucide-react";

@@ -8,12 +8,12 @@ import AuthForm from "@/components/shared/AuthForm";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-import UserIcon from "@/app/assets/images/User.svg";
-import EmailIcon from "@/app/assets/images/Email.svg";
-import PhoneIcon from "@/app/assets/images/Phone.svg";
-import AddressIcon from "@/app/assets/images/Address.svg";
-import PasswordIcon from "@/app/assets/images/Password.svg";
-import EyeClosedIcon from "@/app/assets/images/Eye_Closed.svg";
+import UserIcon from "@/app/assets/images/svgs/User.svg";
+import EmailIcon from "@/app/assets/images/svgs/Email.svg";
+import PhoneIcon from "@/app/assets/images/svgs/Phone.svg";
+import AddressIcon from "@/app/assets/images/svgs/Address.svg";
+import PasswordIcon from "@/app/assets/images/svgs/Password.svg";
+import EyeClosedIcon from "@/app/assets/images/svgs/Eye_Closed.svg";
 
 const Signup: FC = () => {
   return (

@@ -5,5 +5,5 @@ export const PATHS = {
   DASHBOARD: "/dashboard",
   SAVES: "/saved-items",
   CHAT: "/chat",
-  CATEGORY: "/dashboard/category",
+  CATEGORY: "/category",
 };

@@ -1,7 +1,7 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
-import Rating from "@/app/assets/images/star_rating.svg";
-import HotPick from "@/app/assets/images/hot_pick.svg";
+import Rating from "@/app/assets/images/svgs/star_rating.svg";
+import HotPick from "@/app/assets/images/svgs/hot_pick.svg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import { Heart } from "lucide-react";

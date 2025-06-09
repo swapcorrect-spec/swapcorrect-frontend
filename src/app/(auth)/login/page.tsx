@@ -6,10 +6,10 @@ import AuthForm from "@/components/shared/AuthForm";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 
-import EmailIcon from "@/app/assets/images/Email.svg";
-import PasswordIcon from "@/app/assets/images/Password.svg";
-import EyeClosedIcon from "@/app/assets/images/Eye_Closed.svg";
-import GoogleIcon from "@/app/assets/images/GoogleIcon.svg";
+import EmailIcon from "@/app/assets/images/svgs/Email.svg";
+import PasswordIcon from "@/app/assets/images/svgs/Password.svg";
+import EyeClosedIcon from "@/app/assets/images/svgs/Eye_Closed.svg";
+import GoogleIcon from "@/app/assets/images/svgs/GoogleIcon.svg";
 
 import { PATHS } from "@/app/_constants/paths";
 

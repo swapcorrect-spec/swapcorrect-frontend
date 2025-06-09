@@ -1,9 +1,9 @@
 import MomentAgo from "../moment-ago";
-import NewChat from "@/app/assets/images/New_chat.svg";
-import NewReview from "@/app/assets/images/New_review.svg";
-import NewSwap from "@/app/assets/images/new_swap.svg";
-import OfferAccepted from "@/app/assets/images/Offer_accepted.svg";
-import OfferDeclined from "@/app/assets/images/Offer_declined.svg";
+import NewChat from "@/app/assets/images/svgs/New_chat.svg";
+import NewReview from "@/app/assets/images/svgs/New_review.svg";
+import NewSwap from "@/app/assets/images/svgs/new_swap.svg";
+import OfferAccepted from "@/app/assets/images/svgs/Offer_accepted.svg";
+import OfferDeclined from "@/app/assets/images/svgs/Offer_declined.svg";
 
 interface Notify {
   read: boolean;

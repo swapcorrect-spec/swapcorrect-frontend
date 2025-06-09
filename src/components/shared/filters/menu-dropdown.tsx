@@ -6,7 +6,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { SelectFilter } from "./select";
 import { Button } from "@/components/ui/button";
-import Filter from "@/app/assets/images/Filter.svg";
+import Filter from "@/app/assets/images/svgs/Filter.svg";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 

@@ -7,8 +7,8 @@ import { Input } from "@/components/ui/input";
 import SwapModalContent from "./swap-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import Gallery from "@/app/assets/images/Gallery.svg";
-import Smiley from "@/app/assets/images/smiley.svg";
+import Gallery from "@/app/assets/images/svgs/Gallery.svg";
+import Smiley from "@/app/assets/images/svgs/smiley.svg";
 
 type ChatListProps = {
   id: string;

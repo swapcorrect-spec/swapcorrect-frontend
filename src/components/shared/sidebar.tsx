@@ -1,14 +1,14 @@
 "use client";
 
-import HomeOutline from "@/app/assets/images/home_outline.svg";
-import HomeFilled from "@/app/assets/images/home_filled.svg";
-import ChatFilled from "@/app/assets/images/chat_filled.svg";
-import ChatOutline from "@/app/assets/images/chat_outline.svg";
-import SaveFilled from "@/app/assets/images/save_filled.svg";
-import SaveOutline from "@/app/assets/images/save_outline.svg";
-import Hamburger from "@/app/assets/images/hamburger.svg";
-import CategoryFilled from "@/app/assets/images/category_filled.svg";
-import CategoryOutline from "@/app/assets/images/category_outline.svg";
+import HomeOutline from "@/app/assets/images/svgs/home_outline.svg";
+import HomeFilled from "@/app/assets/images/svgs/home_filled.svg";
+import ChatFilled from "@/app/assets/images/svgs/chat_filled.svg";
+import ChatOutline from "@/app/assets/images/svgs/chat_outline.svg";
+import SaveFilled from "@/app/assets/images/svgs/save_filled.svg";
+import SaveOutline from "@/app/assets/images/svgs/save_outline.svg";
+import Hamburger from "@/app/assets/images/svgs/hamburger.svg";
+import CategoryFilled from "@/app/assets/images/svgs/category_filled.svg";
+import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
 import { usePathname } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import Link from "next/link";
