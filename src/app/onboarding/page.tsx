@@ -1,12 +1,12 @@
 import { FC } from "react";
 import Image from "next/image";
 
-import SwapperImg from "@/app/assets/images/swapper.png";
-import VisitorImg from "@/app/assets/images/visitor.png";
+import SwapperImg from "@/app/assets/images/pngs/swapper.png";
+import VisitorImg from "@/app/assets/images/pngs/visitor.png";
 import { Button } from "@/components/ui/button";
 
-import CheckIcon from "@/app/assets/images/check_icon.svg";
-import Logo from "@/app/assets/images/logo_full.svg";
+import CheckIcon from "@/app/assets/images/svgs/check_icon.svg";
+import Logo from "@/app/assets/images/svgs/logo_full.svg";
 
 type ButtonVariant =
   | "default"
@@ -42,7 +42,7 @@ const USER_TYPE = [
 const Onboarding: FC = () => {
   return (
     <div
-      className={`bg-[url(../app/assets/images/onboarding_bg.png)] bg-cover bg-no-repeat h-[75vh] absolute bottom-0 left-0 right-0 bg-top`}
+      className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-cover bg-no-repeat h-[75vh] absolute bottom-0 left-0 right-0 bg-top`}
     >
       <div className="w-2/4 mx-auto absolute top-[35%] left-1/2 -translate-x-1/2 -translate-y-1/2">
         <div className="flex justify-center">

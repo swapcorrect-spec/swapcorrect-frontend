@@ -1,4 +1,4 @@
-import SavedEmpty from "@/app/assets/images/saved-empty.svg";
+import SavedEmpty from "@/app/assets/images/svgs/saved-empty.svg";
 import { Button } from "@/components/ui/button";
 
 const SavedItemsEmptyState: React.FC = () => {

@@ -2,8 +2,8 @@
 
 import { Card, CardContent } from "@/components/ui/card";
 import Image from "next/image";
-import HotPick from "@/app/assets/images/hot_pick.svg";
-import Rating from "@/app/assets/images/star_rating.svg";
+import HotPick from "@/app/assets/images/svgs/hot_pick.svg";
+import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";

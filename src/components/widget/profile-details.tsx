@@ -1,7 +1,7 @@
 import { Card, CardContent } from "../ui/card";
-import Listed from "@/app/assets/images/listed.svg";
-import Swaps from "@/app/assets/images/swaps.svg";
-import Ratings from "@/app/assets/images/ratings.svg";
+import Listed from "@/app/assets/images/svgs/listed.svg";
+import Swaps from "@/app/assets/images/svgs/swaps.svg";
+import Ratings from "@/app/assets/images/svgs/ratings.svg";
 import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
@@ -11,7 +11,7 @@ const ProfileDetailsHeader: React.FC = () => {
     <Card>
       <CardContent className="p-3">
         <div className="flex items-center gap-3 w-full mb-6">
-          <div className="w-20 h-20 rounded-full flex items-center justify-center bg-[#F4CE9B] rounded-full">
+          <div className="w-20 h-20 rounded-full flex items-center justify-center bg-[#F4CE9B]">
             <Image
               src="https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80"
               height={56}

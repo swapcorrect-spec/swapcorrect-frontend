@@ -1,11 +1,11 @@
 "use client";
 
-import Logo from "@/app/assets/images/logo_full.svg";
-import SwapperUpgradeLogo from "@/app/assets/images/swapper_upgrade.svg";
-import Bell from "@/app/assets/images/Bell.svg";
-import Search from "@/app/assets/images/Search.svg";
-import Avatar from "@/app/assets/images/Avatar.svg";
-import ArrowDown from "@/app/assets/images/arrow_down.svg";
+import Logo from "@/app/assets/images/svgs/logo_full.svg";
+import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import Bell from "@/app/assets/images/svgs/Bell.svg";
+import Search from "@/app/assets/images/svgs/Search.svg";
+import Avatar from "@/app/assets/images/svgs/Avatar.svg";
+import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 import { Button } from "../ui/button";
@@ -105,7 +105,7 @@ const Navbar: React.FC = () => {
   ];
 
   return (
-    <section className="shadow-lg border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10 w-full">
+    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10 w-full">
       <div className="flex justify-center">
         <Logo />
       </div>

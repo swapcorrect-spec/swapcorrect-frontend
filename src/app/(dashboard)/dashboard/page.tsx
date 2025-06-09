@@ -6,7 +6,7 @@ const Dashboard: FC = () => {
   return (
     <section>
       <div
-        className={`bg-[url(../app/assets/images/onboarding_bg.png)] bg-cover bg-no-repeat h-[calc(100vh-82px)] bg-top flex flex-col items-center justify-center`}
+        className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-cover bg-no-repeat h-[calc(100vh-82px)] bg-top flex flex-col items-center justify-center`}
       >
         <div className="max-w-[839px] w-full mx-auto">
           <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center">
