@@ -6,7 +6,7 @@ const ItemsListingEmptyState: React.FC = () => {
     <section className="flex flex-col items-center justify-center text-center mt-20">
       <ItemsEmpty />
       <p className="text-xl font-medium text-[#222222] mt-8 mb-2">
-        You haven't listed any items yet
+        You haven&apos;t listed any items yet
       </p>
       <p className="text-[#737373] text-sm mb-8">
         Start listing items you want to swap with others

@@ -1,7 +1,6 @@
 "use client";
 
 import ItemsListingEmptyState from "./empty-items-listing";
-import ProductDetails from "@/components/widget/product-details";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";

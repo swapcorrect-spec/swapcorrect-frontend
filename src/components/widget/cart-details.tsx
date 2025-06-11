@@ -14,7 +14,6 @@ interface iProps {
   productName?: string;
   title?: string;
   rating?: number;
-  vendorName?: string;
   price?: string | number;
   showHotpick?: boolean;
   description?: string;
@@ -25,7 +24,6 @@ interface iProps {
 const CartDetails: React.FC<iProps> = ({
   imgUrl,
   rating,
-  vendorName,
   wantList,
   productName,
   price,
