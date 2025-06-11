@@ -33,7 +33,7 @@ const ProductDetails: React.FC<iProps> = ({
   return (
     <Card
       className="bg-white w-full flex p-2 cursor-pointer"
-      onClick={() => router.push("/product-overview/1")}
+      onClick={() => router.push("/product/1")}
     >
       <CardContent className="h-full flex flex-col flex-grow p-0">
         <div className="mb-4 w-full h-[255px] relative">

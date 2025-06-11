@@ -10,6 +10,7 @@ const UserProfile: React.FC = () => {
         <ProfileDetailsHeader />
         <Card>
           <CardContent className="p-3">
+            <p className="mb-4 font-medium text-base">Reviews</p>
             <div className="flex flex-col gap-2">
               {Array.from({ length: 5 }).map((_, index) => (
                 <Reviews key={index} />
