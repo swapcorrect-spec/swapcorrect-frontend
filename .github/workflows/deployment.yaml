@@ -1,0 +1,33 @@
+name: Deploy app to Render
+
+on:
+  push:
+    branches: ["dev"]
+  pull_request:
+    branches: ["dev"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run build
+        run: npm run build
+
+      # Optional: run tests here
+      # - name: Run tests
+      #   run: npm test
+
+      - name: Deploy to render
+        run: curl ${{ secrets.RENDER_DEPLOY_HOOK }}
