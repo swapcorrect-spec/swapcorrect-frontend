@@ -48,7 +48,7 @@ const AuthLayout = ({
               <div className="relative bg-[url(../app/assets/images/pngs/banner_one.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
-                    Turn Your Items Into Instant Value!
+                    Turns Yours Items Into Instant Value!
                   </h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
                     No be only buy and sell — swap your way to something better.
