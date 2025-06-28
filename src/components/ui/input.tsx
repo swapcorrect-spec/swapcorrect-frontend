@@ -5,7 +5,7 @@ import { cn } from "@/lib/utils";
 interface InputProps extends React.ComponentProps<"input"> {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
-  error?: any;
+  error?: string;
   label?: string;
 }
 
