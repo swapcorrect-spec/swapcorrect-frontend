@@ -26,13 +26,6 @@ import { useEffect, useState } from "react";
 const Navbar: React.FC = () => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
-  // let isLoggedIn;
-
-  // if (typeof window !== "undefined") {
-  // const isLoggedIn = localStorage.getItem("user")
-  //   ? localStorage.getItem("user")
-  //   : null;
-  // // }
 
   useEffect(() => {
     if (localStorage.getItem("user")) {
