@@ -1,8 +1,11 @@
 "use client";
+import { useEffect, useState } from "react";
+import { useSearchParams, useRouter } from "next/navigation";
+
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import Product from "@/components/shared/Product";
-import { useSearchParams, useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+
+import ProductThree from "@/app/assets/images/pngs/product_3.jpg";
 
 const Categories = () => {
   const search = useSearchParams();
@@ -52,12 +55,18 @@ const Categories = () => {
         />
       </div>
       <div className="grid grid-cols-3 gap-5">
-        <Product />
-        <Product />
-        <Product />
-        <Product />
-        <Product />
-        <Product />
+        {[0, 1, 2, 3, 4, 5].map((item: number) => (
+          <Product
+            key={item}
+            author="Jenny Franklin"
+            image={ProductThree}
+            name="Gently used Nike shoe"
+            photo="https://randomuser.me/api/portraits/thumb/women/1.jpg"
+            price="$75,000 Est."
+            rating={3.4}
+            wants={["Airpod, Powerbank"]}
+          />
+        ))}
       </div>
     </div>
   );

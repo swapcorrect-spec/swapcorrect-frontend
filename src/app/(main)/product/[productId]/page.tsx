@@ -1,4 +1,4 @@
-import ProductOverview from "@/app/(dashboard)/product/[productId]/components";
+import ProductOverview from "@/app/(main)/product/[productId]/components";
 
 export default function Product() {
   return (
