@@ -1,11 +1,10 @@
 "use client";
 import { Card, CardContent } from "@/components/ui/card";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
-import HotPick from "@/app/assets/images/svgs/hot_pick.svg";
-import { Button } from "@/components/ui/button";
 import Image from "next/image";
-import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { Button } from "../ui/button";
+import { Eye, SquarePen, Trash2 } from "lucide-react";
 interface iWantList {
   name: string;
 }
@@ -15,19 +14,22 @@ interface iProps {
   productName?: string;
   title?: string;
   rating?: number;
-  vendorName?: string;
   price?: string | number;
   showHotpick?: boolean;
+  description?: string;
+  status?: string;
+  level?: string;
 }
 
-const ProductDetails: React.FC<iProps> = ({
+const CartDetails: React.FC<iProps> = ({
   imgUrl,
   rating,
-  vendorName,
   wantList,
   productName,
   price,
-  showHotpick = true,
+  description,
+  status,
+  level,
 }) => {
   const router = useRouter();
   return (
@@ -43,26 +45,28 @@ const ProductDetails: React.FC<iProps> = ({
             src={imgUrl}
             className="rounded-xl object-cover"
           />
-          <div className=" px-4 w-full absolute top-[16px] flex">
-            {showHotpick && (
-              <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
-                <HotPick />
-                <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
-              </div>
-            )}
-            <div className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center">
-              <Heart fill="#E42222" color="#E42222" size={16} />
-            </div>
-          </div>
         </div>
         <div>
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-3">
             <h6 className="text-xl font-medium">
               {productName || "Gently used Nike shoe"}
             </h6>
+            <span className="border border-[#E9E9E9] bg-[#FAFAFA] rounded-xl text-xs px-2 py-1">
+              {status || "Active"}
+            </span>
+          </div>
+          <p className="text-[#737373] text-sm mb-3">
+            {description ||
+              "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidun"}
+          </p>
+          <div className="flex gap-3 items-center mb-2">
             <p className="font-medium text-[#007AFF]">
               $ {price || "75,000"} Est.
             </p>
+            <span className="border border-[#E9E9E9] bg-[#FAFAFA] rounded-xl text-xs px-2 py-1">
+              {level || "Basic"}
+            </span>
+            <p className="ms-auto text-sm text-[#737373]">10/15/2023</p>
           </div>
           <div className="flex items-start gap-2 mb-3">
             <h6 className="text-[#222222] text-sm font-medium">Wants:</h6>
@@ -79,25 +83,27 @@ const ProductDetails: React.FC<iProps> = ({
               </ul>
             )}
           </div>
-          <div className="rounded-xl mb-6 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-            <p className="font-medium me-auto">
-              {vendorName || "Jenny Franklin"}
-            </p>
-            <p className="flex items-center gap-1">
-              {rating || 3.5} <Rating />
-            </p>
+
+          <p className="flex items-center gap-1">
+            {rating || 3.5} <Rating />
+          </p>
+          <div className="mt-4 flex gap-3 items-center text-[#737373] text-sm">
+            <Button variant="outline" className="flex items-center gap-2">
+              <SquarePen size={16} /> Edit
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Trash2 size={16} />
+              Delete
+            </Button>
+            <Button variant="outline" className="flex items-center gap-2">
+              <Eye size={16} />
+              View
+            </Button>
           </div>
-          <Button
-            variant={"default"}
-            className="rounded-full font-medium text-sm py-3 w-full"
-            size={"lg"}
-          >
-            Swap Now
-          </Button>
         </div>
       </CardContent>
     </Card>
   );
 };
 
-export default ProductDetails;
+export default CartDetails;
