@@ -1,5 +1,8 @@
+"use client";
 import { FC } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useFormik } from "formik";
 
 import AuthForm from "@/components/shared/AuthForm";
 
@@ -13,7 +16,27 @@ import GoogleIcon from "@/app/assets/images/svgs/GoogleIcon.svg";
 
 import { PATHS } from "@/app/_constants/paths";
 
+import { loginPayload, validationSchema } from "@/app/(auth)/login/_validation";
+
 const Login: FC = () => {
+  const router = useRouter();
+
+  const handleLogin = (data: loginPayload) => {
+    localStorage.setItem("user", JSON.stringify(data));
+    router.push(`${PATHS.DASHBOARD}`);
+  };
+
+  const formik = useFormik({
+    initialValues: {
+      email: "",
+      password: "",
+    },
+    onSubmit: handleLogin,
+    validationSchema,
+  });
+
+  const { values, handleBlur, handleChange, handleSubmit, errors } = formik;
+
   return (
     <AuthForm
       title="Welcome Back, Swapper!"
@@ -36,6 +59,11 @@ const Login: FC = () => {
           type="email"
           placeholder="Email address"
           startIcon={<EmailIcon />}
+          name="email"
+          onChange={handleChange}
+          onBlur={handleBlur}
+          value={values.email}
+          error={errors.email}
         />
         <div>
           <Input
@@ -43,6 +71,11 @@ const Login: FC = () => {
             placeholder="Password"
             startIcon={<PasswordIcon />}
             endIcon={<EyeClosedIcon />}
+            name="password"
+            onChange={handleChange}
+            onBlur={handleBlur}
+            value={values.password}
+            error={errors.password}
           />
           <Link
             href={PATHS.FORGOT_PASSWORD}
@@ -51,7 +84,12 @@ const Login: FC = () => {
             Forgot Password
           </Link>
         </div>
-        <Button variant={"default"} className="rounded-full py-6 mt-2 md:mt-4">
+        <Button
+          variant={"default"}
+          className="rounded-full py-6 mt-2 md:mt-4"
+          onClick={() => handleSubmit()}
+          type="button"
+        >
           Sign In
         </Button>
         <p className="text-center pb-10 md:pb-0">

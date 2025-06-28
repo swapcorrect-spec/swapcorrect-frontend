@@ -2,10 +2,14 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import ProductImage from "@/app/assets/images/pngs/shoess.png";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
+import { FC } from "react";
+import { IProduct } from "@/interface/IProduct";
 
-const Product = () => {
+type Props = Prettify<Omit<IProduct, "id">>;
+
+const Product: FC<Props> = (props) => {
+  const { image, photo, price, rating, wants, author, name } = props;
   const router = useRouter();
 
   const handleSwap = () => {
@@ -13,13 +17,14 @@ const Product = () => {
   };
 
   return (
-    <div className="rounded-xl hover:border hover:border-[#e3e0e0] cursor-pointer p-2">
+    <div className="rounded-xl w-fit hover:border hover:border-[#e3e0e0] cursor-pointer p-2">
       <div className="relative">
         <Image
-          src={ProductImage}
+          src={image}
+          width={350}
           alt="Product Preview"
-          objectFit="contain"
-          className="rounded-xl"
+          objectFit="cover"
+          className="rounded-xl h-[350px]"
         />
         <div className="bg-white absolute top-3 right-3 rounded-full p-1">
           <Heart size={20} />
@@ -27,30 +32,28 @@ const Product = () => {
       </div>
       <div className="flex flex-col gap-1 mt-2 mb-3">
         <div className="flex justify-between items-center">
-          <p className="font-medium text-lg">Gently used Nike Shoe</p>
-          <p className="text-[#007AFF] font-medium text-sm">$75,000 Est.</p>
+          <p className="font-medium text-lg">{name}</p>
+          <p className="text-[#007AFF] font-medium text-sm">{price}</p>
         </div>
         <p className="text-[#737373] font-normal text-[13px]">
           <span className="text-[#222222] font-medium text-[13px]">Wants:</span>{" "}
-          Power Bank &bull; Smart Watch &bull; Airpods
+          {wants}
         </p>
       </div>
 
       <div className="flex items-center justify-between border border-[#e3e0e0] px-2 py-2 rounded-xl">
         <div className="flex items-center gap-1">
           <Image
-            src="https://randomuser.me/api/portraits/thumb/women/9.jpg"
+            src={photo}
             alt="user photo"
             width={40}
             height={40}
             className="rounded-full"
           />
-          <p className="text-[#222222] font-medium text-[14px]">
-            Wallace Harrison
-          </p>
+          <p className="text-[#222222] font-medium text-[14px]">{author}</p>
         </div>
         <div className="flex items-center gap-1">
-          <p className="text-[#222222] font-normal text-[15px]">3.5</p>
+          <p className="text-[#222222] font-normal text-[15px]">{rating}</p>
           <Rating />
         </div>
       </div>
