@@ -21,11 +21,17 @@ import { Input } from "../ui/input";
 import Notification from "../widget/notification";
 import { PATHS } from "@/app/_constants/paths";
 import { mockNotifications, notifyType } from "@/app/_constants/notifications";
+import { useEffect, useState } from "react";
 
 const Navbar: React.FC = () => {
   const router = useRouter();
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const isLoggedIn = localStorage.getItem("user");
+  useEffect(() => {
+    if (localStorage.getItem("user")) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   const handleLogin = () => {
     router.push(`/${PATHS.LOGIN}`);
