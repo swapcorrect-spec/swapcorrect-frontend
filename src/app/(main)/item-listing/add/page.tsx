@@ -3,7 +3,7 @@ import PreviewImage from "@/app/assets/images/pngs/preview.png";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 
-export const NewItemListing = () => {
+const NewItemListing = () => {
   return (
     <div className="">
       <div className="border border-[#E9E9E9] px-8 py-4">
