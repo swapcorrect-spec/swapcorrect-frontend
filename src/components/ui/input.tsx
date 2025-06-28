@@ -6,12 +6,14 @@ interface InputProps extends React.ComponentProps<"input"> {
   startIcon?: React.ReactNode;
   endIcon?: React.ReactNode;
   error?: any;
+  label?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-  ({ className, error, startIcon, endIcon, ...props }, ref) => {
+  ({ className, error, startIcon, endIcon, label, ...props }, ref) => {
     return (
       <div className="w-full">
+        <p className="font-normal text-[13px]">{label}</p>
         {/* Input wrapper with relative positioning for icons */}
         <div className="relative w-full">
           {startIcon && (

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "swap shop",
 };
 
-export default function AuthLayout({
+export default function MainLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
