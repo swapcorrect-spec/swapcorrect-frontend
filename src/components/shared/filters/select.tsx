@@ -20,6 +20,8 @@ interface IProps {
   setFilter: React.Dispatch<React.SetStateAction<string>>;
   className?: string;
   label?: string;
+  name?: string;
+  error?: string;
 }
 
 export function SelectFilter({
@@ -27,6 +29,8 @@ export function SelectFilter({
   placeholder = "Select option",
   setFilter,
   className,
+  name,
+  error,
   label = "",
 }: IProps) {
   return (
@@ -35,6 +39,7 @@ export function SelectFilter({
         onValueChange={(value) => {
           setFilter(value);
         }}
+        name={name}
       >
         {label && (
           <p className="text-[#01190F] font-medium text-sm mb-2">{label}</p>
@@ -52,6 +57,9 @@ export function SelectFilter({
           </SelectGroup>
         </SelectContent>
       </Select>
+      {error && (
+        <p className="mt-1 text-sm text-red-500 min-h-[1rem]">{error}</p>
+      )}
     </div>
   );
 }
