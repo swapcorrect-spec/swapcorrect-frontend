@@ -27,8 +27,8 @@ const AuthLayout = ({
   };
   return (
     <div className="">
-      <div className="flex flex-col md:w-[90%] md:flex-row md:absolute md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:gap-8 items-center md:justify-between">
-        <div className="hidden md:block w-[50%]">
+      <div className="relative w-[90%] mx-auto flex flex-col items-center md:flex-row gap-8 py-12">
+        <div className="hidden md:block w-1/2">
           <Swiper
             spaceBetween={30}
             centeredSlides={false}
@@ -36,21 +36,19 @@ const AuthLayout = ({
               delay: 2500,
               disableOnInteraction: false,
             }}
-            pagination={{
-              clickable: true,
-            }}
+            pagination={{ clickable: true }}
             navigation={false}
             modules={[Autoplay, Pagination, Navigation]}
             onAutoplayTimeLeft={onAutoplayTimeLeft}
-            className="mySwiper"
+            className="mySwiper h-full"
           >
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/pngs/banner_one.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/pngs/banner_one.png)] rounded-[30px] bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
                     Turn Your Items Into Instant Value!
                   </h2>
-                  <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
+                  <p className="text-white font-normal text-lg leading-tight w-full pt-4">
                     No be only buy and sell — swap your way to something better.
                     List now, trade smart.
                   </p>
@@ -58,7 +56,7 @@ const AuthLayout = ({
               </div>
             </SwiperSlide>
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/pngs/banner_three.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/pngs/banner_three.png)] rounded-[30px]  bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
                     Swap. Shop. Shine!
@@ -71,7 +69,7 @@ const AuthLayout = ({
               </div>
             </SwiperSlide>
             <SwiperSlide>
-              <div className="relative bg-[url(../app/assets/images/pngs/banner_two.png)] rounded-[30px]  bg-contain bg-no-repeat h-[90vh]">
+              <div className="relative bg-[url(../app/assets/images/pngs/banner_two.png)] rounded-[30px]  bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
                   <h2 className="text-white text-[40px] font-bold leading-none w-[76%]">
                     Join The Elite Team of Swappers
@@ -86,7 +84,8 @@ const AuthLayout = ({
             </SwiperSlide>
           </Swiper>
         </div>
-        <div className="w-[90%] md:w-[50%]">{children}</div>
+
+        <div className="w-full md:w-1/2">{children}</div>
       </div>
     </div>
   );

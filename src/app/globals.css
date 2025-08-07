@@ -101,3 +101,13 @@ body {
 .hide-scrollbar::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Opera */
 }
+.react-tel-input .flag-dropdown {
+  border-top-left-radius: 9.77px !important;
+  border-bottom-left-radius: 9.77px !important;
+}
+.react-tel-input .selected-flag:hover,
+.react-tel-input .selected-flag:focus {
+  background-color: unset !important;
+  border-top-left-radius: 9.77px !important;
+  border-bottom-left-radius: 9.77px !important;
+}
