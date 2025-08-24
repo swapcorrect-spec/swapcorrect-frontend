@@ -27,60 +27,9 @@ export const handleApiError = (error: any) => {
 
   switch (response?.status) {
     case 400:
-      const keys = Object.keys(data).filter((field) => !["success", "message", "code"].includes(field));
-
-      if (data?.message) {
-        return `${data?.message}`;
-      }
-
-      const firstItem = data[keys[0]];
-
-      if (Array.isArray(firstItem)) {
-        if (isArrayOfStrings(firstItem)) {
-          return firstItem.join("\n");
-        }
-        let toastMsg = {};
-        firstItem?.forEach((v, i) => {
-          toastMsg = {
-            ...toastMsg,
-            [`error-${i}`]: `${v}`,
-          };
-        });
-        // return `${keys[0]}: ${firstItem[0]}`;
-        return JSON.stringify(toastMsg);
-      }
-      if (typeof firstItem === "string") return firstItem;
-      if (typeof firstItem === "number") return firstItem;
-
-      const detailKeys = Object.keys(data?.detail || {});
-      if (detailKeys.length) {
-        const firstDetail = data?.detail[detailKeys[0]];
-        if (Array.isArray(firstDetail)) return `${detailKeys[0]}: ${firstDetail[0]}`;
-        if (typeof firstDetail === "string") return firstDetail;
-      }
-
-      const dataErrors = Object.keys(data?.errors || {});
-      if (dataErrors.length > 0) {
-        const firstError = data?.errors[dataErrors[0]];
-        if (Array.isArray(firstError)) return JSON.stringify(firstError);
-        // return `${dataErrors[0]}: ${firstError[0]}`;
-        if (typeof firstError === "string") return firstError;
-      }
-
-      const dataErrorsError = Object.keys(data?.errors?.error || {});
-      if (dataErrorsError.length > 0) {
-        const toastMsg = {};
-        return JSON.stringify(toastMsg);
-      }
-
-      const errorReturnMsg =
-        (data?.detail && (typeof data?.detail === "string" ? data?.detail : JSON.stringify(data?.detail))) ||
-        (data?.error && data?.error[0]?.message) ||
-        data?.message ||
-        "Bad Request Sent";
-
-      return typeof errorReturnMsg === "string" ? errorReturnMsg : JSON.stringify(errorReturnMsg);
-
+    case 404:
+    case 409:
+      return extractApiErrorMessage(data);
     case 401:
       return (
         (data?.detail && (typeof data?.detail === "string" ? data?.detail : JSON.stringify(data?.detail))) ||
@@ -98,20 +47,7 @@ export const handleApiError = (error: any) => {
         data?.data ||
         "You are forbidden from performing this action"
       );
-    case 404:
-      return (
-        (data?.detail && (typeof data?.detail === "string" ? data?.detail : "JSON.stringify(data?.detail)")) ||
-        (data?.error && data?.error[0]?.message) ||
-        data?.message ||
-        "The resource you are trying to load cannot be found"
-      );
-    case 409:
-      return (
-        (data?.detail && (typeof data?.detail === "string" ? data?.detail : JSON.stringify(data?.detail))) ||
-        (data?.error && data?.error[0]?.message) ||
-        data?.message ||
-        "A duplicate already exists"
-      );
+
     case 500:
       return genericMessage;
     case 504:
@@ -128,18 +64,17 @@ export const handleApiError = (error: any) => {
 
 export default handleApiError;
 
-export function recurseValue(value: any) {
-  if (Array.isArray(value)) {
-    let toastMsg = {};
-    value?.forEach((v, i) => {
-      toastMsg = {
-        ...toastMsg,
-        [`error-${i}`]: `${v}`,
-      };
-    });
-    // return `${keys[0]}: ${value[0]}`;
-    return JSON.stringify(toastMsg);
+
+function extractApiErrorMessage(data: any): string {
+  if (Array.isArray(data?.errorMessages)) {
+    return data.errorMessages.join("\n");
   }
-  if (typeof value === "string") return value;
-  if (typeof value === "number") return value;
+  if (Array.isArray(data?.error)) {
+    return data.error.map((e: any) => e?.message || e).join("\n");
+  }
+  if (typeof data?.message === "string") return data.message;
+  if (typeof data?.detail === "string") return data.detail;
+  if (typeof data?.displayMessage === "string") return data.displayMessage;
+
+  return "Something went wrong";
 }

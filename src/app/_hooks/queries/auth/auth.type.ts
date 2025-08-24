@@ -20,3 +20,20 @@ export interface IRegisterResponse {
   displayMessage: string;
   result: string;
 }
+
+type Login = {
+  email: string;
+  password: string
+};
+
+export type LoginPayload = Prettify<BaseApiPayloadDto<Login>>;
+
+export interface ILoginResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: {
+    jwt: string;
+    userRole: Array<'Visitor'>;
+  },
+  errorMessages: string | null
+}

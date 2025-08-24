@@ -3,6 +3,7 @@ import { FC } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
+import { toast } from "sonner";
 
 import AuthForm from "@/components/shared/AuthForm";
 
@@ -18,12 +19,32 @@ import { PATHS } from "@/app/_constants/paths";
 
 import { loginPayload, validationSchema } from "@/app/(auth)/login/_validation";
 
+import { useLogin } from "@/app/_hooks/queries/auth/auth";
+
 const Login: FC = () => {
   const router = useRouter();
 
+  const { mutate, isPending } = useLogin({
+    onSuccess(_val: any) {
+      toast.success(_val.displayMessage, {
+        onAutoClose: () => {
+          localStorage.setItem("token", _val.result.jwt);
+          router.push(`${PATHS.DASHBOARD}`);
+        },
+      });
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
+
   const handleLogin = (data: loginPayload) => {
-    localStorage.setItem("user", JSON.stringify(data));
-    router.push(`${PATHS.DASHBOARD}`);
+    mutate({
+      payload: {
+        email: data.email,
+        password: data.password,
+      },
+    });
   };
 
   const formik = useFormik({
@@ -54,7 +75,7 @@ const Login: FC = () => {
         <span className="mx-4 text-gray-500">OR</span>
         <div className="border-t border-gray-300 flex-grow"></div>
       </div>
-      <form className="flex flex-col gap-6 mt-4">
+      <form className="flex flex-col gap-6 mt-4" onSubmit={handleSubmit}>
         <Input
           type="email"
           placeholder="Email address"
@@ -87,8 +108,8 @@ const Login: FC = () => {
         <Button
           variant={"default"}
           className="rounded-full py-6 mt-2 md:mt-4"
-          onClick={() => handleSubmit()}
-          type="button"
+          type="submit"
+          loading={isPending}
         >
           Sign In
         </Button>

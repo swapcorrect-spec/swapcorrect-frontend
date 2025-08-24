@@ -13,8 +13,8 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    const user = localStorage.getItem("user");
-    if (!user) {
+    const token = localStorage.getItem("token");
+    if (!token) {
       router.push(`/${PATHS.LOGIN}`);
     } else {
       setIsLoggedIn(true);
