@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("user")) {
+    if (localStorage.getItem("token")) {
       setIsLoggedIn(true);
     }
   }, []);

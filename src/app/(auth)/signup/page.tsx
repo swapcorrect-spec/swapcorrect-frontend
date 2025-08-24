@@ -2,8 +2,9 @@
 
 import { FC } from "react";
 import Link from "next/link";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
+import { toast } from "sonner";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 
@@ -24,16 +25,17 @@ import {
   validationSchema,
 } from "@/app/(auth)/signup/_validation";
 import { useRegister } from "@/app/_hooks/queries/auth/auth";
-import { toast } from "sonner";
 import { SelectFilter } from "@/components/shared/filters/select";
 import { countries } from "@/app/_constants/countries";
 import { ROLES } from "@/app/_constants/roles";
 
 const Signup: FC = () => {
-  // const router = useRouter();
+  const router = useRouter();
   const { mutate, isPending } = useRegister({
-    onSuccess(_val) {
-      console.log(_val);
+    onSuccess(_val: any) {
+      toast.success(_val.result, {
+        onAutoClose: () => router.push(`/${PATHS.LOGIN}`),
+      });
     },
     onError(_err) {
       toast.error(_err);
@@ -41,8 +43,6 @@ const Signup: FC = () => {
   });
 
   const handleLogin = (data: signupPayload) => {
-    // localStorage.setItem("user", JSON.stringify(data));
-    // router.push(`${PATHS.DASHBOARD}`);
     mutate({
       payload: {
         firstName: data.firstname,
