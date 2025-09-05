@@ -28,7 +28,7 @@ const Navbar: React.FC = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    if (localStorage.getItem("token")) {
+    if (localStorage.getItem("comms-access-token")) {
       setIsLoggedIn(true);
     }
   }, []);
@@ -48,18 +48,11 @@ const Navbar: React.FC = () => {
 
   return (
     <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10 w-full">
-      <Link
-        href={`${isLoggedIn ? "/dashboard" : "/"}`}
-        className="flex justify-center"
-      >
+      <Link href={`${isLoggedIn ? "/dashboard" : "/"}`} className="flex justify-center">
         <Logo />
       </Link>
       <div className="max-w-[749px] w-full me-auto">
-        <Input
-          startIcon={<Search />}
-          className="w-full !h-11 rounded-[2rem]"
-          placeholder="Search items..."
-        />
+        <Input startIcon={<Search />} className="w-full !h-11 rounded-[2rem]" placeholder="Search items..." />
       </div>
       {isLoggedIn ? (
         <div className="flex gap-5 items-center">
@@ -80,17 +73,10 @@ const Navbar: React.FC = () => {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[500px] flex flex-col gap-1 h-[75vh] pb-2 mt-5 py-0">
-              <Tabs
-                defaultValue="item-description"
-                className="w-full mb-6 sticky top-0 bg-white py-3"
-              >
+              <Tabs defaultValue="item-description" className="w-full mb-6 sticky top-0 bg-white py-3">
                 <TabsList className="flex w-full">
                   {notifyType.map((_, index: number) => (
-                    <TabsTrigger
-                      value={_.value}
-                      className={`rounded-[26px] w-full`}
-                      key={index}
-                    >
+                    <TabsTrigger value={_.value} className={`rounded-[26px] w-full`} key={index}>
                       {_.title}
                     </TabsTrigger>
                   ))}
@@ -118,26 +104,17 @@ const Navbar: React.FC = () => {
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>
-                  Logout
-                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button
-            className="bg-[#007AFF] rounded-full px-8"
-            onClick={handleLogin}
-          >
+          <Button className="bg-[#007AFF] rounded-full px-8" onClick={handleLogin}>
             Login
           </Button>
-          <Button
-            className="!no-underline"
-            variant={"link"}
-            onClick={handleGetStarted}
-          >
+          <Button className="!no-underline" variant={"link"} onClick={handleGetStarted}>
             Get started
           </Button>
         </div>

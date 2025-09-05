@@ -1,32 +1,34 @@
 "use client";
 
-import { useRouter } from "next/navigation";
-import { useEffect, useState, ReactNode } from "react";
+import { redirect } from "next/navigation";
+import { ReactNode } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
 import { PATHS } from "../_constants/paths";
+import { useGetUserInfo } from "../_hooks/queries/auth/auth";
+import { Auth } from "../_config/auth";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
-  const router = useRouter();
-  const [checkedAuth, setCheckedAuth] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const { isFetching } = useGetUserInfo({ enabler: true });
 
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      router.push(`/${PATHS.LOGIN}`);
-    } else {
-      setIsLoggedIn(true);
-      setCheckedAuth(true);
-    }
-  }, [router]);
+  const isAuthenticated = Auth.isAuthenticated();
 
-  if (!checkedAuth) return null;
+  if (isFetching) {
+    return (
+      <div>
+        <p>Fetching</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    redirect(`/${PATHS.LOGIN}`);
+  }
 
   return (
     <section className={cn("flex w-full")}>
-      {isLoggedIn && <Sidebar />}
+      {isAuthenticated && <Sidebar />}
       <section className="flex-1 h-screen overflow-y-auto">
         <Navbar />
         {children}
