@@ -1,11 +1,14 @@
-import { jwtDecode, type JwtPayload } from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
-export interface IUserDecoded extends JwtPayload {
-  user_id: string;
-  email: string;
-  fullname: string;
-  phone: string;
-  token_type: "access" | "refresh";
+export interface IDecodedToken {
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress": string;
+  "http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name": string;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/userdata": string;
+  "http://schemas.microsoft.com/ws/2008/06/identity/claims/role": string;
+  jti: string;
+  exp: number;
+  iss: string;
+  aud: string;
 }
 
 const AuthLocalStorageObject = {
@@ -39,31 +42,44 @@ export class Auth {
     return localStorage.getItem(AuthLocalStorageObject.session_id);
   }
 
+  static mapToken(raw: IDecodedToken) {
+    return {
+      email: raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/emailaddress"],
+      jti: raw.jti,
+      name: raw["http://schemas.xmlsoap.org/ws/2005/05/identity/claims/name"],
+      userdata: raw["http://schemas.microsoft.com/ws/2008/06/identity/claims/userdata"],
+      role: raw["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"],
+      exp: raw.exp,
+      iss: raw.iss,
+      aud: raw.aud,
+    };
+  }
+
   static getDecodedJwt(tkn = "") {
     try {
       const token = this.getToken();
       const t = token || tkn;
-      const decoded = jwtDecode<IUserDecoded>(t);
+      const decoded = jwtDecode<IDecodedToken>(t);
       return decoded;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_e: unknown) {
-      return {} as IUserDecoded;
+      return {} as IDecodedToken;
     }
   }
 
   static isAuthenticated() {
     try {
       const decodedToken = this.getDecodedJwt();
-      // if (!isEmpty(decodedToken)) {
-        // const { exp } = decodedToken;
-        // const currentTime = Date.now() / 1000;
-        // if (exp) {
-        //   return exp > currentTime;
-        // }
-        // return true;
-      // }
-      // return false;
-      console.log(decodedToken, 'decode')
+      const hasProperties = decodedToken && Object.keys(decodedToken).length > 0;
+      if (hasProperties) {
+        const { exp } = decodedToken;
+        const currentTime = Date.now() / 1000;
+        if (exp) {
+          return exp > currentTime;
+        }
+        return true;
+      }
+      return false;
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
     } catch (_e) {
       return false;

@@ -1,5 +1,5 @@
 type Register = {
- email: string;
+  email: string;
   userName: string;
   firstName: string;
   lastName: string;
@@ -10,7 +10,7 @@ type Register = {
   role: string;
   deliveryAddress: string;
   phoneNumber: string;
-  password: string
+  password: string;
 };
 
 export type RegisterPayload = Prettify<BaseApiPayloadDto<Register>>;
@@ -23,7 +23,7 @@ export interface IRegisterResponse {
 
 type Login = {
   email: string;
-  password: string
+  password: string;
 };
 
 export type LoginPayload = Prettify<BaseApiPayloadDto<Login>>;
@@ -33,7 +33,74 @@ export interface ILoginResponse {
   displayMessage: string;
   result: {
     jwt: string;
-    userRole: Array<'Visitor'>;
-  },
-  errorMessages: string | null
+    userRole: Array<"Visitor">;
+  };
+  errorMessages: string | null;
+}
+
+type VerifyEmail = {
+  email: string;
+  token: string;
+};
+
+export type VerifyEmailPayload = Prettify<BaseApiPayloadDto<VerifyEmail>>;
+
+export interface IVerifyEmailResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
+
+export type ForgotPassword = {
+  email: string;
+};
+
+export type ForgotPasswordPayload = Prettify<BaseApiPayloadDto<ForgotPassword>>;
+
+export interface IFogotPasswordResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
+
+export type ResetPassword = {
+  email: string;
+  token: string | string[];
+  password: string;
+};
+
+export type ResetPasswordPayload = Prettify<BaseApiPayloadDto<ResetPassword>>;
+
+export interface IResetPasswordResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
+export interface IGetUserInfoResponseData {
+  statusCode: 200;
+  displayMessage: string;
+  result: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profilePicture: null | string;
+    isEmailConfirmed: boolean;
+    email: string;
+    phoneNumber: string;
+    userName: string;
+    gender: string;
+    isSuspendUser: boolean;
+    isFlag: boolean;
+    isTwoFactorEnable: boolean;
+    lastLoginTime: string;
+    deliveryAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    created: string;
+  };
+  errorMessages: null | string;
 }

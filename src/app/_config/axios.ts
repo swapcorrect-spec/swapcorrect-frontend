@@ -1,9 +1,7 @@
 import axios, { type InternalAxiosRequestConfig } from "axios";
 import { Auth } from "@/app/_config/auth";
 
-const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string
-
-console.log(BASE_URL, 'base')
+const BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL as string;
 
 export const API = axios.create({
   baseURL: BASE_URL + "/api",
@@ -21,7 +19,7 @@ API.interceptors.request.use(
       Auth.removeToken(); // Call the logout function
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 API.interceptors.response.use(
@@ -71,5 +69,5 @@ API.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  },
+  }
 );
