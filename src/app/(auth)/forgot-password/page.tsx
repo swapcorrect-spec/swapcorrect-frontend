@@ -32,11 +32,7 @@ const ForgotPassword: FC = () => {
 
   const { mutate, isPending } = useForgotPassword({
     onSuccess(_val: { result: string }) {
-      toast.success(_val.result, {
-        onAutoClose: () => {
-          router.push(`${PATHS.LOGIN}`);
-        },
-      });
+      toast.success(_val.result);
       setFormStep("code");
     },
     onError(_err) {
@@ -46,7 +42,11 @@ const ForgotPassword: FC = () => {
 
   const { mutate: mutateResetPassword, isPending: isPendingResetPassword } = useResetPassword({
     onSuccess(_val: { result: string }) {
-      toast.success(_val.result);
+      toast.success(_val.result, {
+        onAutoClose: () => {
+          router.push(`${PATHS.LOGIN}`);
+        },
+      });
       setFormStep("email");
       resetForm();
     },
