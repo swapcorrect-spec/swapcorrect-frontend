@@ -28,15 +28,13 @@ export default function RootLayout({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: { queries: { staleTime: 60 * 1000 } },
+        defaultOptions: { queries: { staleTime: 60 * 1000, refetchOnWindowFocus: false, retry: 0 } },
       })
   );
 
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
         <QueryClientProvider client={queryClient}>
           <NextTopLoader height={4} showSpinner={false} />
           {children}

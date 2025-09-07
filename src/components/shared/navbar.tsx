@@ -5,7 +5,6 @@ import Logo from "@/app/assets/images/svgs/logo_full.svg";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
 import Search from "@/app/assets/images/svgs/Search.svg";
-import Avatar from "@/app/assets/images/svgs/Avatar.svg";
 import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
@@ -22,8 +21,14 @@ import Notification from "../widget/notification";
 import { PATHS } from "@/app/_constants/paths";
 import { mockNotifications, notifyType } from "@/app/_constants/notifications";
 import { useEffect, useState } from "react";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
 
-const Navbar: React.FC = () => {
+interface Props {
+  data?: IGetUserInfoResponseData;
+}
+
+const Navbar: React.FC<Props> = ({ data }) => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -93,14 +98,18 @@ const Navbar: React.FC = () => {
             <DropdownMenuTrigger asChild>
               <button className="flex items-center !border-0 gap-2">
                 <div className="w-[42px] h-[42px] rounded-full bg-[#007AFF] flex items-center justify-center">
-                  <Avatar />
+                  <Avatar>
+                    <AvatarImage src={data?.result?.profilePicture as string} />
+                    <AvatarFallback>{`${data?.result?.firstName?.charAt(0)} ${data?.result?.lastName?.charAt(
+                      0
+                    )}`}</AvatarFallback>
+                  </Avatar>
                 </div>
                 <ArrowDown />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40">
               <DropdownMenuGroup>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>

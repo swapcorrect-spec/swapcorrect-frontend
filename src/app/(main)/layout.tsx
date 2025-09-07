@@ -8,16 +8,17 @@ import Navbar from "@/components/shared/navbar";
 import { PATHS } from "../_constants/paths";
 import { useGetUserInfo } from "../_hooks/queries/auth/auth";
 import { Auth } from "../_config/auth";
+import { CircularProgress } from "@/components/shared/circular-progress";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
-  const { isFetching } = useGetUserInfo({ enabler: true });
+  const { isFetching, data } = useGetUserInfo({ enabler: true });
 
   const isAuthenticated = Auth.isAuthenticated();
 
   if (isFetching) {
     return (
-      <div>
-        <p>Fetching</p>
+      <div className="text-center mt-4 flex flex-col items-center justify-center">
+        <CircularProgress color="#007AFF" size={40} />
       </div>
     );
   }
@@ -30,7 +31,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     <section className={cn("flex w-full")}>
       {isAuthenticated && <Sidebar />}
       <section className="flex-1 h-screen overflow-y-auto">
-        <Navbar />
+        <Navbar data={data} />
         {children}
       </section>
     </section>
