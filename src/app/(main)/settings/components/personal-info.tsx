@@ -1,13 +1,6 @@
 "use client";
 
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -15,13 +8,15 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import Image from "next/image";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 const formSchema = z.object({
-  fullname: z.string().min(5, "fullname must be greater 4"),
-  username: z.string().min(5, "username must be greater 4"),
+  firstname: z.string().nonempty("Required"),
+  lastname: z.string().nonempty("Required"),
+  username: z.string().min(5, "Username must be greater 4"),
   address: z.string(),
-  email: z.string().email(),
+  email: z.string().email().nonempty("Required"),
   type: z.enum(["all", "mentions", "none"], {
     required_error: "You need to select a notification type.",
   }),
@@ -30,13 +25,16 @@ const formSchema = z.object({
 type FormSchemaType = z.infer<typeof formSchema>;
 
 const PersonalInfo: React.FC = () => {
+  const { data } = useGetUserInfo({ enabler: true });
+
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      fullname: "",
-      username: "",
-      address: "",
-      email: "",
+      firstname: data?.result.firstName || "",
+      lastname: data?.result.lastName || "",
+      username: data?.result.userName || "",
+      address: data?.result.deliveryAddress || "",
+      email: data?.result.email || "",
       type: "all",
     },
   });
@@ -48,25 +46,17 @@ const PersonalInfo: React.FC = () => {
 
   return (
     <div>
-      <h6 className="text-[#222222] font-medium text-xl">
-        Personal Information
-      </h6>
-      <p className="text-sm text-[#737373] mb-8">
-        Edit and manage your core details.
-      </p>
+      <h6 className="text-[#222222] font-medium text-xl">Personal Information</h6>
+      <p className="text-sm text-[#737373] mb-8">Edit and manage your core details.</p>
       <div className="mb-8 flex items-center gap-5">
-        <Image
-          src="https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80"
-          height={120}
-          width={120}
-          alt="User profile"
-          className="w-[120px] h-[120px] rounded-full"
-        />
+        <Avatar className="w-32 h-32">
+          <AvatarImage width={"300px"} sizes="200px" src={data?.result.profilePicture as string} />
+          <AvatarFallback className="font-bold text-lg">{`${data?.result?.firstName?.charAt(
+            0
+          )} ${data?.result?.lastName?.charAt(0)}`}</AvatarFallback>
+        </Avatar>
         <div>
-          <label
-            htmlFor="profile-photo"
-            className="cursor-pointer inline-block"
-          >
+          <label htmlFor="profile-photo" className="cursor-pointer inline-block">
             <div className="border border-[#E2E2E2] rounded-md py-2 px-4 font-medium text-xs shadow-md text-center">
               Change photo
             </div>
@@ -88,24 +78,34 @@ const PersonalInfo: React.FC = () => {
       </div>
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="mb-8">
-          <FormField
-            control={form.control}
-            name="fullname"
-            render={({ field }) => (
-              <FormItem className="w-full mb-4">
-                <FormLabel className="text-[#1D2433]">Full Name</FormLabel>
-                <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="Admin name"
-                    {...field}
-                    className="h-12"
-                  />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="firstname"
+              render={({ field }) => (
+                <FormItem className="w-full mb-4">
+                  <FormLabel className="text-[#1D2433]">Firstname</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Enter firstname" {...field} className="h-12" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="lastname"
+              render={({ field }) => (
+                <FormItem className="w-full mb-4">
+                  <FormLabel className="text-[#1D2433]">Lastname</FormLabel>
+                  <FormControl>
+                    <Input type="text" placeholder="Enter lastname" {...field} className="h-12" />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
           <FormField
             control={form.control}
             name="username"
@@ -113,12 +113,7 @@ const PersonalInfo: React.FC = () => {
               <FormItem className="w-full mb-4">
                 <FormLabel className="text-[#1D2433]">Username</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="No., 16, Saint Lucy Str,."
-                    {...field}
-                    className="h-12"
-                  />
+                  <Input type="text" placeholder="Enter username" {...field} className="h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -132,12 +127,7 @@ const PersonalInfo: React.FC = () => {
               <FormItem className="w-full mb-4">
                 <FormLabel className="text-[#1D2433]">Email Address</FormLabel>
                 <FormControl>
-                  <Input
-                    type="text"
-                    placeholder="admin1524887@gmail.com"
-                    {...field}
-                    className="h-12"
-                  />
+                  <Input type="text" placeholder="Enter email address" {...field} className="h-12" />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -150,11 +140,7 @@ const PersonalInfo: React.FC = () => {
               <FormItem className="mb-3">
                 <FormLabel>Address</FormLabel>
                 <FormControl>
-                  <Textarea
-                    placeholder="Sango-tedo"
-                    className="resize-none"
-                    {...field}
-                  />
+                  <Textarea placeholder="Sango-tedo" className="resize-none" {...field} />
                 </FormControl>
 
                 <FormMessage />
@@ -177,17 +163,13 @@ const PersonalInfo: React.FC = () => {
                       <FormControl>
                         <RadioGroupItem value="all" />
                       </FormControl>
-                      <FormLabel className="font-normal">
-                        Visitor (browse and request swaps)
-                      </FormLabel>
+                      <FormLabel className="font-normal">Visitor (browse and request swaps)</FormLabel>
                     </FormItem>
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
                         <RadioGroupItem value="mentions" />
                       </FormControl>
-                      <FormLabel className="font-normal">
-                        Swapper (list items and accept swaps)
-                      </FormLabel>
+                      <FormLabel className="font-normal">Swapper (list items and accept swaps)</FormLabel>
                     </FormItem>
                   </RadioGroup>
                 </FormControl>
@@ -196,9 +178,7 @@ const PersonalInfo: React.FC = () => {
             )}
           />
           <div className="gap-5 justify-end flex mt-6">
-            <Button className="w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]">
-              Save Change
-            </Button>
+            <Button className="w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]">Save Change</Button>
           </div>
         </form>
       </Form>
