@@ -67,7 +67,7 @@ const LoginRequiredModal: FC<LoginRequiredModalProps> = ({
 
           {/* Additional info */}
           <p className="text-sm text-gray-500">
-            Don't have an account?{" "}
+            Don&apos;t have an account?{" "}
             <button
               onClick={onSignup}
               className="text-[#007AFF] hover:underline font-medium"

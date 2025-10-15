@@ -15,7 +15,6 @@ type Props = {
   showSliderArrows?: boolean;
   isLoading?: boolean;
   emptyStateTitle?: string;
-  emptyStateSubtitle?: string;
   emptyStateDescription?: string;
   showEmptyStateAction?: boolean;
   emptyStateActionText?: string;
@@ -49,7 +48,6 @@ const Marketplace: FC<Props> = ({
   showSliderArrows = false,
   isLoading = false,
   emptyStateTitle = "No items found",
-  emptyStateSubtitle = "Nothing to show here yet",
   emptyStateDescription = "Check back later for new items or try refreshing the page.",
   showEmptyStateAction = false,
   emptyStateActionText = "Browse All Items",

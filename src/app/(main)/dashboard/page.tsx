@@ -48,19 +48,22 @@ const Dashboard: FC = () => {
             title="FEATURED"
             subtitle="Hot Picks, Fast Swaps."
             description="Discover trending items that everyone wants — swap quick"
-            products={HOT_PICKS}
+            products={data || HOT_PICKS}
+            isLoading={isLoadingHotPicks}
           />
           <Marketplace
             title="FEATURED"
             subtitle="Swaps Just for You."
             description="Our spotlight trades are secure, high-value, and worth every click."
-            products={HOT_PICKS}
+            products={recommendedItems || HOT_PICKS}
+            isLoading={isLoadingRecommendedItems}
           />
           <Marketplace
             title="OUR RECOMMENDATION"
             subtitle="Advanced Tech Gadgets"
             description="Our spotlight trades are secure, high-value, and worth every click."
-            products={HOT_PICKS}
+            products={electronicsItems || HOT_PICKS}
+            isLoading={isLoadingElectronicsItems}
             showSliderArrows
           />
         </div>
