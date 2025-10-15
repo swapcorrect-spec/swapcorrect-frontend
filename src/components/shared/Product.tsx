@@ -3,17 +3,43 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
-import { FC } from "react";
+import { FC, useState } from "react";
 import { IProduct } from "@/interface/IProduct";
+import LoginRequiredModal from "@/components/shared/login-required-modal";
 
-type Props = Prettify<Omit<IProduct, "id">>;
+type Props = Prettify<Omit<IProduct, "id">> & {
+  isAuthenticated?: boolean;
+};
 
 const Product: FC<Props> = (props) => {
-  const { image, photo, price, rating, wants, author, name } = props;
+  const {
+    image,
+    photo,
+    price,
+    rating,
+    wants,
+    author,
+    name,
+    isAuthenticated = true,
+  } = props;
   const router = useRouter();
+  const [showLoginModal, setShowLoginModal] = useState(false);
 
   const handleSwap = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     router.push("/product/1");
+  };
+
+  const handleLogin = () => {
+    setShowLoginModal(false);
+    router.push("/login");
+  };
+  const handleSignup = () => {
+    setShowLoginModal(false);
+    router.push("/signup");
   };
 
   return (
@@ -60,6 +86,16 @@ const Product: FC<Props> = (props) => {
       <Button className="w-full rounded-full mt-4 mb-2" onClick={handleSwap}>
         Swap Now
       </Button>
+
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        title="Login Required to Swap"
+        description="You need to be logged in to swap items. Please sign in to continue with your swap and start trading!"
+        actionText="Go to Login"
+      />
     </div>
   );
 };
