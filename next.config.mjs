@@ -10,6 +10,22 @@ const nextConfig = {
         protocol: "https",
         hostname: "randomuser.me",
       },
+            {
+        protocol: "https",
+        hostname: "tse1.mm.bing.net",
+      },
+            {
+        protocol: "https",
+        hostname: "images.search.yahoo.com",
+      },
+            {
+        protocol: "https",
+        hostname: "plus.unsplash.com",
+      },
+            {
+        protocol: "https",
+        hostname: "tse2.mm.bing.net",
+      },
     ],
   },
 

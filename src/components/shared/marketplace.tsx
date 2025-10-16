@@ -36,7 +36,7 @@ const responsive = {
   mobile: {
     breakpoint: { max: 464, min: 0 },
     items: 1,
-    partialVisibilityGutter: 30,
+    partialVisibilityGutter:  30,
   },
 };
 
@@ -160,17 +160,10 @@ const Marketplace: FC<Props> = ({
           dotListClass="custom-dot-list-style"
           itemClass="carousel-item-padding-40-px"
         >
-          {products.map(
-            ({ id, author, image, name, photo, price, rating, wants }) => (
+          {products.map((product) => (
               <Product
-                key={id}
-                name={name}
-                author={author}
-                image={image}
-                photo={photo}
-                price={price}
-                rating={rating}
-                wants={wants}
+                key={product.listingId || product.id}
+                {...product}
                 isAuthenticated={isAuthenticated}
               />
             )

@@ -58,13 +58,36 @@ const Categories = () => {
         {[0, 1, 2, 3, 4, 5].map((item: number) => (
           <Product
             key={item}
+            listingId={item + 1}
+            listType="Basic"
+            itemName="Gently used Nike shoe"
+            estimatedCurrency="NGN"
+            estimatedAmount={75000}
+            itemDescription="High quality Nike sneakers in excellent condition"
+            isFavItem={false}
+            reviewStage="Approved"
+            categoryName="Fashion"
+            fullName="Jenny Franklin"
+            email="jenny@example.com"
+            phoneNumber="08123456789"
+            profilePicture="https://randomuser.me/api/portraits/thumb/women/1.jpg"
+            username="Jenny Franklin"
+            media={[
+              {
+                mediaType: 'Image',
+                url: ProductThree
+              }
+            ]}
+            swapListRequest={["Airpod", "Powerbank"]}
+            itemCondition="Fairly used"
+            // Legacy fields for backward compatibility
             author="Jenny Franklin"
             image={ProductThree}
             name="Gently used Nike shoe"
             photo="https://randomuser.me/api/portraits/thumb/women/1.jpg"
-            price="$75,000 Est."
+            price="₦75,000.00"
             rating={3.4}
-            wants={["Airpod, Powerbank"]}
+            wants={["Airpod", "Powerbank"]}
           />
         ))}
       </div>

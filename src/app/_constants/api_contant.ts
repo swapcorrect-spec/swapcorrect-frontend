@@ -1,3 +1,6 @@
 export const HOT_PICKS = "HOT_PICKS";
 export const RECOMMENDED_ITEMS = "RECOMMENDED_ITEMS";
 export const ELECTRONICS_ITEMS = "ELECTRONICS_ITEMS";
+export const SEARCH_ITEMS = "SEARCH_ITEMS";
+export const ALL_CATEGORIES = "ALL_CATEGORIES";
+export const START_SWAP = "START_SWAP";

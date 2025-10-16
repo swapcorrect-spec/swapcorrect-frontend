@@ -113,7 +113,7 @@ const ProductOverview: React.FC = () => {
               </div>
             </CardContent>
           </Card>
-          <h6 className="text-xl mb-3 font-medium">Requested in Exchange</h6>
+          <h6 className="text-xl mb-3 font-medium">About the Swapper</h6>
           <Card className="mb-4 2xl:mb-6">
             <CardContent className="p-4 2xl:p-6 flex gap-3 items-center">
               <Image

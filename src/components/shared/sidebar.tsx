@@ -25,6 +25,13 @@ const Sidebar: React.FC = () => {
       showCount: false,
     },
     {
+      title: "Marketplace",
+      iconFilled: <CategoryFilled />,
+      iconOutline: <CategoryOutline />,
+      link: PATHS.MARKETPLACE,
+      showCount: false,
+    },
+    {
       title: "Saves",
       iconFilled: <SaveFilled />,
       iconOutline: <SaveOutline />,

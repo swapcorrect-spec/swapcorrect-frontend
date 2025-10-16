@@ -1,20 +1,27 @@
 "use client";
 
-import SavedItemsEmptyState from "./empty-state";
-import ProductDetails from "@/components/widget/product-details";
+import MarketPlaceItemsEmptyState from "./empty-state";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
-import { useState } from "react";
-
-const SavedItems: React.FC = () => {
+import { useState, useEffect } from "react";
+import { useSearchItems } from "@/app/_hooks/queries/swap";
+import ProductDetails from "@/components/widget/product-details";
+const MarketPlaceItems: React.FC = () => {
   const [category, setCategory] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
   const [searchParam, setSearchParam] = useState<string>("");
   
-  // Mock loading state - replace with actual API loading when integrated
-  const isLoading = false;
-  const data: any[] = []; // Mock data - replace with actual API data when integrated
+  const { data, isLoading, isError, error } = useSearchItems({
+    enabler: true,
+    searhParam: searchParam,
+    categoryld: category,
+    location: location,
+    lowestRange: lowestRange,
+    highestRange: highestRange,
+    pageNumber: 1,
+    perpageSize: 20
+  });
 
   const handleApplyFilters = (filters: {
     category: string;
@@ -48,12 +55,11 @@ const SavedItems: React.FC = () => {
       value: "abuja",
     },
   ];
-
   return (
     <section className="p-6">
-      <h6 className="text-[#007AFF] font-medium mb-3 text-xl">SAVED SWAPS</h6>
+      <h6 className="text-[#007AFF] font-medium mb-3 text-xl">MARKETPLACE</h6>
       <p className="text-xl font-medium text-[#222222] mb-8">
-        All the items you&apos;ve marked to trade later
+        All available items for swap
       </p>
       <div>
         <FilterMenu
@@ -67,7 +73,6 @@ const SavedItems: React.FC = () => {
           onApplyFilters={handleApplyFilters}
         />
       </div>
-      
       {isLoading ? (
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -78,16 +83,16 @@ const SavedItems: React.FC = () => {
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
           {data.map((item: any) => (
             <ProductDetails
-              key={item.listingId || item.id}
+              key={item.listingId}
               {...item}
             />
           ))}
         </div>
       ) : (
-        <SavedItemsEmptyState />
+        <MarketPlaceItemsEmptyState />
       )}
     </section>
   );
 };
 
-export default SavedItems;
+export default MarketPlaceItems;

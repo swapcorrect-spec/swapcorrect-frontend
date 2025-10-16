@@ -8,7 +8,7 @@ import {
   useGetItemByRaterHotPick,
   useGetRecommendedItems,
   useGetElectronicsItems,
-} from "./_hooks/queries/dashboard-features";
+} from "./_hooks/queries/swap";
 import { Auth } from "./_config/auth";
 
 export default function Home() {
