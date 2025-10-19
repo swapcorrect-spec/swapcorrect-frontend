@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { getRequestParams } from "@/app/_config/request-methods";
-import { FavouriteResponseInterface } from "./favourite";
+import { FavouriteResponseInterface } from "./favourite.type";
 
 export const useGetUserFavourite = (props: { enabler: boolean }) => {
   const { enabler = true } = props;
