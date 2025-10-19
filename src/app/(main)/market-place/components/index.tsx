@@ -3,7 +3,7 @@
 import MarketPlaceItemsEmptyState from "./empty-state";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState, useEffect } from "react";
-import { useSearchItems } from "@/app/_hooks/queries/swap";
+import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import ProductDetails from "@/components/widget/product-details";
 const MarketPlaceItems: React.FC = () => {
   const [category, setCategory] = useState<string>("");

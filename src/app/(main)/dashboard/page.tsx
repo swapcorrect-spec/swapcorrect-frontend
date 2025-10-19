@@ -7,7 +7,7 @@ import {
   useGetItemByRaterHotPick,
   useGetRecommendedItems,
   useGetElectronicsItems,
-} from "@/app/_hooks/queries/swap";
+} from "@/app/_hooks/queries/listing/listing";
 import Marketplace from "@/components/shared/marketplace";
 
 const Dashboard: FC = () => {

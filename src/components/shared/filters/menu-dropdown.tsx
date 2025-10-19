@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import Filter from "@/app/assets/images/svgs/Filter.svg";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
-import { useGetAllCategories } from "@/app/_hooks/queries/swap";
+import { useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
 import { useMemo, useState, useEffect } from "react";
 import { useDebounce } from "@/app/_hooks/useDebounce";
 

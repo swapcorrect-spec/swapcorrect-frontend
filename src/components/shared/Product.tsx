@@ -9,7 +9,7 @@ import { IProduct } from "@/interface/IProduct";
 import LoginRequiredModal from "@/components/shared/login-required-modal";
 import ReactPlayer from "react-player";
 import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
-import { useStartSwap } from "@/app/_hooks/queries/swap";
+import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 
 type Props = Prettify<Omit<IProduct, "id">> & {
   isAuthenticated?: boolean;

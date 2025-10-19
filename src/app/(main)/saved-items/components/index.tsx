@@ -4,6 +4,7 @@ import SavedItemsEmptyState from "./empty-state";
 import ProductDetails from "@/components/widget/product-details";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
+import { useGetUserFavourite } from "@/app/_hooks/queries/favourite";
 
 const SavedItems: React.FC = () => {
   const [category, setCategory] = useState<string>("");
@@ -11,10 +12,10 @@ const SavedItems: React.FC = () => {
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
   const [searchParam, setSearchParam] = useState<string>("");
-  
-  // Mock loading state - replace with actual API loading when integrated
-  const isLoading = false;
-  const data: any[] = []; // Mock data - replace with actual API data when integrated
+  const { data, isLoading, isError, error } = useGetUserFavourite({
+    enabler: true,
+ 
+  });
 
   const handleApplyFilters = (filters: {
     category: string;
@@ -48,6 +49,7 @@ const SavedItems: React.FC = () => {
       value: "abuja",
     },
   ];
+console.log(data, "data");
 
   return (
     <section className="p-6">

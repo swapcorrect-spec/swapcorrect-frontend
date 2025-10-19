@@ -31,3 +31,18 @@ export function getImageSrcWithFallback(
 ): string {
   return hasError ? fallbackUrl : originalSrc;
 }
+
+export function formatDateTime(date: string | Date, options?: Intl.DateTimeFormatOptions) {
+  const dateObj = typeof date === 'string' ? new Date(date) : date;
+  
+  const defaultOptions: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: true
+  };
+  
+  return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(dateObj);
+}

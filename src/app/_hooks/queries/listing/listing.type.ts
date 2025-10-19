@@ -1,3 +1,30 @@
+export interface ListingDetailsResponseInterface {
+  result: {
+    listingId: string;
+    listType: string;
+    itemName: string;
+    estimatedCurrency: string;
+    estimatedAmount: number;
+    itemDescription: string;
+    isFavItem: boolean;
+    reviewStage: string;
+    categoryName: string;
+    fullName: string;
+    email: string;
+    phoneNumber: string;
+    profilePicture: string | null;
+    username: string;
+    media: Array<{
+      mediaType: "Image" | "Video" | "Img";
+      url: string;
+    }>;
+    swapListRequest: string[];
+    itemCondition: string;
+  };
+  statusCode: 200;
+  displayMessage: string;
+}
+
 export interface SwapResponseInterface<T = any> {
   result: Array<{
     listingId: string;

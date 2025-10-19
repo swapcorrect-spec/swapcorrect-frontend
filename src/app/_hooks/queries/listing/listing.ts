@@ -1,3 +1,5 @@
+
+
 import {
   HOT_PICKS,
   RECOMMENDED_ITEMS,
@@ -5,11 +7,36 @@ import {
   SEARCH_ITEMS,
   ALL_CATEGORIES,
   START_SWAP,
+  LISTING_DETAILS
 } from "@/app/_constants/api_contant";
-import { useQuery, useMutation } from "@tanstack/react-query";
-import { getRequestParams, postRequest } from "@/app/_config/request-methods";
-import { SwapResponseInterface, SearchResponseInterface, CategoriesResponseInterface } from "./swap";
+import { useMutation, useQuery } from "@tanstack/react-query";
+import { getRequestParams, postRequest, getRequest } from "@/app/_config/request-methods";
+import { SwapResponseInterface, SearchResponseInterface, CategoriesResponseInterface, ListingDetailsResponseInterface } from "./listing.type";
 import { toast } from "sonner";
+
+export const useGetListingDetails = (props: { 
+  enabler: boolean;
+  listingId: string;
+}) => {
+  const { enabler, listingId } = props;
+  const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
+    queryKey: [LISTING_DETAILS, listingId],
+    queryFn: () =>
+      getRequest<ListingDetailsResponseInterface>({
+        url: `/listing_item/listing_details?listingId=${listingId}`,
+      }),
+    enabled: !!enabler && !!listingId,
+  });
+
+  return {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    isSuccess,
+  };
+};
 
 export const useGetItemByRaterHotPick = (props: { enabler: boolean }) => {
   const { enabler = true } = props;

@@ -10,7 +10,7 @@ import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useState } from "react";
 import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
-import { useStartSwap } from "@/app/_hooks/queries/swap";
+import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -208,7 +208,7 @@ const ProductDetails: React.FC<iProps> = ({
         </Button>
         
         <Link 
-          href={`/product/${listingId}`}
+          href={`/listing/${listingId}`}
           className="w-full mt-2 inline-block"
         >
           <Button
