@@ -53,6 +53,7 @@ const Sidebar: React.FC = () => {
       showCount: false,
     },
   ];
+  
   return (
     <section className="max-w-[99px] w-full border border-[#D9D9D9] bg-white h-screen overflow-y-auto py-7">
       <div className="mb-20 flex items-center justify-center">
@@ -61,6 +62,7 @@ const Sidebar: React.FC = () => {
       <ul className="flex flex-col gap-6 items-center jsutify-center">
         {SIDEBAR_LIST.map(({ title, iconFilled, iconOutline, link }, index) => {
           const isActive = path === link;
+                  
           return (
             <li key={index}>
               <Link href={link}>

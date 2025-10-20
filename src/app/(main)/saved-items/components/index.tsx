@@ -4,7 +4,7 @@ import SavedItemsEmptyState from "./empty-state";
 import ProductDetails from "@/components/widget/product-details";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
-import { useGetUserFavourite } from "@/app/_hooks/queries/favourite";
+import { useGetUserFavourite } from "@/app/_hooks/queries/favourite/favourite";
 
 const SavedItems: React.FC = () => {
   const [category, setCategory] = useState<string>("");

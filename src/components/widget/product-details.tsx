@@ -11,6 +11,7 @@ import ReactPlayer from "react-player";
 import { useState } from "react";
 import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
+import { useAddToFavourite, useRemoveFromFavourite } from "@/app/_hooks/queries/favourite/favourite";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -37,7 +38,6 @@ interface iProps {
   swapListRequest?: string[];
   itemCondition?: string;
   
-  // Legacy fields for backward compatibility
   wantList?: { name: string }[];
   imgUrl?: string;
   productName?: string;
@@ -49,7 +49,6 @@ interface iProps {
 }
 
 const ProductDetails: React.FC<iProps> = ({
-  // New API fields
   listingId,
   listType,
   itemName,
@@ -85,6 +84,29 @@ const ProductDetails: React.FC<iProps> = ({
     listingId: listingId?.toString() || "",
     onSuccess: () => {
       router.push("/chat");
+    },
+  });
+
+  // Favourite toggle (optimistic UI)
+  const [isFav, setIsFav] = useState<boolean>(!!isFavItem);
+  const { addToFavourite, isPending: isAddingFav } = useAddToFavourite({
+    listId: listingId?.toString() || "",
+    onSuccess: () => {
+      // Keep the optimistic state
+    },
+    onError: () => {
+      // Revert to original state on error
+      setIsFav(!!isFavItem);
+    },
+  });
+  const { removeFromFavourite, isPending: isRemovingFav } = useRemoveFromFavourite({
+    listId: listingId?.toString() || "",
+    onSuccess: () => {
+      // Keep the optimistic state
+    },
+    onError: () => {
+      // Revert to original state on error
+      setIsFav(!!isFavItem);
     },
   });
 
@@ -141,13 +163,29 @@ const ProductDetails: React.FC<iProps> = ({
                 <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
               </div>
             )}
-            <div className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center">
-              <Heart 
-                fill={isFavItem ? "#ef4444" : "none"} 
-                color={isFavItem ? "#ef4444" : "#6b7280"} 
-                size={16} 
+            <button
+              type="button"
+              aria-label="toggle favourite"
+              disabled={isAddingFav || isRemovingFav || !listingId}
+              onClick={() => {
+                if (!listingId) return;
+                // Optimistic update - change UI immediately
+                setIsFav(!isFav);
+                // Then make API call
+                if (isFav) {
+                  removeFromFavourite();
+                } else {
+                  addToFavourite();
+                }
+              }}
+              className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60"
+            >
+              <Heart
+                fill={isFav ? "#ef4444" : "none"}
+                color={isFav ? "#ef4444" : "#6b7280"}
+                size={16}
               />
-            </div>
+            </button>
           </div>
         </div>
         <div>

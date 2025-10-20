@@ -10,6 +10,9 @@ import {
   useGetElectronicsItems,
 } from "./_hooks/queries/listing/listing";
 import { Auth } from "./_config/auth";
+import { PATHS } from "./_constants/paths";
+import { redirect } from "next/navigation";
+
 
 export default function Home() {
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
@@ -20,7 +23,9 @@ export default function Home() {
   const { isLoading: isLoadingElectronicsItems, data: electronicsItems } =
     useGetElectronicsItems({ enabler: true });
   const isAuthenticated = Auth.isAuthenticated();
-
+  if (isAuthenticated) {
+    redirect(`${PATHS.DASHBOARD}`);
+  }
   return (
     <div>
       <Navbar />

@@ -10,6 +10,7 @@ import LoginRequiredModal from "@/components/shared/login-required-modal";
 import ReactPlayer from "react-player";
 import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
+import { useAddToFavourite, useRemoveFromFavourite } from "@/app/_hooks/queries/favourite/favourite";
 
 type Props = Prettify<Omit<IProduct, "id">> & {
   isAuthenticated?: boolean;
@@ -57,6 +58,30 @@ const Product: FC<Props> = (props) => {
     listingId: listingId?.toString() || "",
     onSuccess: () => {
       router.push("/chat");
+    },
+  });
+
+  // Favourite toggle (optimistic UI)
+  const [isFav, setIsFav] = useState<boolean>(!!isFavItem);
+
+  const { addToFavourite, isPending: isAddingFav } = useAddToFavourite({
+    listId: listingId?.toString() || "",
+    onSuccess: () => {
+      // Keep the optimistic state
+    },
+    onError: () => {
+      // Revert to original state on error
+      setIsFav(!!isFavItem);
+    },
+  });
+  const { removeFromFavourite, isPending: isRemovingFav } = useRemoveFromFavourite({
+    listId: listingId?.toString() || "",
+    onSuccess: () => {
+      // Keep the optimistic state
+    },
+    onError: () => {
+      // Revert to original state on error
+      setIsFav(!!isFavItem);
     },
   });
 
@@ -109,13 +134,33 @@ const Product: FC<Props> = (props) => {
             </div>
         )}
         
-        <div className="bg-white absolute top-3 right-3 rounded-full p-1">
-          <Heart 
-            size={20} 
-            fill={isFavItem ? "#ef4444" : "none"} 
-            color={isFavItem ? "#ef4444" : "#6b7280"} 
+        <button
+          type="button"
+          aria-label="toggle favourite"
+          disabled={isAddingFav || isRemovingFav || !listingId}
+          onClick={() => {
+            if (!isAuthenticated) {
+              setShowLoginModal(true);
+              return;
+            }
+            if (!listingId) return;
+            // Optimistic update - change UI immediately
+            setIsFav(!isFav);
+            // Then make API call
+            if (isFav) {
+              removeFromFavourite();
+            } else {
+              addToFavourite();
+            }
+          }}
+          className="bg-white absolute top-3 right-3 rounded-full p-1 disabled:opacity-60"
+        >
+          <Heart
+            size={20}
+            fill={isFav ? "#ef4444" : "none"}
+            color={isFav ? "#ef4444" : "#6b7280"}
           />
-        </div>
+        </button>
       </div>
       <div className="flex flex-col gap-1 mt-2 mb-3">
         <div className="flex justify-between items-center">
@@ -159,7 +204,7 @@ const Product: FC<Props> = (props) => {
       </Button>
       
       <Link 
-        href={`/product/${listingId}`}
+        href={`/listing/${listingId}`}
         className="w-full rounded-lg mb-2 inline-block"
       >
         <Button 

@@ -5,3 +5,4 @@ export const SEARCH_ITEMS = "SEARCH_ITEMS";
 export const ALL_CATEGORIES = "ALL_CATEGORIES";
 export const START_SWAP = "START_SWAP";
 export const LISTING_DETAILS = "LISTING_DETAILS";
+export const USER_FAVOURITE = "USER_FAVOURITE"
