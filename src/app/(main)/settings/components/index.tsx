@@ -8,7 +8,7 @@ import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 
 const Settings: React.FC = () => {
   const { data } = useGetUserInfo({ enabler: true });
-  console.log(data);
+
   const settingsTabList = [
     {
       title: "Personal Info",

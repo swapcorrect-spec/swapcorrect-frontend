@@ -65,7 +65,10 @@ const Login: FC = () => {
   const { values, handleBlur, handleChange, handleSubmit, errors } = formik;
 
   return (
-    <AuthForm title="Welcome Back, Swapper!" subtitle="Log in to continue your swap journey.">
+    <AuthForm
+      title="Welcome Back, Swapper!"
+      subtitle="Log in to continue your swap journey."
+    >
       {/* <Button variant={"secondary"} className="w-full py-6 border-[#EEEEEE] border text-[#000000] font-medium text-lg">
         <GoogleIcon style={{ width: "30px", height: "30px" }} /> Continue with Google
       </Button> */}
@@ -91,7 +94,11 @@ const Login: FC = () => {
             placeholder="Password"
             startIcon={<PasswordIcon />}
             endIcon={
-              <button type="button" onClick={toggleVisibility} className="focus:outline-none">
+              <button
+                type="button"
+                onClick={toggleVisibility}
+                className="focus:outline-none"
+              >
                 {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
               </button>
             }
@@ -102,12 +109,20 @@ const Login: FC = () => {
             error={errors.password}
           />
           <div className="flex justify-end pt-2">
-            <Link href={PATHS.FORGOT_PASSWORD} className="text-[#898989] text-xs w-fit">
+            <Link
+              href={PATHS.FORGOT_PASSWORD}
+              className="text-[#898989] text-xs w-fit"
+            >
               Forgot Password
             </Link>
           </div>
         </div>
-        <Button variant={"default"} className="rounded-full py-6 mt-2 md:mt-4" type="submit" loading={isPending}>
+        <Button
+          variant={"default"}
+          className="rounded-full py-6 mt-2 md:mt-4"
+          type="submit"
+          loading={isPending}
+        >
           Sign In
         </Button>
         <p className="text-center pb-10 md:pb-0">

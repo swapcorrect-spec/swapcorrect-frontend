@@ -9,6 +9,9 @@
 # pnpm lockfile (ignore it to avoid pushing)
 pnpm-lock.yaml
 
+# npm lockfile (ignore it to avoid conflicts with yarn)
+package-lock.json
+
 # testing
 /coverage
 

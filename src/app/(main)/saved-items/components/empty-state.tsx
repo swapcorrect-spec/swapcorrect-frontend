@@ -1,5 +1,5 @@
 import SavedEmpty from "@/app/assets/images/svgs/saved-empty.svg";
-import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 const SavedItemsEmptyState: React.FC = () => {
   return (
@@ -11,13 +11,12 @@ const SavedItemsEmptyState: React.FC = () => {
       <p className="text-[#737373] text-sm mb-8">
         Browse items and tap the heart to save what you love!
       </p>
-      <Button
-        variant={"default"}
-        className="rounded-full font-medium text-sm py-3 px-10 w-fit"
-        size={"lg"}
+      <Link
+        href="/market-place"
+        className="rounded-full font-medium text-sm py-3 px-10 w-fit bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
       >
         Go to Marketplace
-      </Button>
+      </Link>
     </section>
   );
 };

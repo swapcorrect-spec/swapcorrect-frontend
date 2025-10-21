@@ -9,6 +9,9 @@ import { Button } from "@/components/ui/button";
 import Filter from "@/app/assets/images/svgs/Filter.svg";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
+import { useMemo, useState, useEffect } from "react";
+import { useDebounce } from "@/app/_hooks/useDebounce";
 
 interface selectType {
   value: string;
@@ -18,22 +21,85 @@ interface selectType {
 interface iProps {
   setCategory: React.Dispatch<React.SetStateAction<string>>;
   setLocation: React.Dispatch<React.SetStateAction<string>>;
+  setLowestRange?: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setHighestRange?: React.Dispatch<React.SetStateAction<number | undefined>>;
+  setSearchParam?: React.Dispatch<React.SetStateAction<string>>;
+  onApplyFilters?: (filters: {
+    category: string;
+    location: string;
+    lowestRange?: number;
+    highestRange?: number;
+  }) => void;
   categoryList: selectType[];
   locationList: selectType[];
 }
 const FilterMenu: React.FC<iProps> = ({
   setCategory,
   setLocation,
+  setLowestRange,
+  setHighestRange,
+  setSearchParam,
+  onApplyFilters,
   categoryList,
   locationList,
 }) => {
+  const { data: categoriesData, isLoading, error } = useGetAllCategories({ enabler: true });
+  const [rangeValue, setRangeValue] = useState(0);
+  const [tempCategory, setTempCategory] = useState("");
+  const [tempLocation, setTempLocation] = useState("");
+  const [searchValue, setSearchValue] = useState("");
+  
+  // Debounce search value with 500ms delay
+  const debouncedSearchValue = useDebounce(searchValue, 500);
+
+  // Effect to update searchParam when debounced value changes
+  useEffect(() => {
+    if (setSearchParam) {
+      setSearchParam(debouncedSearchValue);
+    }
+  }, [debouncedSearchValue, setSearchParam]);
+
+  // Transform API data to selectType format
+  const apiCategoryList = useMemo(()=> categoriesData?.map(category => ({
+    value: category.id, // Use ID for filtering
+    text: category.categoryName
+  })) || [], [categoriesData]);
+
+  const finalCategoryList = apiCategoryList.length > 0 ? apiCategoryList : categoryList;
+
+  const handleApplyFilters = () => {
+    if (onApplyFilters) {
+      onApplyFilters({
+        category: tempCategory,
+        location: tempLocation,
+        lowestRange: 0,
+        highestRange: rangeValue
+      });
+    }
+    // Update the actual states
+    setCategory(tempCategory);
+    setLocation(tempLocation);
+    if (setLowestRange) setLowestRange(0);
+    if (setHighestRange) setHighestRange(rangeValue);
+  };
+
+  const handleResetFilters = () => {
+    setTempCategory("");
+    setTempLocation("");
+    setRangeValue(0);
+    setCategory("");
+    setLocation("");
+    if (setLowestRange) setLowestRange(undefined);
+    if (setHighestRange) setHighestRange(undefined);
+  };
+
   return (
-    <div className="flex gap-4 items-center">
+    <div className="flex gap-4 items-cente mb-5">
       <DropdownMenu>
-        <DropdownMenuTrigger asChild>
+        <DropdownMenuTrigger asChild className="h-9">
           <Button
             variant="outline"
-            className="!h-11 flex items-center border border-[#E9E9E9] w-fit rounded-md text-sm text-[#222222] gap-2"
+            className="!h-12 flex items-center border border-[#E9E9E9] w-fit rounded-md text-sm text-[#222222] gap-2"
           >
             <Filter />
             Filter
@@ -46,15 +112,8 @@ const FilterMenu: React.FC<iProps> = ({
             </h6>
             <div className="flex gap-5">
               <SelectFilter
-                list={categoryList}
-                setFilter={setCategory}
-                placeholder="Location"
-                className="!w-full"
-                label="Location"
-              />
-              <SelectFilter
-                list={locationList}
-                setFilter={setLocation}
+                list={finalCategoryList}
+                setFilter={setTempCategory}
                 placeholder="Category"
                 className="!w-full"
                 label="Category"
@@ -62,21 +121,32 @@ const FilterMenu: React.FC<iProps> = ({
               <div className="w-full">
                 <label className="flex justify-between text-sm mb-2 font-medium">
                   <p>Estimated Value</p>
-                  <p className="text-[#007AFF]">₦0 - ₦1,000,000+</p>
+                  <p className="text-[#007AFF]">₦0 - ₦{rangeValue.toLocaleString()}</p>
                 </label>
                 <div className="bg-[#F3F9FF] !h-10 relative flex items-center justify-center rounded-lg px-2">
                   <input
                     type="range"
+                    min="0"
+                    max="1000000"
+                    step="10000"
+                    value={rangeValue}
+                    onChange={(e) => setRangeValue(Number(e.target.value))}
                     className="w-full rounded-lg !border-0 border-[#D9D9D994]"
                   />
                 </div>
               </div>
             </div>
             <div className="flex gap-3 justify-end mt-10">
-              <Button className="bg-[#B2B2B2] text-white font-medium text-sm rounded-[1rem]">
+              <Button 
+                onClick={handleResetFilters}
+                className="bg-[#B2B2B2] text-white font-medium text-sm rounded-[1rem]"
+              >
                 Reset
               </Button>
-              <Button className="font-medium text-sm rounded-[1rem]">
+              <Button 
+                onClick={handleApplyFilters}
+                className="font-medium text-sm rounded-[1rem]"
+              >
                 Apply Filter
               </Button>
             </div>
@@ -86,8 +156,10 @@ const FilterMenu: React.FC<iProps> = ({
       <div className="max-w-[749px] w-full">
         <Input
           startIcon={<Search />}
-          className="w-full !h-9 rounded-lg"
+          className="w-full !h-8 rounded-lg"
           placeholder="Search items..."
+          value={searchValue}
+          onChange={(e) => setSearchValue(e.target.value)}
         />
       </div>
     </div>
