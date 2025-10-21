@@ -1,5 +1,8 @@
 import MomentAgo from "@/components/moment-ago";
 import Image from "next/image";
+import { useRouter, useSearchParams } from "next/navigation";
+import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
+import { useState } from "react";
 
 interface iChatRoom {
   count?: number;
@@ -9,6 +12,9 @@ interface iChatRoom {
   fullName: string;
   isText?: boolean;
   fileUrl?: Record<string, string>[];
+  userStatus?: "Online" | "Offline";
+  userId?: string;
+  chatRoomName?: string;
 }
 
 interface iProps {
@@ -17,21 +23,43 @@ interface iProps {
 }
 
 const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [imageError, setImageError] = useState(false);
+
+  const handleChatClick = () => {
+    const params = new URLSearchParams(searchParams.toString());
+    params.set('roomName', chat.chatRoomName || '');
+    router.push(`?${params.toString()}`);
+  };
+
+  const imageSrc = getImageSrcWithFallback(chat.userImgUrl, imageError);
+
   return (
-    <div className="hover:bg-[#F9F9F9] border-b-[0.8px] border-[#0E0E0E0D] p-3 flex gap-[10px] items-center cursor-pointer">
+    <div 
+      className="hover:bg-[#F9F9F9] border-b-[0.8px] border-[#0E0E0E0D] p-3 flex gap-[10px] items-center cursor-pointer"
+      onClick={handleChatClick}
+    >
       <div className="w-12 h-14 rounded-full">
         <Image
-          src={chat.userImgUrl || ""}
+          src={imageSrc}
           height={40}
           width={40}
           alt="User profile"
           className="w-10 h-10 rounded-full"
+          onError={createImageErrorHandler(setImageError)}
         />
       </div>
       <div className="flex-1">
-        <p className="text-[#222222] font-medium text-lg mb-1">
-          {chat.fullName}
-        </p>
+        <div className="flex items-center gap-2">
+          <p className="text-[#222222] font-medium text-lg mb-1">
+            {chat.fullName}
+          </p>
+          
+          {chat.userStatus?.toLowerCase() !== "offline" && (
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          )}
+        </div>
         <p className="text-sm text-[#222222]">{chat.message}</p>
       </div>
       <div>

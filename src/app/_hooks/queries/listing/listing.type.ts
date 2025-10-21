@@ -20,6 +20,9 @@ export interface ListingDetailsResponseInterface {
     }>;
     swapListRequest: string[];
     itemCondition: string;
+    userId: string;
+    rating: number;
+    swapCount: number;
   };
   statusCode: 200;
   displayMessage: string;

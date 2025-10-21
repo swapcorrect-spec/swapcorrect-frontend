@@ -1,12 +1,13 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { getRequest, postRequest } from "@/app/_config/request-methods";
+import { getRequest, getRequestParams, postRequest } from "@/app/_config/request-methods";
 
 import { MutationProps } from "@/app/_types/mutation-prop-types";
 
 import {
   ForgotPasswordPayload,
   IFogotPasswordResponse,
+  IGetGeneralUserInfoResponseData,
   IGetUserInfoResponseData,
   ILoginResponse,
   IRegisterResponse,
@@ -163,6 +164,28 @@ export const useGetUserInfo = (props: { enabler: boolean }) => {
         url: "/auth/user/info",
       }),
     enabled: !!enabler,
+  });
+
+  return {
+    data,
+    isLoading,
+    isFetching,
+    isError,
+    error,
+    isSuccess,
+  };
+};
+
+export const useGetGeneralUserInfo = (props: { userId: string; enabler: boolean }) => {
+  const { userId, enabler } = props;
+  const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
+    queryKey: ["useGetGeneralUserInfo", userId],
+    queryFn: () =>
+      getRequestParams<{}, IGetGeneralUserInfoResponseData>({
+        url: "/auth/general/user/info",
+        params: { userId },
+      }),
+    enabled: !!enabler && !!userId,
   });
 
   return {

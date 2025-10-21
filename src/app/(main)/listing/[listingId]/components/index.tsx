@@ -251,13 +251,13 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                 </p>
                 <div className="flex gap-2 text-[#737373] text-sm items-center">
                   <p className="flex items-center gap-1">
-                    3.5 <Rating />
+                    {listingData?.rating || 0} <Rating />
                   </p>
                   <span className="w-1 h-1 rounded-full bg-[#737373]"></span>
-                  <p>27 swaps</p>
+                  <p>{listingData?.swapCount || 0} swaps</p>
                 </div>
               </div>
-              <Link href={`/profile/${listingData?.username || 'unknown'}`}>
+              <Link href={`/profile/${listingData?.userId || 'unknown'}`}>
                 <div className="border border-[#E9E9E9] rounded-[6px] gap-1 p-[6px] flex items-center">
                   <p className="font-medium text-xs text-[#222222]">
                     View profile
