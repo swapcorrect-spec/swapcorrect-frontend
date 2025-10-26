@@ -10,6 +10,7 @@ import { Button } from "@/components/ui/button";
 import Gallery from "@/app/assets/images/svgs/Gallery.svg";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
 import { useGetChatRoomMessages } from "@/app/_hooks/queries/chat/chat";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchParams } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import * as signalR from "@microsoft/signalr";
@@ -41,6 +42,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   
   const searchParams = useSearchParams();
   const roomName = searchParams.get('roomName') || '';
+  
+  const { data: currentUserData } = useGetUserInfo({
+    enabler: true,
+  });
+  
+  const currentUserId = currentUserData?.result?.id || '';
   
   const { data, isLoading, isError, error } = useGetChatRoomMessages({
     roomName,
@@ -94,7 +101,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       !connection ||
       connection.state !== signalR.HubConnectionState.Disconnected ||
       !roomName ||
-      !userId
+      !currentUserId
     )
       return;
 
@@ -106,7 +113,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         setConnectionStatus("Connected");
 
         // Join the room
-        await connection.invoke("JoinRoom", roomName, userId);
+        await connection.invoke("JoinRoom", roomName, currentUserId);
 
         // Register handler once
         connection.off("ReceiveMessage"); // Prevent duplicate handlers
@@ -114,6 +121,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           console.log("Received message data:", message);
           console.log("Message type:", typeof message);
           console.log("Message structure:", JSON.stringify(message, null, 2));
+          
+          // Handle edge case where backend sends string instead of object
+          if (typeof message === "string") {
+            console.warn("Received string instead of message object, ignoring:", message);
+            return;
+          }
           
           // Transform message to match expected format
           const transformedMessage = {
@@ -134,20 +147,19 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     };
 
     startSignalR();
-  }, [connection, roomName, userId]);
+  }, [connection, roomName, currentUserId]);
 
   // Send message function
   const sendMessage = async (message: string, messageType: string = "Text") => {
-    if (connection && roomName && userId) {
+    if (connection && roomName && currentUserId) {
       try {
         console.log("Sending message:", {
           roomName,
-          userId,
+          userId: currentUserId,
           message,
           messageType
         });
-        await connection.invoke("SendMessageToRoom", roomName, userId, message, messageType);
-        console.log("Message sent successfully");
+        await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
       } catch (error) {
         console.error("Error sending message:", error);
       }

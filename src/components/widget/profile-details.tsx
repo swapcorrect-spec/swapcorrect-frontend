@@ -7,6 +7,8 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
+import Link from "next/link";
+import { PATHS } from "@/app/_constants/paths";
 
 interface ProfileDetailsHeaderProps {
   userData?: {
@@ -56,15 +58,17 @@ const ProfileDetailsHeader: React.FC<ProfileDetailsHeaderProps> = ({ userData })
         </div>
         <div className="flex gap-3 mb-6">
           <Button>{userRole}</Button>
+          <Link href={PATHS.CHAT} passHref>
           <Button
             className="items-center flex border-[#E9E9E9] text-[#222222]"
             variant="outline"
           >
-            Open Chat{" "}
+            Open Chat
             <div className="bg-[#303030] rounded-full w-[14px] h-[14px]">
               <ArrowRight size={12} color="#fff" />
             </div>
           </Button>
+          </Link>
         </div>
         <div className="flex gap-2">
           <div className="border-[#E9E9E9] border p-2 rounded-md w-full">
