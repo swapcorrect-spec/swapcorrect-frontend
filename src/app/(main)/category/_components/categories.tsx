@@ -1,24 +1,52 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
-import Product from "@/components/shared/Product";
-
-import ProductThree from "@/app/assets/images/pngs/product_3.jpg";
+import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
+import ProductDetails from "@/components/widget/product-details";
+import EmptyItemsState from "@/components/shared/empty-items-state";
 
 const Categories = () => {
   const search = useSearchParams();
   const router = useRouter();
   const tab = search.get("tab");
-  const [, setCategory] = useState<string>("");
-  const [, setLocation] = useState<string>("");
+  
+  const [category, setCategory] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+  const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
+  const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
+  const [searchParam, setSearchParam] = useState<string>("");
 
   useEffect(() => {
     if (!tab) {
       router.push("?tab=categories");
     }
-  }, [tab]);
+  }, [tab, router]);
+
+  const categoryId = tab && tab !== "categories" && tab.length > 10 ? tab : category;
+
+  const { data, isLoading, isError, error } = useSearchItems({
+    enabler: true,
+    searhParam: searchParam,
+    categoryld: categoryId || undefined,
+    location: location || undefined,
+    lowestRange: lowestRange,
+    highestRange: highestRange,
+    pageNumber: 1,
+    perpageSize: 20
+  });
+
+  const handleApplyFilters = (filters: {
+    category: string;
+    location: string;
+    lowestRange?: number;
+    highestRange?: number;
+  }) => {
+    setCategory(filters.category);
+    setLocation(filters.location);
+    setLowestRange(filters.lowestRange);
+    setHighestRange(filters.highestRange);
+  };
 
   const categoryList = [
     {
@@ -30,6 +58,7 @@ const Categories = () => {
       value: "textiles",
     },
   ];
+  
   const locationList = [
     {
       text: "Lagos",
@@ -40,56 +69,44 @@ const Categories = () => {
       value: "abuja",
     },
   ];
+
   return (
-    <div className="w-[80%] p-3">
-      <p className="text-[#007AFF] font-medium text-[15px] pb-1">Category</p>
-      <p className="text-[#222222] font-medium text-xl capitalize">
-        Browse {tab}
-      </p>
-      <div className="my-5">
-        <FilterMenu
-          categoryList={categoryList}
-          locationList={locationList}
-          setCategory={setCategory}
-          setLocation={setLocation}
-        />
-      </div>
-      <div className="grid grid-cols-3 gap-5">
-        {[0, 1, 2, 3, 4, 5].map((item: number) => (
-          <Product
-            key={item}
-            listingId={item + 1}
-            listType="Basic"
-            itemName="Gently used Nike shoe"
-            estimatedCurrency="NGN"
-            estimatedAmount={75000}
-            itemDescription="High quality Nike sneakers in excellent condition"
-            isFavItem={false}
-            reviewStage="Approved"
-            categoryName="Fashion"
-            fullName="Jenny Franklin"
-            email="jenny@example.com"
-            phoneNumber="08123456789"
-            profilePicture="https://randomuser.me/api/portraits/thumb/women/1.jpg"
-            username="Jenny Franklin"
-            media={[
-              {
-                mediaType: 'Image',
-                url: ProductThree
-              }
-            ]}
-            swapListRequest={["Airpod", "Powerbank"]}
-            itemCondition="Fairly used"
-            // Legacy fields for backward compatibility
-            author="Jenny Franklin"
-            image={ProductThree}
-            name="Gently used Nike shoe"
-            photo="https://randomuser.me/api/portraits/thumb/women/1.jpg"
-            price="₦75,000.00"
-            rating={3.4}
-            wants={["Airpod", "Powerbank"]}
+    <div className="w-[80%] h-full overflow-y-auto hide-scrollbar">
+      <div className="p-6">
+        <p className="text-[#007AFF] font-medium text-[15px] pb-1">Category</p>
+        <p className="text-[#222222] font-medium text-xl capitalize mb-8">
+          Browse {tab || "categories"}
+        </p>
+        <div className="mb-6">
+          <FilterMenu
+            categoryList={categoryList}
+            locationList={locationList}
+            setCategory={setCategory}
+            setLocation={setLocation}
+            setLowestRange={setLowestRange}
+            setHighestRange={setHighestRange}
+            setSearchParam={setSearchParam}
+            onApplyFilters={handleApplyFilters}
           />
-        ))}
+        </div>
+        {isLoading ? (
+          <div className="grid lg:grid-cols-3 md:grid-cols-2 sm:grid-cols-2 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-gray-200 h-[400px] rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : data && data.length > 0 ? (
+          <div className="grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {data.map((item: any) => (
+              <ProductDetails
+                key={item.listingId}
+                {...item}
+              />
+            ))}
+          </div>
+        ) : (
+          <EmptyItemsState />
+        )}
       </div>
     </div>
   );

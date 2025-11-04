@@ -25,10 +25,10 @@ const Sidebar: React.FC = () => {
       showCount: false,
     },
     {
-      title: "Marketplace",
+      title: "Category",
       iconFilled: <CategoryFilled />,
       iconOutline: <CategoryOutline />,
-      link: PATHS.MARKETPLACE,
+      link: PATHS.CATEGORY,
       showCount: false,
     },
     {
@@ -45,13 +45,7 @@ const Sidebar: React.FC = () => {
       link: PATHS.CHAT,
       showCount: true,
     },
-    {
-      title: "Category",
-      iconFilled: <CategoryFilled />,
-      iconOutline: <CategoryOutline />,
-      link: PATHS.CATEGORY,
-      showCount: false,
-    },
+   
   ];
   
   return (

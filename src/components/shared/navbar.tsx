@@ -52,7 +52,7 @@ const Navbar: React.FC<Props> = ({ data }) => {
   };
 
   return (
-    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-10 w-full">
+    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-50 w-full">
       <Link href={`${isLoggedIn ? "/dashboard" : "/"}`} className="flex justify-center">
         <Logo />
       </Link>

@@ -114,6 +114,7 @@ export const useSearchItems = (props: {
   listingDate?: string;
   pageNumber?: number;
   perpageSize?: number;
+  userId?: string;
 }) => {
   const { 
     enabler = true,
@@ -124,11 +125,12 @@ export const useSearchItems = (props: {
     highestRange,
     listingDate,
     pageNumber,
-    perpageSize = 20
+    perpageSize = 20,
+    userId
   } = props;
   
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
-    queryKey: [SEARCH_ITEMS, searhParam, categoryld, location, lowestRange, highestRange, listingDate, pageNumber, perpageSize],
+    queryKey: [SEARCH_ITEMS, searhParam, categoryld, location, lowestRange, highestRange, listingDate, pageNumber, perpageSize, userId],
     queryFn: async ({ signal }) =>
       getRequestParams<{
         searhParam?: string;
@@ -139,6 +141,7 @@ export const useSearchItems = (props: {
         listingDate?: string;
         pageNumber?: number;
         perpageSize?: number;
+        userId?: string;
       }, SearchResponseInterface>({
         url: "/listing_item/paginated/search_item",
         params: {
@@ -149,7 +152,8 @@ export const useSearchItems = (props: {
           highestRange,
           listingDate,
           pageNumber,
-          perpageSize
+          perpageSize,
+          userId
         },
         config: { signal },
       }),

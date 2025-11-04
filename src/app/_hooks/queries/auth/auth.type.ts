@@ -104,3 +104,33 @@ export interface IGetUserInfoResponseData {
   };
   errorMessages: null | string;
 }
+
+export interface IGetGeneralUserInfoResponseData {
+  statusCode: number;
+  displayMessage: string;
+  result: {
+    id: string;
+    firstName: string;
+    lastName: string;
+    profilePicture: null | string;
+    isEmailConfirmed: boolean;
+    email: string;
+    phoneNumber: string;
+    userName: string;
+    gender: string;
+    isSuspendUser: boolean;
+    isFlag: boolean;
+    isTwoFactorEnable: boolean;
+    lastLoginTime: string;
+    deliveryAddress: string;
+    city: string;
+    state: string;
+    country: string;
+    userRole: string[];
+    listingCount: number;
+    swapCount: number;
+    rating: number;
+    created: string;
+  };
+  errorMessages: null | string;
+}
