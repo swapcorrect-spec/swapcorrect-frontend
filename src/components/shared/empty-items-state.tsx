@@ -1,9 +1,9 @@
 import SavedEmpty from "@/app/assets/images/svgs/saved-empty.svg";
-interface MarketPlaceItemsEmptyStateProps {
+interface ItemsEmptyStateProps {
   title?: string;
   description?: string;
 }
-const MarketPlaceItemsEmptyState: React.FC<MarketPlaceItemsEmptyStateProps> = ({ title, description }) => {
+const EmptyItemsState: React.FC<ItemsEmptyStateProps> = ({ title, description }) => {
   return (
     <section className="flex flex-col items-center justify-center text-center mt-20">
       <SavedEmpty />
@@ -18,4 +18,4 @@ const MarketPlaceItemsEmptyState: React.FC<MarketPlaceItemsEmptyStateProps> = ({
   );
 };
 
-export default MarketPlaceItemsEmptyState;
+export default EmptyItemsState;

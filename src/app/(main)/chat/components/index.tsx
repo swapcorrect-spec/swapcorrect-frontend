@@ -37,9 +37,9 @@ const ChatRoom: React.FC = () => {
 
   if (isLoading) {
     return (
-      <section className="flex">
-        <div className="max-w-[426px] w-full h-[calc(100vh-72px)] overflow-y-auto hide-scrollbar">
-          <div className={`sticky top-0 z-10 p-4 bg-white`}>
+      <section className="flex h-[calc(100vh-72px)]">
+        <div className="max-w-[426px] w-full h-full flex flex-col border-r border-[#EEEEEE]">
+          <div className={`sticky top-0 z-10 p-4 bg-white border-b border-[#EEEEEE]`}>
             <div className={`flex justify-between items-center mb-4`}>
               <h2 className={`text-base text-[#007AFF] capitalize`}>CHAT</h2>
             </div>
@@ -49,28 +49,30 @@ const ChatRoom: React.FC = () => {
               placeholder="Search items..."
             />
           </div>
-          <div className="2xl:px-8 ps-5 pb-8">
-            <div className="flex flex-col">
-              {Array.from({ length: 5 }).map((_, index) => (
-                <div key={index} className="hover:bg-[#F9F9F9] border-b-[0.8px] border-[#0E0E0E0D] p-3 flex gap-[10px] items-center">
-                  <Skeleton className="w-10 h-10 rounded-full" />
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-1">
-                      <Skeleton className="h-5 w-24" />
-                      <Skeleton className="w-2 h-2 rounded-full" />
+          <div className="flex-1 overflow-y-auto hide-scrollbar">
+            <div className="2xl:px-8 ps-5 pb-8">
+              <div className="flex flex-col">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div key={index} className="hover:bg-[#F9F9F9] border-b-[0.8px] border-[#0E0E0E0D] p-3 flex gap-[10px] items-center">
+                    <Skeleton className="w-10 h-10 rounded-full" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        <Skeleton className="h-5 w-24" />
+                        <Skeleton className="w-2 h-2 rounded-full" />
+                      </div>
+                      <Skeleton className="h-4 w-32" />
                     </div>
-                    <Skeleton className="h-4 w-32" />
+                    <div className="text-right">
+                      <Skeleton className="h-3 w-12 mb-1" />
+                      <Skeleton className="w-4 h-4 rounded-full ml-auto" />
+                    </div>
                   </div>
-                  <div className="text-right">
-                    <Skeleton className="h-3 w-12 mb-1" />
-                    <Skeleton className="w-4 h-4 rounded-full ml-auto" />
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
           </div>
         </div>
-        <div className="flex-1">
+        <div className="flex-1 h-full overflow-hidden">
           <div className="flex h-full w-full flex-col items-center justify-center text-center border border-[#EEEEEE] border-t-0">
             <div className="space-y-4">
               <Skeleton className="h-8 w-32" />
@@ -83,9 +85,9 @@ const ChatRoom: React.FC = () => {
     );
   }
   return (
-    <section className="flex">
-      <div className="max-w-[426px] w-full h-[calc(100vh-72px)] overflow-y-auto hide-scrollbar">
-        <div className={`sticky top-0 z-10 p-4 bg-white`}>
+    <section className="flex h-[calc(100vh-72px)]">
+      <div className="max-w-[426px] w-full h-full flex flex-col border-r border-[#EEEEEE]">
+        <div className={`sticky top-0 z-10 p-4 bg-white border-b border-[#EEEEEE]`}>
           <div className={`flex justify-between items-center mb-4`}>
             <h2 className={`text-base text-[#007AFF] capitalize`}>CHAT</h2>
           </div>
@@ -95,15 +97,17 @@ const ChatRoom: React.FC = () => {
             placeholder="Search items..."
           />
         </div>
-        <div className="2xl:px-8 ps-5 pb-8">
-          <div className="flex flex-col">
-            {chatList.map((chat, index: number) => (
-              <NotificationMessageCard chat={chat} key={index} />
-            ))}
+        <div className="flex-1 overflow-y-auto hide-scrollbar">
+          <div className="2xl:px-8 ps-5 pb-8">
+            <div className="flex flex-col">
+              {chatList.map((chat, index: number) => (
+                <NotificationMessageCard chat={chat} key={index} />
+              ))}
+            </div>
           </div>
         </div>
       </div>
-      <div className="flex-1">
+      <div className="flex-1 h-full overflow-hidden">
         {roomName ? (
           <MessageRoom 
             userName={selectedChat?.fullName || ""} 

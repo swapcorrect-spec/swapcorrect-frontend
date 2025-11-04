@@ -171,9 +171,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   };
 
   return (
-    <section className="border border-[#EEEEEE] border-t-0">
+    <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col">
       <div
-        className={`border-b py-4 px-5 flex justify-between sticky bg-white top-0 z-10 items-center`}
+        className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
       >
         <div className="flex items-center gap-3 w-full">
           <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] rounded-full">
@@ -232,7 +232,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           </div>
         </div>
       </div>
-      <div className="h-[calc(100vh-200px)] overflow-y-auto hide-scrollbar">
+      <div className="flex-1 overflow-y-auto hide-scrollbar">
         {chatList.length === 0 ? (
           <EmptyMessageRoom  hideMarketplaceLink={true}/>
         ) : (
@@ -262,7 +262,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           </div>
         )}
       </div>
-      <div className="border-t p-4">
+      <div className="border-t p-4 flex-shrink-0">
         <div className="flex gap-2">
           <Input
             startIcon={<Smiley />}

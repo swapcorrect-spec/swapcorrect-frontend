@@ -8,9 +8,9 @@ import { useGetGeneralUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
-import MarketPlaceItemsEmptyState from "@/app/(main)/market-place/components/empty-state";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
+import EmptyItemsState from "@/components/shared/empty-items-state";
 
 const UserProfile: React.FC = () => {
   const params = useParams();
@@ -186,7 +186,7 @@ const UserProfile: React.FC = () => {
             ))}
           </div>
         ) : (
-         <MarketPlaceItemsEmptyState title="Looks like user swap list is empty!"/>
+         <EmptyItemsState title="Looks like user swap list is empty!"/>
         )}
       </div>
     </section>
