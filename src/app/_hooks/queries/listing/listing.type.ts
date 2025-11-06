@@ -103,3 +103,46 @@ export interface CategoriesResponseInterface {
   displayMessage: string;
   errorMessages?: string | null;
 }
+
+export interface ICreateListingPayload {
+  listType: string;
+  itemName: string;
+  estimatedCurrency: string;
+  estimatedAmount: number;
+  itemDescription: string;
+  categoryId: string;
+  itemCondition: string;
+  location: string;
+  listMediaFiles: Array<{
+    mediaType: string;
+    url: string;
+  }>;
+  listingSwapReq: Array<{
+    itemNeededName: string;
+  }>;
+}
+
+export interface ICreateListingResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: any;
+  errorMessages: string | null;
+}
+
+export interface IUpdateListingPayload extends ICreateListingPayload {
+  listingId: string;
+}
+
+export interface IUpdateListingResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: any;
+  errorMessages: string | null;
+}
+
+export interface IDeleteListingResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: any;
+  errorMessages: string | null;
+}

@@ -1,35 +1,105 @@
 import EmptyMessageRoom from "./empty-room";
 import Image from "next/image";
-import { Send } from "lucide-react";
-import { useState, useEffect } from "react";
-import MomentAgo from "@/components/moment-ago";
-import { Input } from "@/components/ui/input";
+import { Send, Check, CheckCheck, Plus, X, File, FileVideo, Info, FileImage } from "lucide-react";
+import { useState, useEffect, useRef } from "react";
 import SwapModalContent from "./swap-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
-import Gallery from "@/app/assets/images/svgs/Gallery.svg";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
 import { useGetChatRoomMessages } from "@/app/_hooks/queries/chat/chat";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchParams } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import * as signalR from "@microsoft/signalr";
+import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
+import EmojiPicker from "emoji-picker-react";
+import ReactPlayer from "react-player";
 
-type ChatListProps = {
-  id: string;
-  message: string;
-  time: string;
-  isText: boolean;
-  fileUrl?: {
-    imgUrl: string;
-  }[];
-};
+type ChatListProps = IRoomMessage;
 
 interface MessageRoomProps {
   userName: string;
   userProfileUrl: string;
   userId: string; // Add userId from selected chat
 }
+
+const formatTime = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('en-US', { 
+      hour: 'numeric', 
+      minute: '2-digit',
+      hour12: true 
+    });
+  } catch {
+    return '';
+  }
+};
+
+// Helper function to format date separator (Sat, Jun 28)
+const formatDateSeparator = (dateString: string) => {
+  try {
+    const date = new Date(dateString);
+    const today = new Date();
+    const yesterday = new Date(today);
+    yesterday.setDate(yesterday.getDate() - 1);
+    
+    // Check if today
+    if (date.toDateString() === today.toDateString()) {
+      return 'Today';
+    }
+    
+    // Check if yesterday
+    if (date.toDateString() === yesterday.toDateString()) {
+      return 'Yesterday';
+    }
+    
+    // Otherwise show day and date
+    return date.toLocaleDateString('en-US', { 
+      weekday: 'short', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  } catch {
+    return '';
+  }
+};
+
+// Helper function to check if two dates are on different days
+const isDifferentDay = (date1: string, date2: string) => {
+  try {
+    const d1 = new Date(date1);
+    const d2 = new Date(date2);
+    return d1.toDateString() !== d2.toDateString();
+  } catch {
+    return false;
+  }
+};
+
+// Helper function to get file type from file
+const getFileType = (file: File): "Image" | "Video" | "File" => {
+  const type = file.type.toLowerCase();
+  if (type.startsWith("image/")) return "Image";
+  if (type.startsWith("video/")) return "Video";
+  return "File";
+};
+
+// Helper function to format file size
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return bytes + " B";
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + " KB";
+  return (bytes / (1024 * 1024)).toFixed(1) + " MB";
+};
+
+// Component for rendering message status indicator
+const MessageStatusIndicator = ({ status }: { status: string }) => {
+  if (status === "Read") {
+    return <CheckCheck size={14} className="inline" />;
+  } else if (status === "Sent" || status === "Unread") {
+    return <Check size={14} className="inline" />;
+  }
+  return null;
+};
 
 const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, userId }) => {
   const [isOpen, setIsOpen] = useState<boolean>(false);
@@ -39,6 +109,16 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const [messages, setMessages] = useState<ChatListProps[]>([]);
   const [messageInput, setMessageInput] = useState<string>("");
   const [connectionStatus, setConnectionStatus] = useState<string>("Disconnected");
+  const [showEmojiPicker, setShowEmojiPicker] = useState<boolean>(false);
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set());
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [loadingMedia, setLoadingMedia] = useState<Set<number>>(new Set()); // Track media loading state
+  const [viewImageModal, setViewImageModal] = useState<boolean>(false);
+  const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
+  const [showInfoDrawer, setShowInfoDrawer] = useState<boolean>(false);
+  const emojiPickerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   const searchParams = useSearchParams();
   const roomName = searchParams.get('roomName') || '';
@@ -56,8 +136,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   
   // Sync GET request data with messages state
   useEffect(() => {
-    if (data?.result && Array.isArray(data.result)) {
-      setMessages(data.result);
+    if (data?.result?.roomMessages && Array.isArray(data.result.roomMessages)) {
+      // Reverse to show oldest messages first (top) and newest last (bottom)
+      setMessages([...data.result.roomMessages].reverse());
     }
   }, [data]);
   
@@ -65,6 +146,18 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   
   // Use messages state instead of hardcoded chatList
   const chatList = messages;
+
+  // Get media counts from API (more efficient than manual calculation)
+  const mediaStats = {
+    images: data?.result?.imageCount || 0,
+    videos: data?.result?.videoCount || 0,
+    files: data?.result?.fileCount || 0,
+  };
+
+  // Get all media messages for the grid display
+  const allMedia = messages.filter(msg => 
+    msg.messageType === "Image" || msg.messageType === "Video" || msg.messageType === "File"
+  );
 
   // SignalR Connection Setup
   useEffect(() => {
@@ -95,7 +188,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     };
   }, []);
 
-  // Handle SignalR connection and room management
   useEffect(() => {
     if (
       !connection ||
@@ -128,17 +220,38 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             return;
           }
           
-          // Transform message to match expected format
-          const transformedMessage = {
-            id: message.id || message.userId || "unknown",
+          // Normalize messageType to proper case (text -> Text, image -> Image, etc.)
+          const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
+            const lowerType = (type || "text").toLowerCase();
+            const typeMap: Record<string, "Text" | "Image" | "Video" | "File"> = {
+              text: "Text",
+              image: "Image",
+              video: "Video",
+              file: "File"
+            };
+            return typeMap[lowerType] || "Text";
+          };
+          
+          // Transform message to match IRoomMessage format
+          const transformedMessage: IRoomMessage = {
             message: message.message || message.content || "",
-            time: message.time || message.timestamp || new Date().toISOString(),
-            isText: message.isText !== undefined ? message.isText : true,
-            fileUrl: message.fileUrl || undefined
+            dateTime: message.dateTime || message.time || message.timestamp || new Date().toISOString(),
+            status: message.status || "Sent",
+            messageType: normalizeMessageType(message.messageType),
+            senderImgUrl: message.senderImgUrl || null,
+            senderId: message.senderId || message.userId || "unknown",
+            isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId
           };
           
           console.log("Transformed message:", transformedMessage);
-          setMessages(prev => [...prev, transformedMessage]);
+          setMessages(prev => {
+            const newMessages = [...prev, transformedMessage];
+            // Mark as loading if it's media content
+            if (transformedMessage.messageType === "Image" || transformedMessage.messageType === "Video") {
+              setLoadingMedia((prevLoading) => new Set(prevLoading).add(newMessages.length - 1));
+            }
+            return newMessages;
+          });
         });
 
       } catch (error) {
@@ -148,6 +261,23 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
     startSignalR();
   }, [connection, roomName, currentUserId]);
+
+  // Close emoji picker when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (emojiPickerRef.current && !emojiPickerRef.current.contains(event.target as Node)) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   // Send message function
   const sendMessage = async (message: string, messageType: string = "Text") => {
@@ -164,6 +294,175 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         console.error("Error sending message:", error);
       }
     }
+  };
+
+  // Handle file selection
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      setSelectedFiles((prev) => [...prev, ...fileArray]);
+    }
+    // Reset input value so same file can be selected again
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+  };
+
+  // Remove a selected file
+  const removeFile = (index: number) => {
+    setSelectedFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  // Clear all selected files
+  const clearAllFiles = () => {
+    setSelectedFiles([]);
+    setUploadingFiles(new Set());
+  };
+
+  // Upload file to Cloudinary
+  const uploadToCloudinary = async (file: File, fileIndex: number) => {
+    const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
+    const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET;
+
+    if (!cloudName || !uploadPreset) {
+      console.error("Cloudinary credentials not found!");
+      return null;
+    }
+
+    // Determine resource type
+    let resourceType = "auto";
+    if (file.type.startsWith("image/")) {
+      resourceType = "image";
+    } else if (file.type.startsWith("video/")) {
+      resourceType = "video";
+    } else {
+      resourceType = "raw";
+    }
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("upload_preset", uploadPreset);
+    formData.append("folder", "swap_shop/chat");
+
+    try {
+      // Mark this file as uploading
+      setUploadingFiles((prev) => new Set(prev).add(fileIndex));
+
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      
+      console.log("=== CLOUDINARY UPLOAD RESPONSE ===");
+      console.log("Full Response:", data);
+      console.log("Secure URL:", data.secure_url);
+      console.log("Public ID:", data.public_id);
+      console.log("Resource Type:", data.resource_type);
+      console.log("Format:", data.format);
+      console.log("==================================");
+
+      // Remove from uploading set
+      setUploadingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(fileIndex);
+        return newSet;
+      });
+
+      return data;
+    } catch (error) {
+      console.error("Error uploading to Cloudinary:", error);
+      setUploadingFiles((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(fileIndex);
+        return newSet;
+      });
+      return null;
+    }
+  };
+
+  // Handle send with file uploads
+  const handleSendWithFiles = async () => {
+    if (selectedFiles.length === 0) return;
+
+    setIsUploading(true);
+
+    // For now, just test with the first file
+    const file = selectedFiles[0];
+    const fileType = getFileType(file);
+    
+    console.log("Starting upload for:", file.name);
+
+    // 1. Upload to Cloudinary
+    const uploadResult = await uploadToCloudinary(file, 0);
+
+    if (!uploadResult) {
+      console.error("Upload failed!");
+      setIsUploading(false);
+      return;
+    }
+
+    console.log("Upload successful! URL:", uploadResult.secure_url);
+
+    // 2. Add message optimistically to chat with "Sending" status
+    const optimisticMessage: IRoomMessage = {
+      message: uploadResult.secure_url,
+      dateTime: new Date().toISOString(),
+      status: "Sending", // Custom status to show spinner
+      messageType: fileType,
+      senderImgUrl: currentUserData?.result?.profilePicture || null,
+      senderId: currentUserId,
+      isMe: true,
+    };
+
+    setMessages((prev) => {
+      const newMessages = [...prev, optimisticMessage];
+      // Mark this message as loading media
+      setLoadingMedia((prevLoading) => new Set(prevLoading).add(newMessages.length - 1));
+      return newMessages;
+    });
+
+    // 3. Send via SignalR
+    try {
+      await sendMessage(uploadResult.secure_url, fileType);
+      
+      // 4. Update status to "Sent" after successful send
+      // Note: Spinner stays until media loads (handled in onLoad/onReady)
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === prev.length - 1 && msg.status === "Sending"
+            ? { ...msg, status: "Sent" }
+            : msg
+        )
+      );
+
+      // Clear selected files and uploading state
+      setSelectedFiles([]);
+      setUploadingFiles(new Set());
+    } catch (error) {
+      console.error("Error sending via SignalR:", error);
+      // Optionally: Update message status to "Failed"
+      setMessages((prev) =>
+        prev.map((msg, idx) =>
+          idx === prev.length - 1 && msg.status === "Sending"
+            ? { ...msg, status: "Failed" }
+            : msg
+        )
+      );
+      // Remove from loading media on error
+      setLoadingMedia((prev) => {
+        const newSet = new Set(prev);
+        newSet.delete(messages.length);
+        return newSet;
+      });
+    }
+
+    setIsUploading(false);
   };
 
   const onOpenChange = () => {
@@ -229,6 +528,14 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             >
               Retry
             </Button>
+            <Button
+              className="!h-9 !w-9 rounded-xl"
+              variant="outline"
+              onClick={() => setShowInfoDrawer(!showInfoDrawer)}
+              title="View profile and shared media"
+            >
+              <Info size={18} />
+            </Button>
           </div>
         </div>
       </div>
@@ -236,58 +543,359 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         {chatList.length === 0 ? (
           <EmptyMessageRoom  hideMarketplaceLink={true}/>
         ) : (
-          <div className="p-4 space-y-4">
-            {chatList.map((chat, index) => (
-              <div key={index} className="flex gap-3">
-                <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                  <span className="text-xs font-medium">
-                    {chat.id === "1" ? "Me" : userName.charAt(0)}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <span className="text-sm font-medium">
-                      {chat.id === "1" ? "You" : userName}
-                    </span>
-                    <span className="text-xs text-gray-500">
-                      <MomentAgo createdAt={chat.time || new Date().toISOString()} />
-                    </span>
+          <div className="p-4">
+            {chatList.map((chat, index) => {
+              // Check if next message is from the same sender (for avatar)
+              const nextMessage = index < chatList.length - 1 ? chatList[index + 1] : null;
+              const isNextSameSender = nextMessage && nextMessage.senderId === chat.senderId;
+              const showAvatar = !isNextSameSender; // Show avatar when next message is different or this is last message
+              
+              // Check if we need to show date separator
+              const prevMessage = index > 0 ? chatList[index - 1] : null;
+              const showDateSeparator = index === 0 || (prevMessage && isDifferentDay(prevMessage.dateTime, chat.dateTime));
+              
+              // Check if previous message is from same sender (for spacing)
+              const isPrevSameSender = prevMessage && prevMessage.senderId === chat.senderId;
+
+              return (
+                <div key={index} className={isPrevSameSender ? 'mt-1' : 'mt-3'}>
+                  {/* Date separator */}
+                  {showDateSeparator && (
+                    <div className="flex items-center justify-center my-4">
+                      <div className="bg-gray-200 text-gray-600 text-xs px-3 py-1 rounded-md">
+                        {formatDateSeparator(chat.dateTime)}
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Message */}
+                <div className={`flex gap-3 items-end ${chat.isMe ? 'flex-row-reverse' : ''}`}>
+                  {/* Avatar - only render when showing */}
+                  {showAvatar && (
+                    <div className="w-8 h-8 rounded-full flex-shrink-0">
+                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                        {chat.senderImgUrl ? (
+                          <Image
+                            src={chat.senderImgUrl}
+                            height={32}
+                            width={32}
+                            alt="Sender"
+                            className="w-8 h-8 rounded-full"
+                          />
+                        ) : (
+                          <span className="text-xs font-medium">
+                            {chat.isMe ? "Me" : userName.charAt(0)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  )}
+
+                  <div className={`flex-1 ${chat.isMe ? 'flex justify-end' : 'flex justify-start'} ${!showAvatar ? (chat.isMe ? 'mr-11' : 'ml-11') : ''}`}>
+                    {/* Message bubble with timestamp */}
+                    <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg overflow-hidden max-w-md relative`}>
+                        {/* Sending/Loading spinner overlay */}
+                        {(chat.status === "Sending" || loadingMedia.has(index)) && (
+                          <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
+                            <div className="flex flex-col items-center gap-2">
+                              <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                              <span className="text-xs text-white font-medium">
+                                {chat.status === "Sending" ? "Sending..." : "Loading..."}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        {/* Message content based on type */}
+                        {chat.messageType === "Image" ? (
+                          <div className="relative" style={{ width: '350px', maxWidth: '100%' }}>
+                            <img
+                              src={chat.message}
+                              alt="Shared image"
+                              className="w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
+                              style={{ height: '220px', objectFit: 'cover' }}
+                              onClick={() => {
+                                setSelectedImageUrl(chat.message);
+                                setViewImageModal(true);
+                              }}
+                              onLoad={() => {
+                                // Remove from loading state when image loads
+                                setLoadingMedia((prev) => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(index);
+                                  return newSet;
+                                });
+                              }}
+                              onError={(e) => {
+                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23999' font-size='14'%3EImage failed to load%3C/text%3E%3C/svg%3E";
+                                // Remove from loading state on error
+                                setLoadingMedia((prev) => {
+                                  const newSet = new Set(prev);
+                                  newSet.delete(index);
+                                  return newSet;
+                                });
+                              }}
+                            />
+                            <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 flex items-center justify-end gap-2`}>
+                              <div className="flex items-center gap-1 text-xs opacity-70 whitespace-nowrap">
+                                <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
+                                <MessageStatusIndicator status={chat.status} />
+                              </div>
+                            </div>
+                          </div>
+                        ) : chat.messageType === "Video" ? (
+                          <div className="relative" style={{ width: '350px', maxWidth: '100%' }}>
+                            {/* Video Icon Badge */}
+                            <div className="absolute top-2 left-2 z-30 bg-black bg-opacity-70 rounded px-2 py-1 flex items-center gap-1">
+                              <FileVideo size={14} className="text-white" />
+                              <span className="text-white text-xs font-medium">Video</span>
+                            </div>
+                            
+                            <div className="relative w-full rounded-xl overflow-hidden" style={{ height: '220px' }}>
+                              <ReactPlayer
+                                src={chat.message}
+                                width="100%"
+                                height="100%"
+                                controls={true}
+                                className="rounded-xl"
+                                onReady={() => {
+                                  console.log("Video ready:", chat.message);
+                                  setLoadingMedia((prev) => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(index);
+                                    return newSet;
+                                  });
+                                }}
+                                onError={(error: any) => {
+                                  console.error("Video error:", error, chat.message);
+                                  setLoadingMedia((prev) => {
+                                    const newSet = new Set(prev);
+                                    newSet.delete(index);
+                                    return newSet;
+                                  });
+                                }}
+                              />
+                            </div>
+                            
+                            <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 flex items-center justify-end gap-2 rounded-b-lg`}>
+                              <div className="flex items-center gap-1 text-xs opacity-70 whitespace-nowrap">
+                                <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
+                                <MessageStatusIndicator status={chat.status} />
+                              </div>
+                            </div>
+                          </div>
+                        ) : chat.messageType === "File" ? (
+                          <div className="p-3">
+                            <a
+                              href={chat.message}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="flex items-center gap-2 hover:underline"
+                            >
+                              <File size={24} className={chat.isMe ? 'text-white' : 'text-blue-500'} />
+                              <div className="flex-1">
+                                <p className="text-sm font-medium">Document</p>
+                                <p className="text-xs opacity-70">Click to view</p>
+                              </div>
+                            </a>
+                            <div className="flex items-center justify-end gap-1 text-xs opacity-70 whitespace-nowrap mt-2">
+                              <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
+                              <MessageStatusIndicator status={chat.status} />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="p-3 inline-flex items-end gap-2">
+                            <p className="text-sm flex-1">{chat.message}</p>
+                            <div className="flex items-center gap-1 text-xs opacity-70 whitespace-nowrap">
+                              <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
+                              <MessageStatusIndicator status={chat.status} />
+                            </div>
+                          </div>
+                        )}
+                      </div>
                   </div>
-                  <div className="bg-gray-100 rounded-lg p-3 max-w-xs">
-                    <p className="text-sm">{chat.message}</p>
-                  </div>
                 </div>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </div>
         )}
       </div>
-      <div className="border-t p-4 flex-shrink-0">
-        <div className="flex gap-2">
-          <Input
-            startIcon={<Smiley />}
-            endIcon={<Gallery />}
+      
+      {/* File Preview Section */}
+      {selectedFiles.length > 0 && (
+        <div className="border-t border-b bg-white shadow-sm p-4 flex-shrink-0 relative z-20">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-semibold text-gray-800">
+              {selectedFiles.length} file(s) selected
+            </span>
+            <button
+              onClick={clearAllFiles}
+              className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium px-3 py-1.5 rounded-md transition-colors"
+            >
+              Clear All
+            </button>
+          </div>
+          <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-1 pt-2 px-1">
+            {selectedFiles.map((file, index) => {
+              const fileType = getFileType(file);
+              const isImage = fileType === "Image";
+              const isVideo = fileType === "Video";
+              const isUploading = uploadingFiles.has(index);
+              
+              return (
+                <div
+                  key={index}
+                  className="relative bg-white border border-gray-200 rounded-lg p-2 min-w-[120px] max-w-[120px] flex-shrink-0"
+                >
+                  {/* Loading Overlay */}
+                  {isUploading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 rounded-lg flex items-center justify-center z-20">
+                      <div className="flex flex-col items-center gap-2">
+                        <div className="w-8 h-8 border-4 border-white border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-xs text-white font-medium">Uploading...</span>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Remove button */}
+                  <button
+                    onClick={() => removeFile(index)}
+                    disabled={isUploading}
+                    className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1.5 hover:bg-red-600 shadow-md z-30 transition-transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <X size={14} />
+                  </button>
+
+                  {/* File preview */}
+                  <div className={`flex flex-col items-center gap-2 ${isUploading ? 'opacity-50' : ''}`}>
+                    {isImage ? (
+                      <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    ) : (
+                      <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center">
+                        {isVideo ? (
+                          <FileVideo size={32} className="text-purple-500" />
+                        ) : (
+                          <File size={32} className="text-blue-500" />
+                        )}
+                      </div>
+                    )}
+                    
+                    <div className="w-full text-center">
+                      <p className="text-xs text-gray-700 truncate" title={file.name}>
+                        {file.name}
+                      </p>
+                      <p className="text-xs text-gray-500">
+                        {formatFileSize(file.size)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      <div className="border-t p-4 flex-shrink-0 relative">
+        {/* Hidden file input */}
+        <input
+          ref={fileInputRef}
+          type="file"
+          multiple
+          accept="image/*,video/*,.pdf,.doc,.docx,.xls,.xlsx,.txt,.zip,.rar"
+          onChange={handleFileSelect}
+          className="hidden"
+        />
+
+        {/* Emoji Picker */}
+        {showEmojiPicker && (
+          <div 
+            ref={emojiPickerRef} 
+            className={`absolute left-4 z-50 ${
+              selectedFiles.length > 0 ? 'bottom-32' : 'bottom-20'
+            }`}
+          >
+            <EmojiPicker
+              onEmojiClick={(emojiData: any) => {
+                setMessageInput((prev) => prev + emojiData.emoji);
+              }}
+            />
+          </div>
+        )}
+
+        <div className="flex gap-2 items-center">
+          {/* Emoji Icon Button */}
+          <button
+            type="button"
+            onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+          >
+            <Smiley className="w-5 h-5" />
+          </button>
+
+          <textarea
             placeholder="Type a message..."
-            className="flex-1"
+            className="flex-1 resize-none border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent min-h-[40px] max-h-[120px] overflow-y-auto"
+            rows={1}
             value={messageInput}
-            onChange={(e) => setMessageInput(e.target.value)}
-            onKeyPress={(e) => {
-              if (e.key === "Enter" && messageInput.trim()) {
-                sendMessage(messageInput.trim());
-                setMessageInput("");
+            onChange={(e) => {
+              setMessageInput(e.target.value);
+              // Auto-grow textarea
+              e.target.style.height = 'auto';
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+            }}
+            onKeyDown={(e) => {
+              // Send on Enter (without Shift)
+              if (e.key === "Enter" && !e.shiftKey) {
+                e.preventDefault();
+                if (messageInput.trim()) {
+                  sendMessage(messageInput.trim());
+                  setMessageInput("");
+                  // Reset textarea height
+                  e.currentTarget.style.height = 'auto';
+                }
               }
+              // Shift+Enter adds new line (default behavior, so we don't prevent)
             }}
           />
+          
+          {/* Attachment Button */}
+          <button
+            type="button"
+            onClick={() => fileInputRef.current?.click()}
+            className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+            title="Attach files (images, videos, documents)"
+          >
+            <Plus className="w-5 h-5" />
+          </button>
+
           <Button 
             size="sm"
-            onClick={() => {
-              if (messageInput.trim()) {
+            disabled={isUploading}
+            onClick={async () => {
+              // If files are selected, upload them first
+              if (selectedFiles.length > 0) {
+                await handleSendWithFiles();
+              } 
+              // If text message, send normally
+              else if (messageInput.trim()) {
                 sendMessage(messageInput.trim());
                 setMessageInput("");
               }
             }}
           >
-            <Send size={16} />
+            {isUploading ? (
+              <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+            ) : (
+              <Send size={16} />
+            )}
           </Button>
         </div>
       </div>
@@ -301,6 +909,136 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           />
         </DialogContent>
       </Dialog>
+      <Dialog open={viewImageModal} onOpenChange={setViewImageModal}>
+        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-black border-none">
+          <div className="relative w-full h-full flex items-center justify-center">
+            <button
+              onClick={() => setViewImageModal(false)}
+              className="absolute top-4 right-4 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2 transition-all"
+            >
+              <X size={24} />
+            </button>
+           
+            <img
+              src={selectedImageUrl}
+              alt="Full view"
+              className="max-w-full max-h-[85vh] object-contain"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Info Drawer - Slides from right */}
+      {showInfoDrawer && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black bg-opacity-50 z-40"
+            onClick={() => setShowInfoDrawer(false)}
+          />
+          
+          {/* Drawer Panel */}
+          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-white shadow-2xl z-50 overflow-y-auto">
+            {/* Header */}
+            <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between z-10">
+              <h3 className="text-lg font-semibold text-gray-800">Profile & Media</h3>
+              <button
+                onClick={() => setShowInfoDrawer(false)}
+                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            {/* Profile Section */}
+            <div className="p-6 border-b">
+              <div className="flex flex-col items-center">
+                <div className="w-24 h-24 rounded-full bg-[#F4CE9B] flex items-center justify-center mb-3">
+                  <Image
+                    src={profileImageSrc}
+                    height={96}
+                    width={96}
+                    alt="User profile"
+                    className="w-24 h-24 rounded-full"
+                    onError={createImageErrorHandler(setImageError)}
+                  />
+                </div>
+                <h4 className="text-xl font-semibold text-gray-800">{userName}</h4>
+                <div className="flex items-center gap-2 mt-2">
+                  <div className={`w-2 h-2 rounded-full ${
+                    connectionStatus === "Connected" ? "bg-green-500" : "bg-gray-400"
+                  }`}></div>
+                  <span className="text-sm text-gray-500">{connectionStatus}</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Media Stats */}
+            <div className="p-6 border-b">
+              <h4 className="text-sm font-semibold text-gray-700 mb-4">Shared Files</h4>
+              <div className="grid grid-cols-3 gap-4">
+                <div className="text-center p-3 bg-blue-50 rounded-lg">
+                  <FileImage size={24} className="mx-auto text-blue-500 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{mediaStats.images}</p>
+                  <p className="text-xs text-gray-600">Photos</p>
+                </div>
+                <div className="text-center p-3 bg-purple-50 rounded-lg">
+                  <FileVideo size={24} className="mx-auto text-purple-500 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{mediaStats.videos}</p>
+                  <p className="text-xs text-gray-600">Videos</p>
+                </div>
+                <div className="text-center p-3 bg-green-50 rounded-lg">
+                  <File size={24} className="mx-auto text-green-500 mb-2" />
+                  <p className="text-2xl font-bold text-gray-800">{mediaStats.files}</p>
+                  <p className="text-xs text-gray-600">Files</p>
+                </div>
+              </div>
+            </div>
+
+            {/* Shared Media Grid */}
+            <div className="p-6">
+              <h4 className="text-sm font-semibold text-gray-700 mb-4">Recent Media</h4>
+              {allMedia.length > 0 ? (
+                <div className="grid grid-cols-3 gap-2">
+                  {allMedia.slice(0, 12).map((media, idx) => (
+                    <div
+                      key={idx}
+                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                      onClick={() => {
+                        if (media.messageType === "Image") {
+                          setSelectedImageUrl(media.message);
+                          setViewImageModal(true);
+                          setShowInfoDrawer(false);
+                        } else {
+                          window.open(media.message, '_blank');
+                        }
+                      }}
+                    >
+                      {media.messageType === "Image" ? (
+                        <img
+                          src={media.message}
+                          alt="Shared media"
+                          className="w-full h-full object-cover"
+                        />
+                      ) : media.messageType === "Video" ? (
+                        <div className="w-full h-full bg-purple-100 flex items-center justify-center">
+                          <FileVideo size={32} className="text-purple-500" />
+                        </div>
+                      ) : (
+                        <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+                          <File size={32} className="text-blue-500" />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-sm text-gray-500 text-center py-8">No media shared yet</p>
+              )}
+            </div>
+          </div>
+        </>
+      )}
     </section>
   );
 };

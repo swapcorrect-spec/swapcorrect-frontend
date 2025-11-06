@@ -3,9 +3,11 @@
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Listing from "@/app/(main)/item-listing/_components/listing";
-import ProductOne from "@/app/assets/images/pngs/product_1.jpg";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
+import EmptyItemsState from "@/components/shared/empty-items-state";
 
 const categoryList = [
   {
@@ -31,14 +33,49 @@ const locationList = [
 export default function ItemListing() {
   const router = useRouter();
 
-  const [, setCategory] = useState<string>("");
-  const [, setLocation] = useState<string>("");
+  const [category, setCategory] = useState<string>("");
+  const [location, setLocation] = useState<string>("");
+
+  // Get current logged in user
+  const { data: userData } = useGetUserInfo({ enabler: true });
+  const userId = userData?.result?.id;
+
+  // Fetch user's listings
+  const { data: itemsData } = useSearchItems({
+    enabler: !!userId,
+    userId: userId || undefined,
+    categoryld: category || undefined,
+    location: location || undefined,
+    pageNumber: 1,
+    perpageSize: 20,
+  });
 
   const handleNewListing = () => {
     router.push("/item-listing/add");
   };
+
+  // Format price with currency
+  const formatPrice = (currency: string, amount: number) => {
+    const currencySymbols: Record<string, string> = {
+      NGN: "₦",
+      USD: "$",
+      GBP: "£",
+      EUR: "€",
+      GHS: "GH₵",
+      KES: "KSh",
+      ZAR: "R",
+    };
+    const symbol = currencySymbols[currency] || currency;
+    return `${symbol}${amount.toLocaleString()} Est.`;
+  };
+
+  // Format status
+  const formatStatus = (reviewStage: string) => {
+    return reviewStage || "Active";
+  };
+
   return (
-    <div className="w-[90%] mx-auto my-10">
+    <div className="mx-auto my-10">
       <div className="flex items-end justify-between my-2">
         <div className="flex flex-col gap-2">
           <p className="text-[#007AFF] font-medium text-sm">MY LISTING</p>
@@ -58,23 +95,33 @@ export default function ItemListing() {
           setLocation={setLocation}
         />
       </div>
-      <div className="grid grid-cols-3 gap-5">
-        {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((item) => (
-          <Listing
-            key={item}
-            image={ProductOne}
-            date={"10/15/2023"}
-            description={
-              "Lorem ipsum dolor sit amet, consectetuer adipiscing elit, sed diam nonummy nibh euismod tincidun"
-            }
-            name={"Gently used Nike shoe"}
-            price={"$75,000 Est."}
-            status={"Active"}
-            type={"Basic"}
-            wants={["Smart Watch", "Airpods"]}
-          />
-        ))}
-      </div>
+      {!itemsData || itemsData.length === 0 ? (
+        <EmptyItemsState />
+      ) : (
+        <div className="grid 2xl:grid-cols-4 lg:grid-cols-3 md:grid-cols-2 grid-cols-1 gap-5">
+          {itemsData.map((item) => {
+            return (
+              <Listing
+                key={item.listingId}
+                listingId={item.listingId}
+                name={item.itemName}
+                date={""} // Date not available in response
+                description={item.itemDescription || ""}
+                price={formatPrice(item.estimatedCurrency, item.estimatedAmount)}
+                status={formatStatus(item.reviewStage)}
+                type={item.listType}
+                wants={item.swapListRequest || []}
+                categoryName={item.categoryName}
+                media={item.media}
+                profilePicture={item.profilePicture}
+                fullName={item.fullName}
+                username={item.username}
+                rating={0} // Rating not available in search response
+              />
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

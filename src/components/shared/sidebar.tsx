@@ -39,6 +39,13 @@ const Sidebar: React.FC = () => {
       showCount: true,
     },
     {
+      title: "My Listing",
+      iconFilled: <SaveFilled />,
+      iconOutline: <SaveOutline />,
+      link: PATHS.MYLISTING,
+      showCount: false,
+    },
+    {
       title: "Chat",
       iconFilled: <ChatFilled />,
       iconOutline: <ChatOutline />,

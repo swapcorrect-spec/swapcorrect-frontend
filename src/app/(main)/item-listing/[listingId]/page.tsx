@@ -4,11 +4,10 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Plus, X, Upload } from "lucide-react";
-import { useCreateListing } from "@/app/_hooks/queries/listing/listing";
-import { useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
-import { useRouter } from "next/navigation";
+import { useUpdateListing, useGetListingDetails, useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
+import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 
 const ITEM_CONDITIONS = ["New", "Fairly Used", "Used", "Needs Repair"];
@@ -22,8 +21,11 @@ const CURRENCIES = [
   { code: "ZAR", name: "South African Rand (R)" },
 ];
 
-const NewItemListing = () => {
+const EditItemListing = () => {
   const router = useRouter();
+  const params = useParams();
+  const listingId = params.listingId as string;
+
   const [formData, setFormData] = useState({
     listType: "Swap",
     itemName: "",
@@ -39,12 +41,55 @@ const NewItemListing = () => {
   const [uploadedMedia, setUploadedMedia] = useState<{ mediaType: string; url: string } | null>(null);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
+  const { data: listingData, isLoading, isError, error } = useGetListingDetails({
+    enabler: !!listingId,
+    listingId: listingId || "",
+  });
+
   const { data: categoriesData } = useGetAllCategories({ enabler: true });
-  const { createListing, isPending } = useCreateListing({
+  const { updateListing, isPending } = useUpdateListing({
     onSuccess: () => {
       router.push('/item-listing');
     }
   });
+
+  // Populate form when listing data loads
+  useEffect(() => {
+    if (listingData?.result && categoriesData) {
+      const data = listingData.result;
+      
+      // Map categoryName to categoryId
+      const category = categoriesData.find((cat: any) => cat.categoryName === data.categoryName);
+      const mappedCategoryId = category?.id || "";
+
+      setFormData({
+        listType: data.listType || "Swap",
+        itemName: data.itemName || "",
+        estimatedCurrency: data.estimatedCurrency || "NGN",
+        estimatedAmount: data.estimatedAmount || 0,
+        itemDescription: data.itemDescription || "",
+        categoryId: mappedCategoryId,
+        itemCondition: data.itemCondition || "",
+        location: "", // Not in response, user will need to fill
+      });
+
+      // Set requested items
+      if (data.swapListRequest && data.swapListRequest.length > 0) {
+        setRequestedItems(data.swapListRequest);
+      } else {
+        setRequestedItems([""]);
+      }
+
+      // Set media
+      if (data.media && data.media.length > 0) {
+        const firstMedia = data.media[0];
+        setUploadedMedia({
+          url: firstMedia.url,
+          mediaType: firstMedia.mediaType === "Video" ? "Video" : "Image"
+        });
+      }
+    }
+  }, [listingData, categoriesData]);
 
   const handleInputChange = (field: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [field]: value }));
@@ -113,7 +158,7 @@ const NewItemListing = () => {
     const files = e.target.files;
     if (!files || files.length === 0) return;
 
-    const file = files[0]; // Only take first file
+    const file = files[0];
     setIsUploading(true);
     
     const result = await uploadToCloudinary(file);
@@ -143,19 +188,69 @@ const NewItemListing = () => {
 
     const payload = {
       ...formData,
-      listMediaFiles: [uploadedMedia], // Wrap in array
+      listingId: listingId,
+      listMediaFiles: [uploadedMedia],
       listingSwapReq: requestedItems.filter(item => item.trim()).map(item => ({ itemNeededName: item })),
     };
 
-    createListing(payload);
+    updateListing(payload);
   };
+
+  if (isLoading) {
+    return (
+      <div className="">
+        <div className="border border-[#E9E9E9] px-8 py-4">
+          <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
+          <p className="text-[#222222] font-medium text-xl">
+            Edit Item Listing
+          </p>
+        </div>
+        <div className="grid grid-cols-[25%_40%_30%] justify-between gap-2 w-[95%] mx-auto my-8">
+          <div className="flex flex-col gap-3">
+            <div className="border-2 border-dashed border-gray-300 rounded-lg h-64 flex items-center justify-center">
+              <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+            </div>
+          </div>
+          <div className="flex flex-col gap-4">
+            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-20 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+            <div className="h-10 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+          <div className="border border-[#EEEEEE] rounded-xl p-4">
+            <div className="h-10 bg-gray-200 rounded animate-pulse mb-4"></div>
+            <div className="h-12 bg-gray-200 rounded animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isError || !listingData?.result) {
+    return (
+      <div className="">
+        <div className="border border-[#E9E9E9] px-8 py-4">
+          <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
+          <p className="text-[#222222] font-medium text-xl">
+            Edit Item Listing
+          </p>
+        </div>
+        <div className="w-[95%] mx-auto my-8 p-8 text-center">
+          <p className="text-red-500 mb-4">Failed to load listing details</p>
+          <Button variant="outline" onClick={() => router.push('/item-listing')}>
+            Back to Listings
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="">
       <div className="border border-[#E9E9E9] px-8 py-4">
         <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
         <p className="text-[#222222] font-medium text-xl">
-          List a New Item for Swap
+          Edit Item Listing
         </p>
       </div>
       <div className="grid grid-cols-[25%_40%_30%] justify-between gap-2 w-[95%] mx-auto my-8">
@@ -163,7 +258,6 @@ const NewItemListing = () => {
         <div>
           <p className="text-sm font-medium mb-2">Upload Media</p>
           <div className="flex flex-col gap-3">
-            {/* Upload Button or Preview */}
             {!uploadedMedia ? (
               <label className="border-2 border-dashed border-gray-300 rounded-lg p-4 cursor-pointer hover:border-blue-500 transition-colors flex flex-col items-center justify-center h-64">
                 <input
@@ -324,7 +418,6 @@ const NewItemListing = () => {
               <p>----</p>
             </div>
             
-            {/* Summary */}
             <div className="mb-4 text-sm">
               <p className="text-gray-600">Media: {uploadedMedia ? '1 file' : 'No file'}</p>
               <p className="text-gray-600">Items to swap: {requestedItems.filter(i => i.trim()).length}</p>
@@ -339,10 +432,10 @@ const NewItemListing = () => {
               {isPending ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  Creating...
+                  Updating...
                 </div>
               ) : (
-                "List Item for Swap"
+                "Update Listing"
               )}
             </Button>
           </div>
@@ -352,4 +445,5 @@ const NewItemListing = () => {
   );
 };
 
-export default NewItemListing;
+export default EditItemListing;
+

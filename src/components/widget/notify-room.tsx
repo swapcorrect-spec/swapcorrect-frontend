@@ -3,6 +3,7 @@ import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import { useState } from "react";
+import { FileImage, FileVideo, File } from "lucide-react";
 
 interface iChatRoom {
   count?: number;
@@ -22,6 +23,27 @@ interface iProps {
   chat: iChatRoom;
 }
 
+// Helper function to format message preview
+const formatMessagePreview = (message: string): { text: string; icon?: JSX.Element } => {
+  // Check if it's a Cloudinary URL
+  if (message.includes('res.cloudinary.com')) {
+    if (message.includes('/image/') || message.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+      return { text: "Image", icon: <FileImage size={14} className="inline mr-1" /> };
+    } else if (message.includes('/video/') || message.match(/\.(mp4|mov|avi|mkv|webm)$/i)) {
+      return { text: "Video", icon: <FileVideo size={14} className="inline mr-1" /> };
+    } else if (message.includes('/raw/')) {
+      return { text: "Document", icon: <File size={14} className="inline mr-1" /> };
+    }
+  }
+  
+  // For text messages, truncate if too long
+  if (message.length > 30) {
+    return { text: message.substring(0, 30) + "..." };
+  }
+  
+  return { text: message };
+};
+
 const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -34,6 +56,7 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
   };
 
   const imageSrc = getImageSrcWithFallback(chat.userImgUrl, imageError);
+  const messagePreview = formatMessagePreview(chat.message);
 
   return (
     <div 
@@ -60,7 +83,10 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
           )}
         </div>
-        <p className="text-sm text-[#222222]">{chat.message}</p>
+        <p className="text-sm text-[#666666] truncate">
+          {messagePreview.icon}
+          {messagePreview.text}
+        </p>
       </div>
       <div>
         <p className="mb-1 text-xs text-[#A1A1A1]">
