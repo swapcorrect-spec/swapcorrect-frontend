@@ -36,7 +36,6 @@ type Props = {
 const Listing: FC<Props> = ({
   listingId,
   name,
-  date,
   description,
   price,
   status,
@@ -183,7 +182,7 @@ const Listing: FC<Props> = ({
           <DialogHeader>
             <DialogTitle>Delete Listing</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete "{name}"? This action cannot be undone.
+              Are you sure you want to delete &quot;{name}&quot;? This action cannot be undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
