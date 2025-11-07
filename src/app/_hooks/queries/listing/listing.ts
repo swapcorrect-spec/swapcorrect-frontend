@@ -10,8 +10,8 @@ import {
   LISTING_DETAILS
 } from "@/app/_constants/api_contant";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getRequestParams, postRequest, getRequest } from "@/app/_config/request-methods";
-import { SwapResponseInterface, SearchResponseInterface, CategoriesResponseInterface, ListingDetailsResponseInterface } from "./listing.type";
+import { getRequestParams, postRequest, getRequest, deleteRequest, putRequest } from "@/app/_config/request-methods";
+import { SwapResponseInterface, SearchResponseInterface, CategoriesResponseInterface, ListingDetailsResponseInterface, ICreateListingPayload, ICreateListingResponse, IUpdateListingPayload, IUpdateListingResponse, IDeleteListingResponse } from "./listing.type";
 import { toast } from "sonner";
 
 export const useGetListingDetails = (props: { 
@@ -220,6 +220,95 @@ export const useStartSwap = (props: {
 
   return {
     startSwap: mutate,
+    isPending,
+    isError,
+    error,
+  };
+};
+
+export const useCreateListing = (props?: { onSuccess?: () => void }) => {
+  const { onSuccess } = props || {};
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (payload: ICreateListingPayload) =>
+      postRequest<ICreateListingPayload, ICreateListingResponse>({
+        url: "/listing_item/create",
+        payload,
+      }),
+    onSuccess: (response) => {
+      toast.success(response.displayMessage || "Listing created successfully!", {
+        onAutoClose: () => {
+          if (onSuccess) onSuccess();
+        },
+      });
+    },
+    onError: (err: any) => {
+      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to create listing. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+
+  return {
+    createListing: mutate,
+    isPending,
+    isError,
+    error,
+  };
+};
+
+export const useUpdateListing = (props?: { onSuccess?: () => void }) => {
+  const { onSuccess } = props || {};
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (payload: IUpdateListingPayload) =>
+      putRequest<IUpdateListingPayload, IUpdateListingResponse>({
+        url: `/listing_item/update?listingId=${payload.listingId}`,
+        payload,
+      }),
+    onSuccess: (response) => {
+      toast.success(response.displayMessage || "Listing updated successfully!", {
+        onAutoClose: () => {
+          if (onSuccess) onSuccess();
+        },
+      });
+    },
+    onError: (err: any) => {
+      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to update listing. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+
+  return {
+    updateListing: mutate,
+    isPending,
+    isError,
+    error,
+  };
+};
+
+export const useDeleteListing = (props?: { onSuccess?: () => void }) => {
+  const { onSuccess } = props || {};
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (listingId: string) =>
+      deleteRequest<IDeleteListingResponse>({
+        url: `/listing_item/delete?listingId=${listingId}`,
+      }),
+    onSuccess: (response) => {
+      toast.success(response.displayMessage || "Listing deleted successfully!", {
+        onAutoClose: () => {
+          if (onSuccess) onSuccess();
+        },
+      });
+    },
+    onError: (err: any) => {
+      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to delete listing. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+
+  return {
+    deleteListing: mutate,
     isPending,
     isError,
     error,

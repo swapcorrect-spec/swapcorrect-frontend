@@ -7,4 +7,5 @@ export const PATHS = {
   SAVES: "/saved-items",
   CHAT: "/chat",
   CATEGORY: "/category",
+  MYLISTING: "/item-listing",
 };

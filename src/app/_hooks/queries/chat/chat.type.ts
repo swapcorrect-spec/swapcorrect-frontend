@@ -14,9 +14,24 @@ export interface IGetActiveChatUsersResponseData {
   errorMessages: null | string;
 }
 
+export interface IRoomMessage {
+  message: string;
+  dateTime: string;
+  status: "Read" | "Unread" | "Sent" | "Sending" | "Failed";
+  messageType: "Text" | "Image" | "Video" | "File";
+  senderImgUrl: string | null;
+  senderId: string;
+  isMe: boolean;
+}
+
 export interface IGetChatRoomMessagesResponseData {
   statusCode: number;
   displayMessage: string;
-  result: any;
+  result: {
+    roomMessages: IRoomMessage[];
+    imageCount: number;
+    videoCount: number;
+    fileCount: number;
+  };
   errorMessages: null | string;
 }
