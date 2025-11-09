@@ -14,7 +14,7 @@ import Link from "next/link";
 import { X } from "lucide-react";
 
 type Props = {
-  handleToggleMenu: () => void;
+  handleToggleMenu?: () => void;
 };
 
 const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
