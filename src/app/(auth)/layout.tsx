@@ -3,10 +3,12 @@
 import { Swiper, SwiperSlide } from "swiper/react";
 import { useRef } from "react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
+import Logo from "@/app/assets/images/svgs/logo_full.svg";
 
 import "swiper/css";
 import "swiper/css/pagination";
 import "swiper/css/navigation";
+import Link from "next/link";
 
 const AuthLayout = ({
   children,
@@ -49,8 +51,7 @@ const AuthLayout = ({
                     Turn Your Items Into Instant Value!
                   </h2>
                   <p className="text-white font-normal text-lg leading-tight w-full pt-4">
-                    No be only buy and sell — swap your way to something better.
-                    List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade smart.
                   </p>
                 </div>
               </div>
@@ -58,12 +59,9 @@ const AuthLayout = ({
             <SwiperSlide>
               <div className="relative bg-[url(../app/assets/images/pngs/banner_three.png)] rounded-[30px]  bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
-                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
-                    Swap. Shop. Shine!
-                  </h2>
+                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">Swap. Shop. Shine!</h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
-                    No be only buy and sell — swap your way to something better.
-                    List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade smart.
                   </p>
                 </div>
               </div>
@@ -76,8 +74,7 @@ const AuthLayout = ({
                   </h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
                     {" "}
-                    No be only buy and sell — swap your way to something better.
-                    List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade smart.
                   </p>
                 </div>
               </div>
@@ -85,7 +82,12 @@ const AuthLayout = ({
           </Swiper>
         </div>
 
-        <div className="w-full md:w-1/2">{children}</div>
+        <div className="w-full md:w-1/2">
+          <Link href={`${"/"}`} className="flex justify-center my-4">
+            <Logo />
+          </Link>
+          {children}
+        </div>
       </div>
     </div>
   );

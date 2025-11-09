@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { Heart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
-import { FC, useState, useRef } from "react";
+import { FC, useState } from "react";
 import { IProduct } from "@/interface/IProduct";
 import LoginRequiredModal from "@/components/shared/login-required-modal";
 import ReactPlayer from "react-player";
@@ -26,7 +26,6 @@ const Product: FC<Props> = (props) => {
     profilePicture,
     username,
     swapListRequest,
-    categoryName,
     isFavItem,
     image,
     photo,
@@ -44,13 +43,17 @@ const Product: FC<Props> = (props) => {
 
   const firstMedia = media && media.length > 0 ? media[0] : null;
   const isVideo = firstMedia?.mediaType === "Video";
-  const mediaUrl = firstMedia?.url || image || "https://plus.unsplash.com/premium_photo-1664537979073-a467fa628555?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2371";
-  
+  const mediaUrl =
+    firstMedia?.url ||
+    image ||
+    "https://plus.unsplash.com/premium_photo-1664537979073-a467fa628555?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2371";
+
   const displayName = itemName || name || "Item";
-  const displayPrice = estimatedAmount 
-    ? formatCurrency(estimatedAmount, estimatedCurrency || "NGN") 
+  const displayPrice = estimatedAmount
+    ? formatCurrency(estimatedAmount, estimatedCurrency || "NGN")
     : price || "Price not set";
-  const displayWants = swapListRequest && swapListRequest.length > 0 ? swapListRequest.join(", ") : wants || "Open to offers";
+  const displayWants =
+    swapListRequest && swapListRequest.length > 0 ? swapListRequest.join(", ") : wants || "Open to offers";
   const displayAuthor = username || author || "Unknown";
   const displayPhoto = profilePicture || photo || "https://randomuser.me/api/portraits/thumb/women/1.jpg";
 
@@ -109,31 +112,33 @@ const Product: FC<Props> = (props) => {
   };
 
   return (
-    <div className="rounded-xl w-fit h-full hover:border hover:border-[#e3e0e0] cursor-pointer p-2">
+    <div className="flex flex-col rounded-xl shadow-none md:shadow-sm bg-white h-full">
       <div className="relative">
         {isVideo ? (
-          <ReactPlayer
-            src={typeof mediaUrl === 'string' ? mediaUrl : ''}
-            width={350}
-            height={350}
-            controls={true}
-            className="rounded-xl"
-            // light={true}
-          />
-        ) : (
-          <div className="h-[350px] w-[350px]">
-
-          <Image
-            src={getImageSrcWithFallback(typeof mediaUrl === 'string' ? mediaUrl : (mediaUrl as any).src || '', imageError)}
-            width={350}
-            height={350}
-            alt="Product Preview"
-            className="rounded-xl object-cover h-full"
-            onError={handleImageError}
+          <div className="relative w-full h-[150px] md:h-[250px] rounded-xl overflow-hidden">
+            <ReactPlayer
+              src={typeof mediaUrl === "string" ? mediaUrl : ""}
+              width="100%"
+              height="100%"
+              controls
+              className="react-player"
             />
-            </div>
+          </div>
+        ) : (
+          <div className="relative w-full h-[150px] md:h-[250px] rounded-xl overflow-hidden">
+            <Image
+              src={getImageSrcWithFallback(
+                typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
+                imageError
+              )}
+              alt="Product Preview"
+              fill
+              className="object-cover"
+              onError={handleImageError}
+            />
+          </div>
         )}
-        
+
         <button
           type="button"
           aria-label="toggle favourite"
@@ -155,11 +160,7 @@ const Product: FC<Props> = (props) => {
           }}
           className="bg-white absolute top-3 right-3 rounded-full p-1 disabled:opacity-60"
         >
-          <Heart
-            size={20}
-            fill={isFav ? "#ef4444" : "none"}
-            color={isFav ? "#ef4444" : "#6b7280"}
-          />
+          <Heart size={20} fill={isFav ? "#ef4444" : "none"} color={isFav ? "#ef4444" : "#6b7280"} />
         </button>
       </div>
       <div className="flex flex-col gap-1 mt-2 mb-3">
@@ -167,14 +168,9 @@ const Product: FC<Props> = (props) => {
           <p className="font-medium text-lg">{displayName}</p>
           <p className="text-[#007AFF] font-medium text-sm">{displayPrice}</p>
         </div>
-        {categoryName && (
-          <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit">
-            {categoryName}
-          </p>
-        )}
+
         <p className="text-[#737373] font-normal text-[13px]">
-          <span className="text-[#222222] font-medium text-[13px]">Wants:</span>{" "}
-          {displayWants}
+          <span className="text-[#222222] font-medium text-[13px]">Wants:</span> {displayWants}
         </p>
       </div>
 
@@ -195,23 +191,12 @@ const Product: FC<Props> = (props) => {
           <Rating />
         </div>
       </div>
-      <Button 
-        className="w-full rounded-lg mt-4 mb-2" 
-        onClick={handleSwap}
-        disabled={isStartingSwap || !listingId}
-      >
+      <Button className="w-full rounded-lg mt-4 mb-2" onClick={handleSwap} disabled={isStartingSwap || !listingId}>
         {isStartingSwap ? "Starting..." : "Swap Now"}
       </Button>
-      
-      <Link 
-        href={`/listing/${listingId}`}
-        className="w-full rounded-lg mb-2 inline-block"
-      >
-        <Button 
-          variant="outline"
-          className="w-full rounded-lg mb-2" 
-          disabled={!listingId}
-        >
+
+      <Link href={`/listing/${listingId}`} className="w-full rounded-lg mb-2 inline-block">
+        <Button variant="outline" className="w-full rounded-lg mb-2" disabled={!listingId}>
           View Details
         </Button>
       </Link>

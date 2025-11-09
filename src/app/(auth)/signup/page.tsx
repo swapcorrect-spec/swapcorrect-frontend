@@ -89,7 +89,7 @@ const Signup: FC = () => {
       {!isSuccess ? (
         <AuthForm title="Welcome to SwapShop!" subtitle="Create your free account and start swapping instantly.">
           <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
                 type="text"
                 placeholder="Firstname"
@@ -173,7 +173,7 @@ const Signup: FC = () => {
               }  h-9 px-3 py-6 text-base shadow-sm transition-colors placeholder:text-[#A1A1A1] focus-visible:outline-none focus-visible:border-[#E9E9E9] focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50 md:text-sm`}
               error={errors.country}
             />
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
                 type="text"
                 placeholder="State"
@@ -206,7 +206,7 @@ const Signup: FC = () => {
               error={errors.address}
             />
 
-            <div className="grid grid-cols-2 gap-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
                 type={isTogglePassword.password ? "text" : "password"}
                 placeholder="Password"
