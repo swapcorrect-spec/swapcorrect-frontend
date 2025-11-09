@@ -1,6 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { Menu } from "lucide-react";
 import Logo from "@/app/assets/images/svgs/logo_full.svg";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
@@ -26,9 +27,11 @@ import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
 
 interface Props {
   data?: IGetUserInfoResponseData;
+  handleToggleMenu?: () => void;
+  isOpen?: boolean;
 }
 
-const Navbar: React.FC<Props> = ({ data }) => {
+const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -53,9 +56,12 @@ const Navbar: React.FC<Props> = ({ data }) => {
 
   return (
     <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-50 w-full">
-      <Link href={`${isLoggedIn ? "/dashboard" : "/"}`} className="flex justify-center">
-        <Logo />
-      </Link>
+      <div className="flex gap-4 items-center justify-center">
+        {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
+        <Link href={`${isLoggedIn ? "/dashboard" : "/"}`} className="flex justify-center">
+          <Logo />
+        </Link>
+      </div>
       <div className="max-w-[749px] w-full me-auto">
         <Input startIcon={<Search />} className="w-full !h-11 rounded-[2rem]" placeholder="Search items..." />
       </div>

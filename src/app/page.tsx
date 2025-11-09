@@ -13,6 +13,8 @@ import { Auth } from "./_config/auth";
 import { PATHS } from "./_constants/paths";
 import { redirect } from "next/navigation";
 import Footer from "@/components/shared/footer";
+import useIsMobile from "./_hooks/useIsMobile";
+import MobileNavbar from "@/components/shared/mobile-navbar";
 
 export default function Home() {
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
@@ -21,16 +23,18 @@ export default function Home() {
   const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({ enabler: true });
   const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({ enabler: true });
   const isAuthenticated = Auth.isAuthenticated();
+  const isMobile = useIsMobile();
+
   if (isAuthenticated) {
     redirect(`${PATHS.DASHBOARD}`);
   }
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <Herosection />
-        <div className="flex-1 flex justify-end">
-          <div className="my-8 w-[90%] ml-auto mr-10 gap-12">
+        {isMobile ? <MobileNavbar /> : <Navbar isOpen={true} />}
+        {!isMobile && <Herosection />}
+        <div className="w-[90%] mx-auto">
+          <div className="my-8">
             <Marketplace
               title="FEATURED"
               subtitle="Hot Picks, Fast Swaps."

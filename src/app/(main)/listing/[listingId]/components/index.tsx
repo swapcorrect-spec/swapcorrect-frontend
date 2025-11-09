@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, MoveLeft } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactPlayer from "react-player";
@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 import { useGetListingDetails, useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, formatDateTime } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
+import useIsMobile from "@/app/_hooks/useIsMobile";
 
 interface ProductOverviewProps {
   listingId: string;
@@ -20,6 +21,8 @@ interface ProductOverviewProps {
 
 const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
   const router = useRouter();
+  const isMobile = useIsMobile();
+
   const { data, isLoading, isError, error } = useGetListingDetails({
     enabler: true,
     listingId,
@@ -42,14 +45,13 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
   const listingData = data?.result;
   const firstMedia = listingData?.media?.[0];
   const isVideo = firstMedia?.mediaType === "Video";
-  const mediaUrl = firstMedia?.url || "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80";
-  
+  const mediaUrl =
+    firstMedia?.url || "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80";
+
   const handleNegotiate = () => {
     startSwap();
   };
-  
-  console.log("Listing Details Data:", data);
-  
+
   const productTabList = [
     {
       title: "Item Description",
@@ -64,20 +66,21 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
       value: "swap-guideline",
     },
   ];
-  
+
   // Use API data for exchange list
-  const exchangeList = listingData?.swapListRequest?.map(item => ({
-    description: item
-  })) || [];
+  const exchangeList =
+    listingData?.swapListRequest?.map((item) => ({
+      description: item,
+    })) || [];
 
   // Loading skeleton component
   if (isLoading) {
     return (
       <section className="p-6">
         <Skeleton className="h-6 w-48 mb-6" />
-        <div className="flex gap-6">
+        <div className="flex flex-col md:flex-row gap-6">
           {/* Left side skeleton */}
-          <Card className="w-[60%] overflow-hidden">
+          <Card className="w-full md:w-[60%] overflow-hidden shadow-none">
             <CardContent className="p-0">
               <Skeleton className="w-full h-[418px]" />
               <div className="p-4">
@@ -90,10 +93,10 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               </div>
             </CardContent>
           </Card>
-          
+
           {/* Right side skeleton */}
-          <div className="w-[40%]">
-            <Card className="mb-4 2xl:mb-6">
+          <div className="w-full md:w-[40%]">
+            <Card className="mb-4 2xl:mb-6 shadow-none">
               <CardContent className="p-4 2xl:p-6">
                 <Skeleton className="h-8 w-3/4 mb-2" />
                 <Skeleton className="h-6 w-1/2 mb-6" />
@@ -107,9 +110,9 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                 </div>
               </CardContent>
             </Card>
-            
+
             <Skeleton className="h-6 w-32 mb-3" />
-            <Card className="mb-4 2xl:mb-6">
+            <Card className="mb-4 2xl:mb-6 shadow-none">
               <CardContent className="p-4 2xl:p-6 flex gap-3 items-center">
                 <Skeleton className="h-10 w-10 rounded-full" />
                 <div className="me-auto">
@@ -119,8 +122,8 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                 <Skeleton className="h-8 w-24 rounded-[6px]" />
               </CardContent>
             </Card>
-            
-            <Card className="bg-[#F0FFF6]">
+
+            <Card className="bg-[#F0FFF6] shadow-none">
               <CardContent className="py-3 px-4 2xl:p-6">
                 <Skeleton className="h-6 w-40 mb-3" />
                 <Skeleton className="h-4 w-full mb-3" />
@@ -133,13 +136,29 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
     );
   }
 
+  const handleBack = () => {
+    router.back();
+  };
+
   return (
     <section className="p-6">
-      <h6 className="text-[#007AFF] font-medium mb-6 2xl:mb-8 text-xl">
-        PRODUCT OVERVIEW
-      </h6>
-      <div className="flex gap-6">
-        <Card className="w-[60%] overflow-hidden">
+      {isMobile ? (
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2" onClick={handleBack}>
+            <MoveLeft />
+            <h5 className="text-[#000000] font-medium text-[15px]">{listingData?.itemName || "Item Name"}</h5>
+          </div>
+          <h6 className="text-[#007AFF] font-medium text-xs">
+            {listingData?.estimatedAmount
+              ? formatCurrency(listingData.estimatedAmount, listingData.estimatedCurrency || "NGN")
+              : "Price not available"}
+          </h6>
+        </div>
+      ) : (
+        <h6 className="text-[#007AFF] font-medium mb-6 2xl:mb-8 text-xl">PRODUCT OVERVIEW</h6>
+      )}
+      <div className="flex flex-col md:flex-row gap-6">
+        <Card className="w-full md:w-[60%] overflow-hidden shadow-none">
           <CardContent className="p-0">
             <div className="w-full h-[418px] relative">
               {isVideo ? (
@@ -149,7 +168,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                   height="100%"
                   controls={true}
                   className="rounded-xl overflow-hidden"
-                  style={{ borderRadius: '12px' }}
+                  style={{ borderRadius: "12px" }}
                 />
               ) : (
                 <Image
@@ -162,15 +181,12 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               )}
             </div>
             <div className="p-4">
-              <Tabs
-                defaultValue="item-description"
-                className="w-full !rounded-[26px]"
-              >
+              <Tabs defaultValue="item-description" className="w-full !rounded-[26px]">
                 <TabsList className="grid w-full grid-cols-3">
                   {productTabList.map((_, index) => (
                     <TabsTrigger
                       value={_.value}
-                      className={`rounded-[26px]`}
+                      className={`rounded-[26px] text-[#222222] text-[10px] md:text-sm`}
                       key={index}
                     >
                       {_.title}
@@ -178,50 +194,51 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                   ))}
                 </TabsList>
                 <TabsContent value="item-description">
-                  <p className="text-sm text-[#737373]">
-                    {listingData?.itemDescription || "No description available"}
-                  </p>
+                  <p className="text-sm text-[#737373]">{listingData?.itemDescription || "No description available"}</p>
                 </TabsContent>
-                <TabsContent value="details" className="grid grid-cols-3 gap-2">
-                  <p className="text-sm text-[#737373]">Condition</p>
-                  <p className="text-sm text-[#737373]">Category</p>
-                  <p className="text-sm text-[#737373]">Date Listed</p>
-
-                  <p className="rounded-2xl text-xs text-center text-[#1A9E1C] px-2 py-1 w-fit font-medium text-[#222222] border border-[#E2FFE3] bg-[#F0FFF6]">
-                    {listingData?.itemCondition || "Unknown"}
-                  </p>
-                  <p className="rounded-2xl text-center text-xs text-[#222222] w-fit px-2 py-1 font-medium text-[#222222] border border-[#E9E9E9] bg-white">
-                    {listingData?.categoryName || "Unknown"}
-                  </p>
-                  <p className="text-xs font-medium text-[#222222]">
-                    {formatDateTime(new Date())}
-                  </p>
+                <TabsContent value="details" className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-2">
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-[#737373] font-normal">Condition</p>
+                    <p className="rounded-2xl text-[10.46px] text-center text-[#1A9E1C] px-2 py-1 w-fit font-medium border border-[#E2FFE3] bg-[#F0FFF6]">
+                      {listingData?.itemCondition || "Unknown"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-[#737373] font-normal">Category</p>
+                    <p className="rounded-2xl text-center text-xs text-[#222222] w-fit px-2 py-1 font-medium border border-[#737373] bg-white">
+                      {listingData?.categoryName || "Unknown"}
+                    </p>
+                  </div>
+                  <div className="flex flex-col gap-2">
+                    <p className="text-sm text-[#737373] font-normal">Date Listed</p>
+                    <p className="text-xs font-medium text-[#222222]">{formatDateTime(new Date())}</p>
+                  </div>
                 </TabsContent>
               </Tabs>
             </div>
           </CardContent>
         </Card>
-        <div className="w-[40%]">
-          <Card className="mb-4 2xl:mb-6">
-            <CardContent className="p-4 2xl:p-6">
-              <h5 className="text-[#000000] font-medium mb-2 text-2xl">
-                {listingData?.itemName || "Item Name"}
-              </h5>
-              <h6 className="text-[#007AFF] font-medium mb-6 2xl:mb-8 text-xl">
-                {listingData?.estimatedAmount 
-                  ? formatCurrency(listingData.estimatedAmount, listingData.estimatedCurrency || "NGN")
-                  : "Price not available"
-                }
-              </h6>
-              <div className="bg-[#F7F7F7] py-3 px-4">
-                <h6 className="text-xl mb-4 2xl:mb-6">Requested in Exchange</h6>
-                <ul className="flex flex-col gap-2">
+        <div className="w-full md:w-[40%]">
+          <Card className="mb-4 2xl:mb-6 shadow-none border-none">
+            <CardContent className="p-0 md:p-4 2xl:p-6">
+              {!isMobile && (
+                <>
+                  <h5 className="text-[#000000] font-medium mb-2 text-2xl">{listingData?.itemName || "Item Name"}</h5>
+                  <h6 className="text-[#007AFF] font-medium mb-6 2xl:mb-8 text-xl">
+                    {listingData?.estimatedAmount
+                      ? formatCurrency(listingData.estimatedAmount, listingData.estimatedCurrency || "NGN")
+                      : "Price not available"}
+                  </h6>
+                </>
+              )}
+              <div className="bg-[#F7F7F7] py-3 px-4 rounded-[9.94px]">
+                <h6 className="text-[#000000] text-[13px] font-medium md:text-xl mb-4 2xl:mb-6">
+                  Requested in Exchange
+                </h6>
+                <ul className="flex flex-col gap-5">
                   {exchangeList.map((des, index) => (
-                    <li
-                      className="flex gap-2 items-center text-[#737373] text-sm"
-                      key={index}
-                    >
-                      <span className="w-5 h-5 border-[1.5px] text-black border-[#000000] rounded-full font-bold flex items-center justify-center">
+                    <li className="flex gap-2 items-center text-[#737373] text-sm" key={index}>
+                      <span className="w-2 h-2 text-xs p-1.5 border-[1.5px] text-black border-[#000000] rounded-full font-bold flex items-center justify-center">
                         ?
                       </span>
                       {des.description}
@@ -231,13 +248,14 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               </div>
             </CardContent>
           </Card>
-          <h6 className="text-xl mb-3 font-medium">About the Swapper</h6>
-          <Card className="mb-4 2xl:mb-6">
-            <CardContent className="p-4 2xl:p-6 flex gap-3 items-center">
+          <h6 className="text-[14.87px] md:text-xl mb-3 font-medium">About the Swapper</h6>
+          <Card className="mb-4 2xl:mb-6 shadow-none">
+            <CardContent className="px-2 py-4 2xl:p-6 flex gap-3 items-center">
               <Image
                 className="h-10 w-10 rounded-full"
                 src={getImageSrcWithFallback(
-                  listingData?.profilePicture || "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80",
+                  listingData?.profilePicture ||
+                    "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80",
                   profileImageError
                 )}
                 height={40}
@@ -257,11 +275,9 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                   <p>{listingData?.swapCount || 0} swaps</p>
                 </div>
               </div>
-              <Link href={`/profile/${listingData?.userId || 'unknown'}`}>
-                <div className="border border-[#E9E9E9] rounded-[6px] gap-1 p-[6px] flex items-center">
-                  <p className="font-medium text-xs text-[#222222]">
-                    View profile
-                  </p>
+              <Link href={`/profile/${listingData?.userId || "unknown"}`}>
+                <div className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center">
+                  <p className="font-medium text-xs text-[#222222]">View profile</p>
                   <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
                     <ArrowRight size={12} color="#fff" />
                   </span>
@@ -269,13 +285,12 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               </Link>
             </CardContent>
           </Card>
-          <Card className="bg-[#F0FFF6]">
+          <Card className="bg-[#F0FFF6] shadow-none">
             <CardContent className="py-3 xp-4 2xl:p-6">
-              <h6 className="text-[#1A9E1C] font-medium text-xl mb-3">
-                Ready to negotiate?
-              </h6>
+              <h6 className="text-[#1A9E1C] font-medium text-xl mb-3">Ready to negotiate?</h6>
               <p className="text-[#737373] text-sm mb-3">
-                Start a conversation with {listingData?.fullName || listingData?.username || "the swapper"} to discuss swap details.
+                Start a conversation with {listingData?.fullName || listingData?.username || "the swapper"} to discuss
+                swap details.
               </p>
               <Button
                 onClick={handleNegotiate}
