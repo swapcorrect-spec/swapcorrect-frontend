@@ -11,7 +11,7 @@ const Categories = () => {
   const search = useSearchParams();
   const router = useRouter();
   const tab = search.get("tab");
-  
+
   const [category, setCategory] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
@@ -28,7 +28,7 @@ const Categories = () => {
 
   const categoryId = tab && tab !== "categories" && tab.length > 10 ? tab : category;
 
-  const { data, isLoading, isError, error } = useSearchItems({
+  const { data, isLoading } = useSearchItems({
     enabler: true,
     searhParam: searchParam,
     categoryld: categoryId || undefined,
@@ -62,7 +62,7 @@ const Categories = () => {
       value: "textiles",
     },
   ];
-  
+
   const locationList = [
     {
       text: "Lagos",
@@ -75,12 +75,10 @@ const Categories = () => {
   ];
 
   return (
-    <div className="w-[80%] h-full overflow-y-auto hide-scrollbar">
+    <div className="w-full md:w-[80%] h-full overflow-y-auto hide-scrollbar">
       <div className="p-6">
         <p className="text-[#007AFF] font-medium text-[15px] pb-1">Category</p>
-        <p className="text-[#222222] font-medium text-xl capitalize mb-8">
-          Browse {tab || "categories"}
-        </p>
+        <p className="text-[#222222] font-medium text-xl capitalize mb-8">Browse {tab || "categories"}</p>
         <div className="mb-6">
           <FilterMenu
             categoryList={categoryList}
@@ -102,10 +100,7 @@ const Categories = () => {
         ) : data && data.length > 0 ? (
           <div className="grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-4">
             {data.map((item: any) => (
-              <ProductDetails
-                key={item.listingId}
-                {...item}
-              />
+              <ProductDetails key={item.listingId} {...item} />
             ))}
           </div>
         ) : (

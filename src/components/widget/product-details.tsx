@@ -37,7 +37,7 @@ interface iProps {
   media?: MediaItem[];
   swapListRequest?: string[];
   itemCondition?: string;
-  
+
   wantList?: { name: string }[];
   imgUrl?: string;
   productName?: string;
@@ -66,7 +66,7 @@ const ProductDetails: React.FC<iProps> = ({
   media,
   swapListRequest,
   itemCondition,
-  
+
   // Legacy fields
   imgUrl,
   rating,
@@ -115,10 +115,10 @@ const ProductDetails: React.FC<iProps> = ({
   const isVideo = firstMedia?.mediaType === "Video";
   const mediaUrl = firstMedia?.url || imgUrl || "https://randomuser.me/api/portraits/thumb/women/6.jpg";
   const displayName = itemName || productName || "Item";
-  const displayPrice = estimatedAmount 
+  const displayPrice = estimatedAmount
     ? formatCurrency(estimatedAmount, estimatedCurrency || "NGN")
     : price || "$75,000 Est.";
-  const displayWants = swapListRequest || wantList?.map(item => item.name) || [];
+  const displayWants = swapListRequest || wantList?.map((item) => item.name) || [];
   const displayAuthor = fullName || username || vendorName || "Jenny Franklin";
   const displayPhoto = profilePicture || "https://randomuser.me/api/portraits/thumb/women/6.jpg";
 
@@ -132,26 +132,26 @@ const ProductDetails: React.FC<iProps> = ({
   };
 
   return (
-    <Card
-      className="bg-white w-full flex p-2 cursor-pointer"
-      
-    >
+    <Card className="bg-white w-full flex p-2 cursor-pointer">
       <CardContent className="h-full flex flex-col flex-grow p-0">
-        <div className="mb-4 w-full h-[255px] relative transition-all duration-200 rounded-xl">
+        <div className="mb-4 w-full h-[150px] md:h-[250px] relative transition-all duration-200 rounded-xl">
           {isVideo ? (
             <ReactPlayer
-              src={typeof mediaUrl === 'string' ? mediaUrl : ''}
+              src={typeof mediaUrl === "string" ? mediaUrl : ""}
               width="100%"
               height="100%"
               controls={true}
               className="rounded-xl overflow-hidden"
-              style={{ borderRadius: '12px' }}
+              style={{ borderRadius: "12px" }}
             />
           ) : (
             <Image
               alt="Product Preview"
               fill
-              src={getImageSrcWithFallback(typeof mediaUrl === 'string' ? mediaUrl : (mediaUrl as any).src || '', imageError)}
+              src={getImageSrcWithFallback(
+                typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
+                imageError
+              )}
               className="rounded-xl object-cover"
               onError={handleImageError}
             />
@@ -180,22 +180,14 @@ const ProductDetails: React.FC<iProps> = ({
               }}
               className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60"
             >
-              <Heart
-                fill={isFav ? "#ef4444" : "none"}
-                color={isFav ? "#ef4444" : "#6b7280"}
-                size={16}
-              />
+              <Heart fill={isFav ? "#ef4444" : "none"} color={isFav ? "#ef4444" : "#6b7280"} size={16} />
             </button>
           </div>
         </div>
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h6 className="text-xl font-medium">
-              {displayName}
-            </h6>
-            <p className="font-medium text-[#007AFF]">
-              {displayPrice}
-            </p>
+            <h6 className="text-xl font-medium">{displayName}</h6>
+            <p className="font-medium text-[#007AFF]">{displayPrice}</p>
           </div>
           {categoryName && (
             <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-3">
@@ -227,37 +219,32 @@ const ProductDetails: React.FC<iProps> = ({
                 className="rounded-full"
                 onError={handleProfileImageError}
               />
-              <p className="font-medium">
-                {displayAuthor}
-              </p>
+              <p className="font-medium">{displayAuthor}</p>
             </div>
             <p className="flex items-center gap-1">
               {rating || 3.5} <Rating />
             </p>
           </div>
-        <Button
-          onClick={handleSwapNow}
-          disabled={isStartingSwap || !listingId}
-          variant={"default"}
-          className="rounded-lg font-medium text-sm py-3 w-full"
-          size={"lg"}
-        >
-          {isStartingSwap ? "Starting..." : "Swap Now"}
-        </Button>
-        
-        <Link 
-          href={`/listing/${listingId}`}
-          className="w-full mt-2 inline-block"
-        >
           <Button
-            disabled={!listingId}
-            variant={"outline"}
+            onClick={handleSwapNow}
+            disabled={isStartingSwap || !listingId}
+            variant={"default"}
             className="rounded-lg font-medium text-sm py-3 w-full"
             size={"lg"}
           >
-            View Details
+            {isStartingSwap ? "Starting..." : "Swap Now"}
           </Button>
-        </Link>
+
+          <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block">
+            <Button
+              disabled={!listingId}
+              variant={"outline"}
+              className="rounded-lg font-medium text-sm py-3 w-full"
+              size={"lg"}
+            >
+              View Details
+            </Button>
+          </Link>
         </div>
       </CardContent>
     </Card>

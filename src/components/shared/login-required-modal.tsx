@@ -24,15 +24,13 @@ const LoginRequiredModal: FC<LoginRequiredModalProps> = ({
 }) => {
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="left-[50%] max-w-[500px] translate-x-[-50%] p-6">
+      <DialogContent className="left-[50%] max-w-[360px] translate-x-[-50%] p-6">
         <div className="flex flex-col items-center text-center space-y-6">
           {/* Close button */}
           <button
             onClick={onClose}
             className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-full transition-colors"
-          >
-            <X className="h-4 w-4 text-gray-500" />
-          </button>
+          />
 
           {/* Icon */}
           <div className="bg-[#007AFF]/10 rounded-full p-4">
@@ -42,9 +40,7 @@ const LoginRequiredModal: FC<LoginRequiredModalProps> = ({
           {/* Content */}
           <div className="space-y-3">
             <h3 className="text-2xl font-semibold text-gray-900">{title}</h3>
-            <p className="text-gray-600 leading-relaxed max-w-sm">
-              {description}
-            </p>
+            <p className="text-gray-600 leading-relaxed max-w-sm">{description}</p>
           </div>
 
           {/* Action buttons */}
@@ -68,10 +64,7 @@ const LoginRequiredModal: FC<LoginRequiredModalProps> = ({
           {/* Additional info */}
           <p className="text-sm text-gray-500">
             Don&apos;t have an account?{" "}
-            <button
-              onClick={onSignup}
-              className="text-[#007AFF] hover:underline font-medium"
-            >
+            <button onClick={onSignup} className="text-[#007AFF] hover:underline font-medium">
               Sign up here
             </button>
           </p>
@@ -82,4 +75,3 @@ const LoginRequiredModal: FC<LoginRequiredModalProps> = ({
 };
 
 export default LoginRequiredModal;
-

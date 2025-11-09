@@ -1,7 +1,7 @@
 "use client";
 
 import { redirect } from "next/navigation";
-import { ReactNode } from "react";
+import { ReactNode, useState } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
@@ -9,11 +9,20 @@ import { PATHS } from "../_constants/paths";
 import { useGetUserInfo } from "../_hooks/queries/auth/auth";
 import { Auth } from "../_config/auth";
 import { CircularProgress } from "@/components/shared/circular-progress";
+import useIsMobile from "../_hooks/useIsMobile";
+import MobileNavbar from "@/components/shared/mobile-navbar";
 
 export default function MainLayout({ children }: { children: ReactNode }) {
   const { isFetching, data } = useGetUserInfo({ enabler: true });
+  const isMobile = useIsMobile();
+
+  const [isOpen, setIsOpen] = useState(false);
 
   const isAuthenticated = Auth.isAuthenticated();
+
+  const handleToggleMenu = () => {
+    setIsOpen(!isOpen);
+  };
 
   if (isFetching) {
     return (
@@ -29,9 +38,13 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <section className={cn("flex w-full")}>
-      {isAuthenticated && <Sidebar />}
+      {isOpen && isAuthenticated && !isMobile && <Sidebar handleToggleMenu={handleToggleMenu} />}
       <section className="flex-1 h-screen overflow-y-auto">
-        <Navbar data={data} />
+        {isMobile ? (
+          <MobileNavbar data={data} />
+        ) : (
+          <Navbar data={data} handleToggleMenu={handleToggleMenu} isOpen={isOpen} />
+        )}
         {children}
       </section>
     </section>
