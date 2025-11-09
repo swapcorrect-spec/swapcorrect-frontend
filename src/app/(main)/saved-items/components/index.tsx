@@ -14,7 +14,6 @@ const SavedItems: React.FC = () => {
   const [searchParam, setSearchParam] = useState<string>("");
   const { data, isLoading, isError, error } = useGetUserFavourite({
     enabler: true,
- 
   });
 
   const handleApplyFilters = (filters: {
