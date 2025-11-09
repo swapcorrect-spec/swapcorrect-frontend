@@ -38,14 +38,14 @@ export const useGetListingDetails = (props: {
   };
 };
 
-export const useGetItemByRaterHotPick = (props: { enabler: boolean }) => {
-  const { enabler = true } = props;
+export const useGetItemByRaterHotPick = (props: { enabler: boolean, userId?: string; }) => {
+  const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [HOT_PICKS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number }, SwapResponseInterface>({
+      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
         url: "/listing_item/GetItemByRaterHotPick",
-        params: { limit: 10 },
+        params: { limit: 10, userId },
         config: { signal },
       }),
     enabled: !!enabler,
@@ -60,14 +60,14 @@ export const useGetItemByRaterHotPick = (props: { enabler: boolean }) => {
   };
 };
 
-export const useGetRecommendedItems = (props: { enabler: boolean }) => {
-  const { enabler = true } = props;
+export const useGetRecommendedItems = (props: { enabler: boolean, userId?: string; }) => {
+  const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [RECOMMENDED_ITEMS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number }, SwapResponseInterface>({
+      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
         url: "/listing_item/recommended",
-        params: { limit: 10 },
+        params: { limit: 10, userId },
         config: { signal },
       }),
     enabled: !!enabler,
@@ -82,14 +82,14 @@ export const useGetRecommendedItems = (props: { enabler: boolean }) => {
   };
 };
 
-export const useGetElectronicsItems = (props: { enabler: boolean }) => {
-  const { enabler = true } = props;
+export const useGetElectronicsItems = (props: { enabler: boolean, userId?: string; }) => {
+  const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [ELECTRONICS_ITEMS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number }, SwapResponseInterface>({
+      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
         url: "/listing_item/electronic",
-        params: { limit: 10 },
+        params: { limit: 10, userId },
         config: { signal },
       }),
     enabled: !!enabler,
@@ -106,6 +106,7 @@ export const useGetElectronicsItems = (props: { enabler: boolean }) => {
 
 export const useSearchItems = (props: { 
   enabler: boolean;
+  listingUserId?: string;
   searhParam?: string;
   categoryld?: string;
   location?: string;
@@ -126,6 +127,7 @@ export const useSearchItems = (props: {
     listingDate,
     pageNumber,
     perpageSize = 20,
+    listingUserId,
     userId
   } = props;
   
@@ -141,6 +143,7 @@ export const useSearchItems = (props: {
         listingDate?: string;
         pageNumber?: number;
         perpageSize?: number;
+        listingUserId?: string;
         userId?: string;
       }, SearchResponseInterface>({
         url: "/listing_item/paginated/search_item",
@@ -153,6 +156,7 @@ export const useSearchItems = (props: {
           listingDate,
           pageNumber,
           perpageSize,
+          listingUserId,
           userId
         },
         config: { signal },

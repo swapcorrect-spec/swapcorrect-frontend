@@ -9,15 +9,23 @@ import {
   useGetElectronicsItems,
 } from "@/app/_hooks/queries/listing/listing";
 import Marketplace from "@/components/shared/marketplace";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { Auth } from "@/app/_config/auth";
 
 const Dashboard: FC = () => {
+  const isAuthenticated = Auth.isAuthenticated();
+  const { data: userData, isLoading, isError, error } = useGetUserInfo({
+    enabler: isAuthenticated,
+  });
+  const userId = userData?.result?.id;
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
     enabler: true,
+    userId: userId || undefined,
   });
   const { isLoading: isLoadingRecommendedItems, data: recommendedItems } =
-    useGetRecommendedItems({ enabler: true });
+    useGetRecommendedItems({ enabler: true, userId: userId || undefined });
   const { isLoading: isLoadingElectronicsItems, data: electronicsItems } =
-    useGetElectronicsItems({ enabler: true });
+    useGetElectronicsItems({ enabler: true, userId: userId || undefined });
 
   return (
     <section>

@@ -5,6 +5,7 @@ import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import ProductDetails from "@/components/widget/product-details";
 import EmptyItemsState from "@/components/shared/empty-items-state";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 
 const Categories = () => {
   const search = useSearchParams();
@@ -16,6 +17,8 @@ const Categories = () => {
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
   const [searchParam, setSearchParam] = useState<string>("");
+  const { data: userData } = useGetUserInfo({ enabler: true });
+  const userId = userData?.result?.id;
 
   useEffect(() => {
     if (!tab) {
@@ -33,7 +36,8 @@ const Categories = () => {
     lowestRange: lowestRange,
     highestRange: highestRange,
     pageNumber: 1,
-    perpageSize: 20
+    perpageSize: 20,
+    userId: userId || undefined
   });
 
   const handleApplyFilters = (filters: {

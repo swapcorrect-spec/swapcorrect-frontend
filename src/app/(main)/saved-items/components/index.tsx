@@ -49,7 +49,6 @@ const SavedItems: React.FC = () => {
       value: "abuja",
     },
   ];
-console.log(data, "data");
 
   return (
     <section className="p-6">
@@ -82,6 +81,7 @@ console.log(data, "data");
             <ProductDetails
               key={item.listingId || item.id}
               {...item}
+              isFavItem={true}
             />
           ))}
         </div>

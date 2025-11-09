@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import ProductDetails from "@/components/widget/product-details";
 import ProfileDetailsHeader from "@/components/widget/profile-details";
 import Reviews from "@/components/widget/review";
-import { useGetGeneralUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { useGetGeneralUserInfo, useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import { useParams } from "next/navigation";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -21,6 +21,8 @@ const UserProfile: React.FC = () => {
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
   const [searchParam, setSearchParam] = useState<string>("");
+  const { data: userData } = useGetUserInfo({ enabler: true });
+  const loggedInUserserId = userData?.result?.id;
   
   const { data, isLoading, isError, error } = useGetGeneralUserInfo({
     userId,
@@ -29,7 +31,8 @@ const UserProfile: React.FC = () => {
 
   const { data: itemsData, isLoading: itemsLoading } = useSearchItems({
     enabler: !!userId,
-    userId,
+    userId:loggedInUserserId,
+    listingUserId: userId,
     searhParam: searchParam,
     categoryld: category,
     location: location,
