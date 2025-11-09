@@ -13,14 +13,22 @@ import {
 import Marketplace from "@/components/shared/marketplace";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import Banner from "@/app/assets/images/pngs/mobile_ad.png";
+import { Auth } from "@/app/_config/auth";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 
 const Dashboard: FC = () => {
   const isMobile = useIsMobile();
+  const isAuthenticated = Auth.isAuthenticated();
+  const { data: userData, isLoading, isError, error } = useGetUserInfo({
+    enabler: isAuthenticated,
+  });
+  const userId = userData?.result?.id;
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
     enabler: true,
+    userId: userId || undefined,
   });
-  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({ enabler: true });
-  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({ enabler: true });
+  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({ enabler: true, userId: userId || undefined  });
+  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({ enabler: true, userId: userId || undefined  });
 
   return (
     <section>

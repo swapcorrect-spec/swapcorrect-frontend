@@ -36,14 +36,13 @@ export default function ItemListing() {
   const [category, setCategory] = useState<string>("");
   const [location, setLocation] = useState<string>("");
 
-  // Get current logged in user
   const { data: userData } = useGetUserInfo({ enabler: true });
   const userId = userData?.result?.id;
 
   // Fetch user's listings
   const { data: itemsData } = useSearchItems({
     enabler: !!userId,
-    userId: userId || undefined,
+    listingUserId: userId,
     categoryld: category || undefined,
     location: location || undefined,
     pageNumber: 1,
