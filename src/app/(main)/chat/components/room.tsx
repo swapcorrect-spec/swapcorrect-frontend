@@ -1,7 +1,7 @@
 import EmptyMessageRoom from "./empty-room";
 import Image from "next/image";
-import { Send, Check, CheckCheck, Plus, X, File, FileVideo, Info, FileImage } from "lucide-react";
-import { useState, useEffect, useRef } from "react";
+import { Send, Check, CheckCheck, Plus, X, File, FileVideo, Info, FileImage, ArrowLeft } from "lucide-react";
+import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
 import SwapModalContent from "./swap-modal";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -14,6 +14,7 @@ import * as signalR from "@microsoft/signalr";
 import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
 import EmojiPicker from "emoji-picker-react";
 import ReactPlayer from "react-player";
+import useIsMobile from "@/app/_hooks/useIsMobile";
 
 type ChatListProps = IRoomMessage;
 
@@ -21,18 +22,19 @@ interface MessageRoomProps {
   userName: string;
   userProfileUrl: string;
   userId: string; // Add userId from selected chat
+  setIsShowChat: Dispatch<SetStateAction<boolean>>;
 }
 
 const formatTime = (dateString: string) => {
   try {
     const date = new Date(dateString);
-    return date.toLocaleTimeString('en-US', { 
-      hour: 'numeric', 
-      minute: '2-digit',
-      hour12: true 
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
     });
   } catch {
-    return '';
+    return "";
   }
 };
 
@@ -43,25 +45,25 @@ const formatDateSeparator = (dateString: string) => {
     const today = new Date();
     const yesterday = new Date(today);
     yesterday.setDate(yesterday.getDate() - 1);
-    
+
     // Check if today
     if (date.toDateString() === today.toDateString()) {
-      return 'Today';
+      return "Today";
     }
-    
+
     // Check if yesterday
     if (date.toDateString() === yesterday.toDateString()) {
-      return 'Yesterday';
+      return "Yesterday";
     }
-    
+
     // Otherwise show day and date
-    return date.toLocaleDateString('en-US', { 
-      weekday: 'short', 
-      month: 'short', 
-      day: 'numeric' 
+    return date.toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
+      day: "numeric",
     });
   } catch {
-    return '';
+    return "";
   }
 };
 
@@ -101,7 +103,9 @@ const MessageStatusIndicator = ({ status }: { status: string }) => {
   return null;
 };
 
-const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, userId }) => {
+const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, userId, setIsShowChat }) => {
+  const isMobile = useIsMobile();
+
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [swapType, setSwapType] = useState<string>("");
   const [imageError, setImageError] = useState(false);
@@ -119,21 +123,21 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const [showInfoDrawer, setShowInfoDrawer] = useState<boolean>(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   const searchParams = useSearchParams();
-  const roomName = searchParams.get('roomName') || '';
-  
+  const roomName = searchParams.get("roomName") || "";
+
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
   });
-  
-  const currentUserId = currentUserData?.result?.id || '';
-  
+
+  const currentUserId = currentUserData?.result?.id || "";
+
   const { data, isLoading, isError, error } = useGetChatRoomMessages({
     roomName,
     enabler: !!roomName,
   });
-  
+
   // Sync GET request data with messages state
   useEffect(() => {
     if (data?.result?.roomMessages && Array.isArray(data.result.roomMessages)) {
@@ -141,9 +145,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       setMessages([...data.result.roomMessages].reverse());
     }
   }, [data]);
-  
+
   const profileImageSrc = getImageSrcWithFallback(userProfileUrl, imageError);
-  
+
   // Use messages state instead of hardcoded chatList
   const chatList = messages;
 
@@ -155,18 +159,15 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   };
 
   // Get all media messages for the grid display
-  const allMedia = messages.filter(msg => 
-    msg.messageType === "Image" || msg.messageType === "Video" || msg.messageType === "File"
+  const allMedia = messages.filter(
+    (msg) => msg.messageType === "Image" || msg.messageType === "Video" || msg.messageType === "File"
   );
 
   // SignalR Connection Setup
   useEffect(() => {
     const hubUrl = process.env.NEXT_PUBLIC_API_BASE_URL + "/chathub";
-    
-    const newConnection = new signalR.HubConnectionBuilder()
-      .withUrl(hubUrl)
-      .withAutomaticReconnect()
-      .build();
+
+    const newConnection = new signalR.HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
 
     // Track connection status
     newConnection.onclose(() => {
@@ -189,18 +190,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   }, []);
 
   useEffect(() => {
-    if (
-      !connection ||
-      connection.state !== signalR.HubConnectionState.Disconnected ||
-      !roomName ||
-      !currentUserId
-    )
+    if (!connection || connection.state !== signalR.HubConnectionState.Disconnected || !roomName || !currentUserId)
       return;
 
     const startSignalR = async () => {
       try {
         setConnectionStatus("Connecting");
-        
+
         await connection.start();
         setConnectionStatus("Connected");
 
@@ -213,13 +209,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           console.log("Received message data:", message);
           console.log("Message type:", typeof message);
           console.log("Message structure:", JSON.stringify(message, null, 2));
-          
+
           // Handle edge case where backend sends string instead of object
           if (typeof message === "string") {
             console.warn("Received string instead of message object, ignoring:", message);
             return;
           }
-          
+
           // Normalize messageType to proper case (text -> Text, image -> Image, etc.)
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
             const lowerType = (type || "text").toLowerCase();
@@ -227,11 +223,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
               text: "Text",
               image: "Image",
               video: "Video",
-              file: "File"
+              file: "File",
             };
             return typeMap[lowerType] || "Text";
           };
-          
+
           // Transform message to match IRoomMessage format
           const transformedMessage: IRoomMessage = {
             message: message.message || message.content || "",
@@ -240,11 +236,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
             senderId: message.senderId || message.userId || "unknown",
-            isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId
+            isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId,
           };
-          
+
           console.log("Transformed message:", transformedMessage);
-          setMessages(prev => {
+          setMessages((prev) => {
             const newMessages = [...prev, transformedMessage];
             // Mark as loading if it's media content
             if (transformedMessage.messageType === "Image" || transformedMessage.messageType === "Video") {
@@ -253,7 +249,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             return newMessages;
           });
         });
-
       } catch (error) {
         setConnectionStatus("Error");
       }
@@ -287,7 +282,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           roomName,
           userId: currentUserId,
           message,
-          messageType
+          messageType,
         });
         await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
       } catch (error) {
@@ -349,16 +344,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       // Mark this file as uploading
       setUploadingFiles((prev) => new Set(prev).add(fileIndex));
 
-      const response = await fetch(
-        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
-        {
-          method: "POST",
-          body: formData,
-        }
-      );
+      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
+        method: "POST",
+        body: formData,
+      });
 
       const data = await response.json();
-      
+
       console.log("=== CLOUDINARY UPLOAD RESPONSE ===");
       console.log("Full Response:", data);
       console.log("Secure URL:", data.secure_url);
@@ -395,7 +387,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     // For now, just test with the first file
     const file = selectedFiles[0];
     const fileType = getFileType(file);
-    
+
     console.log("Starting upload for:", file.name);
 
     // 1. Upload to Cloudinary
@@ -430,15 +422,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     // 3. Send via SignalR
     try {
       await sendMessage(uploadResult.secure_url, fileType);
-      
+
       // 4. Update status to "Sent" after successful send
       // Note: Spinner stays until media loads (handled in onLoad/onReady)
       setMessages((prev) =>
-        prev.map((msg, idx) =>
-          idx === prev.length - 1 && msg.status === "Sending"
-            ? { ...msg, status: "Sent" }
-            : msg
-        )
+        prev.map((msg, idx) => (idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg))
       );
 
       // Clear selected files and uploading state
@@ -449,9 +437,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       // Optionally: Update message status to "Failed"
       setMessages((prev) =>
         prev.map((msg, idx) =>
-          idx === prev.length - 1 && msg.status === "Sending"
-            ? { ...msg, status: "Failed" }
-            : msg
+          idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Failed" } : msg
         )
       );
       // Remove from loading media on error
@@ -470,45 +456,62 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   };
 
   return (
-    <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col">
-      <div
-        className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
-      >
-        <div className="flex items-center gap-3 w-full">
-          <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] rounded-full">
-            <Image
-              src={profileImageSrc}
-              height={40}
-              width={40}
-              alt="User profile"
-              className="w-10 h-10 rounded-full"
-              onError={createImageErrorHandler(setImageError)}
-            />
-          </div>
-          <div className="me-auto">
-            <h5 className={`text-[#222222] text-lg font-medium`}>
-              {userName}
-            </h5>
-            <div className="flex items-center gap-2">
-              <div 
-                className={`w-2 h-2 rounded-full ${
-                  connectionStatus === "Connected" ? "bg-green-500" :
-                  connectionStatus === "Connecting" ? "bg-yellow-500" :
-                  connectionStatus === "Reconnecting" ? "bg-yellow-500" :
-                  connectionStatus === "Error" ? "bg-red-500" :
-                  "bg-gray-400"
-                }`}
-              ></div>
-              <span className="text-xs text-gray-500">
-                {connectionStatus}
-              </span>
+    <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
+      <div className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}>
+        <div className="flex flex-col items-start md:flex-row md:items-center gap-3 w-full">
+          <div className="flex items-center gap-2">
+            {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
+            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] rounded-full">
+              <Image
+                src={profileImageSrc}
+                height={40}
+                width={40}
+                alt="User profile"
+                className="w-10 h-10 rounded-full"
+                onError={createImageErrorHandler(setImageError)}
+              />
+            </div>
+            <div>
+              <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5>
+              <div className="flex items-center gap-2">
+                <div
+                  className={`w-2 h-2 rounded-full ${
+                    connectionStatus === "Connected"
+                      ? "bg-green-500"
+                      : connectionStatus === "Connecting"
+                      ? "bg-yellow-500"
+                      : connectionStatus === "Reconnecting"
+                      ? "bg-yellow-500"
+                      : connectionStatus === "Error"
+                      ? "bg-red-500"
+                      : "bg-gray-400"
+                  }`}
+                ></div>
+                <span className="text-xs text-gray-500">{connectionStatus}</span>
+              </div>
             </div>
           </div>
+          <div className="me-auto">
+            {/* <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5> */}
+            {/* <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  connectionStatus === "Connected"
+                    ? "bg-green-500"
+                    : connectionStatus === "Connecting"
+                    ? "bg-yellow-500"
+                    : connectionStatus === "Reconnecting"
+                    ? "bg-yellow-500"
+                    : connectionStatus === "Error"
+                    ? "bg-red-500"
+                    : "bg-gray-400"
+                }`}
+              ></div>
+              <span className="text-xs text-gray-500">{connectionStatus}</span>
+            </div> */}
+          </div>
           <div className="flex gap-2">
-            <Button
-              className="!h-9 rounded-xl font-medium"
-              onClick={() => setIsOpen(!isOpen)}
-            >
+            <Button className="!h-9 rounded-xl font-medium" onClick={() => setIsOpen(!isOpen)}>
               Swap
             </Button>
             <Button
@@ -516,7 +519,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
               onClick={() => {
                 // Try to manually start connection
                 if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
-                  connection.start()
+                  connection
+                    .start()
                     .then(() => {
                       setConnectionStatus("Connected");
                     })
@@ -541,7 +545,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       </div>
       <div className="flex-1 overflow-y-auto hide-scrollbar">
         {chatList.length === 0 ? (
-          <EmptyMessageRoom  hideMarketplaceLink={true}/>
+          <EmptyMessageRoom hideMarketplaceLink={true} />
         ) : (
           <div className="p-4">
             {chatList.map((chat, index) => {
@@ -549,16 +553,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
               const nextMessage = index < chatList.length - 1 ? chatList[index + 1] : null;
               const isNextSameSender = nextMessage && nextMessage.senderId === chat.senderId;
               const showAvatar = !isNextSameSender; // Show avatar when next message is different or this is last message
-              
+
               // Check if we need to show date separator
               const prevMessage = index > 0 ? chatList[index - 1] : null;
-              const showDateSeparator = index === 0 || (prevMessage && isDifferentDay(prevMessage.dateTime, chat.dateTime));
-              
+              const showDateSeparator =
+                index === 0 || (prevMessage && isDifferentDay(prevMessage.dateTime, chat.dateTime));
+
               // Check if previous message is from same sender (for spacing)
               const isPrevSameSender = prevMessage && prevMessage.senderId === chat.senderId;
 
               return (
-                <div key={index} className={isPrevSameSender ? 'mt-1' : 'mt-3'}>
+                <div key={index} className={isPrevSameSender ? "mt-1" : "mt-3"}>
                   {/* Date separator */}
                   {showDateSeparator && (
                     <div className="flex items-center justify-center my-4">
@@ -569,31 +574,37 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                   )}
 
                   {/* Message */}
-                <div className={`flex gap-3 items-end ${chat.isMe ? 'flex-row-reverse' : ''}`}>
-                  {/* Avatar - only render when showing */}
-                  {showAvatar && (
-                    <div className="w-8 h-8 rounded-full flex-shrink-0">
-                      <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
-                        {chat.senderImgUrl ? (
-                          <Image
-                            src={chat.senderImgUrl}
-                            height={32}
-                            width={32}
-                            alt="Sender"
-                            className="w-8 h-8 rounded-full"
-                          />
-                        ) : (
-                          <span className="text-xs font-medium">
-                            {chat.isMe ? "Me" : userName.charAt(0)}
-                          </span>
-                        )}
+                  <div className={`flex gap-3 items-end ${chat.isMe ? "flex-row-reverse" : ""}`}>
+                    {/* Avatar - only render when showing */}
+                    {showAvatar && (
+                      <div className="w-8 h-8 rounded-full flex-shrink-0">
+                        <div className="w-8 h-8 rounded-full bg-gray-200 flex items-center justify-center">
+                          {chat.senderImgUrl ? (
+                            <Image
+                              src={chat.senderImgUrl}
+                              height={32}
+                              width={32}
+                              alt="Sender"
+                              className="w-8 h-8 rounded-full"
+                            />
+                          ) : (
+                            <span className="text-xs font-medium">{chat.isMe ? "Me" : userName.charAt(0)}</span>
+                          )}
+                        </div>
                       </div>
-                    </div>
-                  )}
+                    )}
 
-                  <div className={`flex-1 ${chat.isMe ? 'flex justify-end' : 'flex justify-start'} ${!showAvatar ? (chat.isMe ? 'mr-11' : 'ml-11') : ''}`}>
-                    {/* Message bubble with timestamp */}
-                    <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} rounded-lg overflow-hidden max-w-md relative`}>
+                    <div
+                      className={`flex-1 ${chat.isMe ? "flex justify-end" : "flex justify-start"} ${
+                        !showAvatar ? (chat.isMe ? "mr-11" : "ml-11") : ""
+                      }`}
+                    >
+                      {/* Message bubble with timestamp */}
+                      <div
+                        className={`${
+                          chat.isMe ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
+                        } rounded-lg overflow-hidden max-w-md relative`}
+                      >
                         {/* Sending/Loading spinner overlay */}
                         {(chat.status === "Sending" || loadingMedia.has(index)) && (
                           <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
@@ -608,12 +619,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
                         {/* Message content based on type */}
                         {chat.messageType === "Image" ? (
-                          <div className="relative" style={{ width: '350px', maxWidth: '100%' }}>
+                          <div className="relative" style={{ width: "350px", maxWidth: "100%" }}>
                             <img
                               src={chat.message}
                               alt="Shared image"
                               className="w-full rounded-lg cursor-pointer hover:opacity-90 transition-opacity"
-                              style={{ height: '220px', objectFit: 'cover' }}
+                              style={{ height: "220px", objectFit: "cover" }}
                               onClick={() => {
                                 setSelectedImageUrl(chat.message);
                                 setViewImageModal(true);
@@ -627,7 +638,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                                 });
                               }}
                               onError={(e) => {
-                                e.currentTarget.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23999' font-size='14'%3EImage failed to load%3C/text%3E%3C/svg%3E";
+                                e.currentTarget.src =
+                                  "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' fill='%23999' font-size='14'%3EImage failed to load%3C/text%3E%3C/svg%3E";
                                 // Remove from loading state on error
                                 setLoadingMedia((prev) => {
                                   const newSet = new Set(prev);
@@ -636,7 +648,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                                 });
                               }}
                             />
-                            <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 flex items-center justify-end gap-2`}>
+                            <div
+                              className={`${
+                                chat.isMe ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
+                              } px-3 py-2 flex items-center justify-end gap-2`}
+                            >
                               <div className="flex items-center gap-1 text-xs opacity-70 whitespace-nowrap">
                                 <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
                                 <MessageStatusIndicator status={chat.status} />
@@ -644,14 +660,14 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                             </div>
                           </div>
                         ) : chat.messageType === "Video" ? (
-                          <div className="relative" style={{ width: '350px', maxWidth: '100%' }}>
+                          <div className="relative" style={{ width: "350px", maxWidth: "100%" }}>
                             {/* Video Icon Badge */}
                             <div className="absolute top-2 left-2 z-30 bg-black bg-opacity-70 rounded px-2 py-1 flex items-center gap-1">
                               <FileVideo size={14} className="text-white" />
                               <span className="text-white text-xs font-medium">Video</span>
                             </div>
-                            
-                            <div className="relative w-full rounded-xl overflow-hidden" style={{ height: '220px' }}>
+
+                            <div className="relative w-full rounded-xl overflow-hidden" style={{ height: "220px" }}>
                               <ReactPlayer
                                 src={chat.message}
                                 width="100%"
@@ -676,8 +692,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                                 }}
                               />
                             </div>
-                            
-                            <div className={`${chat.isMe ? 'bg-blue-500 text-white' : 'bg-gray-100 text-gray-900'} px-3 py-2 flex items-center justify-end gap-2 rounded-b-lg`}>
+
+                            <div
+                              className={`${
+                                chat.isMe ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-900"
+                              } px-3 py-2 flex items-center justify-end gap-2 rounded-b-lg`}
+                            >
                               <div className="flex items-center gap-1 text-xs opacity-70 whitespace-nowrap">
                                 <span>{formatTime(chat.dateTime || new Date().toISOString())}</span>
                                 <MessageStatusIndicator status={chat.status} />
@@ -692,7 +712,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 hover:underline"
                             >
-                              <File size={24} className={chat.isMe ? 'text-white' : 'text-blue-500'} />
+                              <File size={24} className={chat.isMe ? "text-white" : "text-blue-500"} />
                               <div className="flex-1">
                                 <p className="text-sm font-medium">Document</p>
                                 <p className="text-xs opacity-70">Click to view</p>
@@ -713,22 +733,20 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                           </div>
                         )}
                       </div>
+                    </div>
                   </div>
-                </div>
                 </div>
               );
             })}
           </div>
         )}
       </div>
-      
+
       {/* File Preview Section */}
       {selectedFiles.length > 0 && (
         <div className="border-t border-b bg-white shadow-sm p-4 flex-shrink-0 relative z-20">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-gray-800">
-              {selectedFiles.length} file(s) selected
-            </span>
+            <span className="text-sm font-semibold text-gray-800">{selectedFiles.length} file(s) selected</span>
             <button
               onClick={clearAllFiles}
               className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium px-3 py-1.5 rounded-md transition-colors"
@@ -742,7 +760,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
               const isImage = fileType === "Image";
               const isVideo = fileType === "Video";
               const isUploading = uploadingFiles.has(index);
-              
+
               return (
                 <div
                   key={index}
@@ -768,14 +786,10 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                   </button>
 
                   {/* File preview */}
-                  <div className={`flex flex-col items-center gap-2 ${isUploading ? 'opacity-50' : ''}`}>
+                  <div className={`flex flex-col items-center gap-2 ${isUploading ? "opacity-50" : ""}`}>
                     {isImage ? (
                       <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                        <img
-                          src={URL.createObjectURL(file)}
-                          alt={file.name}
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
                       </div>
                     ) : (
                       <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center">
@@ -786,14 +800,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                         )}
                       </div>
                     )}
-                    
+
                     <div className="w-full text-center">
                       <p className="text-xs text-gray-700 truncate" title={file.name}>
                         {file.name}
                       </p>
-                      <p className="text-xs text-gray-500">
-                        {formatFileSize(file.size)}
-                      </p>
+                      <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
                     </div>
                   </div>
                 </div>
@@ -816,11 +828,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
         {/* Emoji Picker */}
         {showEmojiPicker && (
-          <div 
-            ref={emojiPickerRef} 
-            className={`absolute left-4 z-50 ${
-              selectedFiles.length > 0 ? 'bottom-32' : 'bottom-20'
-            }`}
+          <div
+            ref={emojiPickerRef}
+            className={`absolute left-4 z-50 ${selectedFiles.length > 0 ? "bottom-32" : "bottom-20"}`}
           >
             <EmojiPicker
               onEmojiClick={(emojiData: any) => {
@@ -848,8 +858,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             onChange={(e) => {
               setMessageInput(e.target.value);
               // Auto-grow textarea
-              e.target.style.height = 'auto';
-              e.target.style.height = Math.min(e.target.scrollHeight, 120) + 'px';
+              e.target.style.height = "auto";
+              e.target.style.height = Math.min(e.target.scrollHeight, 120) + "px";
             }}
             onKeyDown={(e) => {
               // Send on Enter (without Shift)
@@ -859,13 +869,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                   sendMessage(messageInput.trim());
                   setMessageInput("");
                   // Reset textarea height
-                  e.currentTarget.style.height = 'auto';
+                  e.currentTarget.style.height = "auto";
                 }
               }
               // Shift+Enter adds new line (default behavior, so we don't prevent)
             }}
           />
-          
+
           {/* Attachment Button */}
           <button
             type="button"
@@ -876,14 +886,14 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             <Plus className="w-5 h-5" />
           </button>
 
-          <Button 
+          <Button
             size="sm"
             disabled={isUploading}
             onClick={async () => {
               // If files are selected, upload them first
               if (selectedFiles.length > 0) {
                 await handleSendWithFiles();
-              } 
+              }
               // If text message, send normally
               else if (messageInput.trim()) {
                 sendMessage(messageInput.trim());
@@ -902,11 +912,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
       <Dialog open={isOpen} onOpenChange={onOpenChange}>
         <DialogContent className="max-w-md">
-          <SwapModalContent
-            swapType={swapType}
-            setSwapType={setSwapType}
-            handleClose={() => setIsOpen(false)}
-          />
+          <SwapModalContent swapType={swapType} setSwapType={setSwapType} handleClose={() => setIsOpen(false)} />
         </DialogContent>
       </Dialog>
       <Dialog open={viewImageModal} onOpenChange={setViewImageModal}>
@@ -918,12 +924,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             >
               <X size={24} />
             </button>
-           
-            <img
-              src={selectedImageUrl}
-              alt="Full view"
-              className="max-w-full max-h-[85vh] object-contain"
-            />
+
+            <img src={selectedImageUrl} alt="Full view" className="max-w-full max-h-[85vh] object-contain" />
           </div>
         </DialogContent>
       </Dialog>
@@ -932,11 +934,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       {showInfoDrawer && (
         <>
           {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setShowInfoDrawer(false)}
-          />
-          
+          <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setShowInfoDrawer(false)} />
+
           {/* Drawer Panel */}
           <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-white shadow-2xl z-50 overflow-y-auto">
             {/* Header */}
@@ -965,9 +964,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                 </div>
                 <h4 className="text-xl font-semibold text-gray-800">{userName}</h4>
                 <div className="flex items-center gap-2 mt-2">
-                  <div className={`w-2 h-2 rounded-full ${
-                    connectionStatus === "Connected" ? "bg-green-500" : "bg-gray-400"
-                  }`}></div>
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      connectionStatus === "Connected" ? "bg-green-500" : "bg-gray-400"
+                    }`}
+                  ></div>
                   <span className="text-sm text-gray-500">{connectionStatus}</span>
                 </div>
               </div>
@@ -1010,16 +1011,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                           setViewImageModal(true);
                           setShowInfoDrawer(false);
                         } else {
-                          window.open(media.message, '_blank');
+                          window.open(media.message, "_blank");
                         }
                       }}
                     >
                       {media.messageType === "Image" ? (
-                        <img
-                          src={media.message}
-                          alt="Shared media"
-                          className="w-full h-full object-cover"
-                        />
+                        <img src={media.message} alt="Shared media" className="w-full h-full object-cover" />
                       ) : media.messageType === "Video" ? (
                         <div className="w-full h-full bg-purple-100 flex items-center justify-center">
                           <FileVideo size={32} className="text-purple-500" />
