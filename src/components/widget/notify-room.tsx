@@ -2,8 +2,9 @@ import MomentAgo from "@/components/moment-ago";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { FileImage, FileVideo, File } from "lucide-react";
+import useIsMobile from "@/app/_hooks/useIsMobile";
 
 interface iChatRoom {
   count?: number;
@@ -21,45 +22,50 @@ interface iChatRoom {
 interface iProps {
   showIcon?: boolean;
   chat: iChatRoom;
+  setIsShowChat: Dispatch<SetStateAction<boolean>>;
 }
 
 // Helper function to format message preview
 const formatMessagePreview = (message: string): { text: string; icon?: JSX.Element } => {
   // Check if it's a Cloudinary URL
-  if (message.includes('res.cloudinary.com')) {
-    if (message.includes('/image/') || message.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
+  if (message.includes("res.cloudinary.com")) {
+    if (message.includes("/image/") || message.match(/\.(jpg|jpeg|png|gif|webp)$/i)) {
       return { text: "Image", icon: <FileImage size={14} className="inline mr-1" /> };
-    } else if (message.includes('/video/') || message.match(/\.(mp4|mov|avi|mkv|webm)$/i)) {
+    } else if (message.includes("/video/") || message.match(/\.(mp4|mov|avi|mkv|webm)$/i)) {
       return { text: "Video", icon: <FileVideo size={14} className="inline mr-1" /> };
-    } else if (message.includes('/raw/')) {
+    } else if (message.includes("/raw/")) {
       return { text: "Document", icon: <File size={14} className="inline mr-1" /> };
     }
   }
-  
+
   // For text messages, truncate if too long
   if (message.length > 30) {
     return { text: message.substring(0, 30) + "..." };
   }
-  
+
   return { text: message };
 };
 
-const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
+const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
   const router = useRouter();
+  const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const [imageError, setImageError] = useState(false);
 
   const handleChatClick = () => {
     const params = new URLSearchParams(searchParams.toString());
-    params.set('roomName', chat.chatRoomName || '');
+    params.set("roomName", chat.chatRoomName || "");
     router.push(`?${params.toString()}`);
+    if (isMobile) {
+      setIsShowChat(true);
+    }
   };
 
   const imageSrc = getImageSrcWithFallback(chat.userImgUrl, imageError);
   const messagePreview = formatMessagePreview(chat.message);
 
   return (
-    <div 
+    <div
       className="hover:bg-[#F9F9F9] border-b-[0.8px] border-[#0E0E0E0D] p-3 flex gap-[10px] items-center cursor-pointer"
       onClick={handleChatClick}
     >
@@ -75,13 +81,9 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat }) => {
       </div>
       <div className="flex-1">
         <div className="flex items-center gap-2">
-          <p className="text-[#222222] font-medium text-lg mb-1">
-            {chat.fullName}
-          </p>
-          
-          {chat.userStatus?.toLowerCase() !== "offline" && (
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-          )}
+          <p className="text-[#222222] font-medium text-lg mb-1">{chat.fullName}</p>
+
+          {chat.userStatus?.toLowerCase() !== "offline" && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
         </div>
         <p className="text-sm text-[#666666] truncate">
           {messagePreview.icon}
