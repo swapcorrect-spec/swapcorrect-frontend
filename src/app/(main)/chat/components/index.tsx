@@ -21,20 +21,23 @@ const ChatRoom: React.FC = () => {
 
   const [isShowChat, setIsShowChat] = useState(false);
 
-  // Transform API data to match the expected format
-  const chatList =
-    data?.result?.map((chat) => ({
-      sendAt: chat.time || new Date().toISOString(),
-      message: chat.message || "No messages yet",
-      userImgUrl: chat.url
-        ? getImageSrcWithFallback(chat.url, false)
-        : "https://plus.unsplash.com/premium_photo-1664537979073-a467fa628555?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2371",
-      fullName: chat.name,
-      count: chat.unreadCount > 0 ? chat.unreadCount : undefined,
-      userStatus: chat.userStatus,
-      userId: chat.userId,
-      chatRoomName: chat.chatRooomName,
-    })) || [];
+  const chatList = (data?.result?.map((chat) => ({
+    sendAt: chat.time || new Date().toISOString(),
+    message: chat.message || "No messages yet",
+    userImgUrl: chat.url 
+      ? getImageSrcWithFallback(chat.url, false)
+      : "https://plus.unsplash.com/premium_photo-1664537979073-a467fa628555?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2371",
+    fullName: chat.name,
+    count: chat.unreadCount > 0 ? chat.unreadCount : undefined,
+    userStatus: chat.userStatus,
+    userId: chat.userId,
+    chatRoomName: chat.chatRooomName,
+  })) || []).sort((a, b) => {
+    // Sort by sendAt time in descending order (newest first)
+    const timeA = new Date(a.sendAt).getTime();
+    const timeB = new Date(b.sendAt).getTime();
+    return timeB - timeA;
+  });
 
   // Find the selected chat data
   const selectedChat = chatList.find((chat) => chat.chatRoomName === roomName);

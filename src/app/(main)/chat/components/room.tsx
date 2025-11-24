@@ -15,6 +15,7 @@ import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
 import EmojiPicker from "emoji-picker-react";
 import ReactPlayer from "react-player";
 import useIsMobile from "@/app/_hooks/useIsMobile";
+import { useQueryClient } from "@tanstack/react-query";
 
 type ChatListProps = IRoomMessage;
 
@@ -130,19 +131,46 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
   });
-
-  const currentUserId = currentUserData?.result?.id || "";
-
-  const { data, isLoading, isError, error } = useGetChatRoomMessages({
+  
+  const currentUserId = currentUserData?.result?.id || '';
+  
+  const queryClient = useQueryClient();
+  
+  const { data, isLoading, isError, error, refetch: refetchRoomMessages } = useGetChatRoomMessages({
     roomName,
     enabler: !!roomName,
   });
 
   // Sync GET request data with messages state
+  // Only update if we don't have messages or if this is initial load
   useEffect(() => {
     if (data?.result?.roomMessages && Array.isArray(data.result.roomMessages)) {
-      // Reverse to show oldest messages first (top) and newest last (bottom)
-      setMessages([...data.result.roomMessages].reverse());
+      setMessages(prev => {
+        // If we already have messages (from SignalR), merge them intelligently
+        if (prev.length > 0) {
+          // Create a map of existing messages by unique key
+          const existingMessagesMap = new Map(
+            prev.map(msg => [`${msg.message}-${msg.dateTime}-${msg.senderId}`, msg])
+          );
+          
+          // Add new messages from API that don't exist yet
+          const apiMessages = [...data.result.roomMessages].reverse();
+          apiMessages.forEach(msg => {
+            const key = `${msg.message}-${msg.dateTime}-${msg.senderId}`;
+            if (!existingMessagesMap.has(key)) {
+              existingMessagesMap.set(key, msg);
+            }
+          });
+          
+          // Convert back to array and sort by dateTime
+          return Array.from(existingMessagesMap.values()).sort((a, b) => 
+            new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+          );
+        }
+        
+        // Initial load - just reverse the API messages
+        return [...data.result.roomMessages].reverse();
+      });
     }
   }, [data]);
 
@@ -190,33 +218,29 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   }, []);
 
   useEffect(() => {
-    if (!connection || connection.state !== signalR.HubConnectionState.Disconnected || !roomName || !currentUserId)
-      return;
+    if (!connection || !roomName || !currentUserId) return;
 
-    const startSignalR = async () => {
+    const setupSignalR = async () => {
       try {
-        setConnectionStatus("Connecting");
+        // Start connection if not already connected
+        if (connection.state === signalR.HubConnectionState.Disconnected) {
+          setConnectionStatus("Connecting");
+          await connection.start();
+          setConnectionStatus("Connected");
+        }
 
-        await connection.start();
-        setConnectionStatus("Connected");
-
-        // Join the room
+        // Join the room (safe to call multiple times)
         await connection.invoke("JoinRoom", roomName, currentUserId);
 
-        // Register handler once
-        connection.off("ReceiveMessage"); // Prevent duplicate handlers
+        // Register handler - remove old handler first to prevent duplicates
+        connection.off("ReceiveMessage");
         connection.on("ReceiveMessage", (message) => {
-          console.log("Received message data:", message);
-          console.log("Message type:", typeof message);
-          console.log("Message structure:", JSON.stringify(message, null, 2));
 
-          // Handle edge case where backend sends string instead of object
           if (typeof message === "string") {
             console.warn("Received string instead of message object, ignoring:", message);
             return;
           }
 
-          // Normalize messageType to proper case (text -> Text, image -> Image, etc.)
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
             const lowerType = (type || "text").toLowerCase();
             const typeMap: Record<string, "Text" | "Image" | "Video" | "File"> = {
@@ -239,8 +263,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId,
           };
 
-          console.log("Transformed message:", transformedMessage);
-          setMessages((prev) => {
+          setMessages(prev => {
+            // Check if message already exists to prevent duplicates
+            const messageExists = prev.some(
+              msg => msg.message === transformedMessage.message && 
+                     msg.dateTime === transformedMessage.dateTime &&
+                     msg.senderId === transformedMessage.senderId
+            );
+            if (messageExists) {
+              return prev;
+            }
+            
             const newMessages = [...prev, transformedMessage];
             // Mark as loading if it's media content
             if (transformedMessage.messageType === "Image" || transformedMessage.messageType === "Video") {
@@ -248,14 +281,18 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             }
             return newMessages;
           });
+          
+          // Invalidate sidebar query to update chat list
+          queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         });
       } catch (error) {
+        console.error("Error setting up SignalR:", error);
         setConnectionStatus("Error");
       }
     };
 
-    startSignalR();
-  }, [connection, roomName, currentUserId]);
+    setupSignalR();
+  }, [connection, roomName, currentUserId, queryClient]);
 
   // Close emoji picker when clicking outside
   useEffect(() => {
@@ -274,17 +311,14 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     };
   }, [showEmojiPicker]);
 
-  // Send message function
   const sendMessage = async (message: string, messageType: string = "Text") => {
     if (connection && roomName && currentUserId) {
       try {
-        console.log("Sending message:", {
-          roomName,
-          userId: currentUserId,
-          message,
-          messageType,
-        });
+      
         await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
+        
+        queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+        refetchRoomMessages();
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -298,7 +332,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       const fileArray = Array.from(files);
       setSelectedFiles((prev) => [...prev, ...fileArray]);
     }
-    // Reset input value so same file can be selected again
     if (fileInputRef.current) {
       fileInputRef.current.value = "";
     }
@@ -341,7 +374,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     formData.append("folder", "swap_shop/chat");
 
     try {
-      // Mark this file as uploading
       setUploadingFiles((prev) => new Set(prev).add(fileIndex));
 
       const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
@@ -351,15 +383,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
       const data = await response.json();
 
-      console.log("=== CLOUDINARY UPLOAD RESPONSE ===");
-      console.log("Full Response:", data);
-      console.log("Secure URL:", data.secure_url);
-      console.log("Public ID:", data.public_id);
-      console.log("Resource Type:", data.resource_type);
-      console.log("Format:", data.format);
-      console.log("==================================");
-
-      // Remove from uploading set
       setUploadingFiles((prev) => {
         const newSet = new Set(prev);
         newSet.delete(fileIndex);
@@ -388,7 +411,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     const file = selectedFiles[0];
     const fileType = getFileType(file);
 
-    console.log("Starting upload for:", file.name);
 
     // 1. Upload to Cloudinary
     const uploadResult = await uploadToCloudinary(file, 0);
@@ -399,7 +421,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       return;
     }
 
-    console.log("Upload successful! URL:", uploadResult.secure_url);
 
     // 2. Add message optimistically to chat with "Sending" status
     const optimisticMessage: IRoomMessage = {
@@ -428,6 +449,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       setMessages((prev) =>
         prev.map((msg, idx) => (idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg))
       );
+
+      // Invalidate queries to update sidebar chat list
+      queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+      // Refetch room messages to ensure we have the latest from server
+      refetchRoomMessages();
 
       // Clear selected files and uploading state
       setSelectedFiles([]);
@@ -675,7 +701,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                                 controls={true}
                                 className="rounded-xl"
                                 onReady={() => {
-                                  console.log("Video ready:", chat.message);
                                   setLoadingMedia((prev) => {
                                     const newSet = new Set(prev);
                                     newSet.delete(index);

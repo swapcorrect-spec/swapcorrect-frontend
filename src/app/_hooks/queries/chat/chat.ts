@@ -4,7 +4,7 @@ import { IGetActiveChatUsersResponseData, IGetChatRoomMessagesResponseData } fro
 
 export const useGetActiveChatUsers = (props: { enabler: boolean }) => {
   const { enabler } = props;
-  const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
+  const { data, isError, isSuccess, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["useGetActiveChatUsers"],
     queryFn: () =>
       getRequest<IGetActiveChatUsersResponseData>({
@@ -20,12 +20,13 @@ export const useGetActiveChatUsers = (props: { enabler: boolean }) => {
     isError,
     error,
     isSuccess,
+    refetch,
   };
 };
 
 export const useGetChatRoomMessages = (props: { roomName: string; enabler: boolean }) => {
   const { roomName, enabler } = props;
-  const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
+  const { data, isError, isSuccess, isLoading, isFetching, error, refetch } = useQuery({
     queryKey: ["useGetChatRoomMessages", roomName],
     queryFn: () =>
       getRequestParams<{}, IGetChatRoomMessagesResponseData>({
@@ -42,5 +43,6 @@ export const useGetChatRoomMessages = (props: { roomName: string; enabler: boole
     isError,
     error,
     isSuccess,
+    refetch,
   };
 };
