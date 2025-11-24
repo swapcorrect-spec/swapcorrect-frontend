@@ -461,7 +461,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Failed" } : msg
         )
       );
-      // Remove from loading media on error
       setLoadingMedia((prev) => {
         const newSet = new Set(prev);
         newSet.delete(messages.length);
