@@ -444,23 +444,18 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     try {
       await sendMessage(uploadResult.secure_url, fileType);
 
-      // 4. Update status to "Sent" after successful send
-      // Note: Spinner stays until media loads (handled in onLoad/onReady)
+     
       setMessages((prev) =>
         prev.map((msg, idx) => (idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg))
       );
 
-      // Invalidate queries to update sidebar chat list
       queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-      // Refetch room messages to ensure we have the latest from server
       refetchRoomMessages();
 
-      // Clear selected files and uploading state
       setSelectedFiles([]);
       setUploadingFiles(new Set());
     } catch (error) {
       console.error("Error sending via SignalR:", error);
-      // Optionally: Update message status to "Failed"
       setMessages((prev) =>
         prev.map((msg, idx) =>
           idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Failed" } : msg
