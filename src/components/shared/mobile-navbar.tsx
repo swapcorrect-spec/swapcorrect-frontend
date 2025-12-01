@@ -110,7 +110,7 @@ const MobileNavbar: FC<Props> = ({ data }) => {
             </div>
 
             <div className="flex flex-col gap-4 px-4 py-6 text-gray-700">
-              <a href={PATHS.DASHBOARD} className="hover:text-[#007AFF] transition">
+              <a href={PATHS.HOME} className="hover:text-[#007AFF] transition">
                 Home
               </a>
               <a href={PATHS.CATEGORY} className="hover:text-[#007AFF] transition">
@@ -118,6 +118,9 @@ const MobileNavbar: FC<Props> = ({ data }) => {
               </a>
               {isLoggedIn && (
                 <>
+                  <a href={PATHS.DASHBOARD} className="hover:text-[#007AFF] transition">
+                    Dashboard
+                  </a>
                   <a href={PATHS.SAVES} className="hover:text-[#007AFF] transition">
                     Saves
                   </a>

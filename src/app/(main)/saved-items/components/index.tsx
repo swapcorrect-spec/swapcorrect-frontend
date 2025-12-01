@@ -5,6 +5,7 @@ import ProductDetails from "@/components/widget/product-details";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import { useState } from "react";
 import { useGetUserFavourite } from "@/app/_hooks/queries/favourite/favourite";
+import Title from "@/components/shared/tltle";
 
 const SavedItems: React.FC = () => {
   const [category, setCategory] = useState<string>("");
@@ -51,10 +52,8 @@ const SavedItems: React.FC = () => {
 
   return (
     <section className="p-6">
-      <h6 className="text-[#007AFF] font-medium mb-3 text-xl">SAVED SWAPS</h6>
-      <p className="text-xl font-medium text-[#222222] mb-8">
-        All the items you&apos;ve marked to trade later
-      </p>
+      <Title title="SAVED SWAPS" description="All the items you've marked to trade later" />
+     
       <div>
         <FilterMenu
           categoryList={categoryList}

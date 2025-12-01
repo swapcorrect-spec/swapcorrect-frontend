@@ -46,3 +46,19 @@ export function formatDateTime(date: string | Date, options?: Intl.DateTimeForma
   
   return new Intl.DateTimeFormat('en-US', { ...defaultOptions, ...options }).format(dateObj);
 }
+
+export function getStatusColor(status: string): string {
+  switch (status.toLowerCase()) {
+    case "negotiating":
+      return "bg-[#FFF9ED] border-[#FFF1D5] text-[#F6A301]";
+    case "confirmed":
+    case "completed":
+    case "swapped":
+      return "bg-[#F0FFEE] border-[#C0FFB6] text-[#3DAB2B]";
+    case "cancelled":
+    case "failed":
+      return "bg-[#FFEEEE] border-[#FFADAD] text-[#E42222]";
+    default:
+      return "bg-[#E4FFE8] border-[#E4FFE8] text-[#68CC58]";
+  }
+}
