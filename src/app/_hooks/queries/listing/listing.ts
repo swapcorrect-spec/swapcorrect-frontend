@@ -266,7 +266,7 @@ export const useUpdateListing = (props?: { onSuccess?: () => void }) => {
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: (payload: IUpdateListingPayload) =>
       putRequest<IUpdateListingPayload, IUpdateListingResponse>({
-        url: `/listing_item/update?listingId=${payload.listingId}`,
+        url: `/listing_item/update-listing`,
         payload,
       }),
     onSuccess: (response) => {
@@ -296,7 +296,7 @@ export const useDeleteListing = (props?: { onSuccess?: () => void }) => {
   const { mutate, isPending, isError, error } = useMutation({
     mutationFn: (listingId: string) =>
       deleteRequest<IDeleteListingResponse>({
-        url: `/listing_item/delete?listingId=${listingId}`,
+        url: `/listing_item/remove-single-listing?listingId=${listingId}`,
       }),
     onSuccess: (response) => {
       toast.success(response.displayMessage || "Listing deleted successfully!", {

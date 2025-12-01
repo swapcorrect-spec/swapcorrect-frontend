@@ -130,7 +130,7 @@ export interface ICreateListingResponse {
 }
 
 export interface IUpdateListingPayload extends ICreateListingPayload {
-  listingId: string;
+  listId: string;
 }
 
 export interface IUpdateListingResponse {

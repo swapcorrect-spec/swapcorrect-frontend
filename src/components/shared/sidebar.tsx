@@ -11,7 +11,7 @@ import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
 import { usePathname } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import Link from "next/link";
-import { X } from "lucide-react";
+import { ArrowLeftRight, X } from "lucide-react";
 
 type Props = {
   handleToggleMenu?: () => void;
@@ -25,6 +25,13 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
       title: "Home",
       iconFilled: <HomeFilled />,
       iconOutline: <HomeOutline />,
+      link: PATHS.HOME,
+      showCount: false,
+    },
+    {
+      title: "Dashboard",
+      iconFilled: <HomeFilled />,
+      iconOutline: <HomeOutline />,
       link: PATHS.DASHBOARD,
       showCount: false,
     },
@@ -34,6 +41,13 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
       iconOutline: <CategoryOutline />,
       link: PATHS.CATEGORY,
       showCount: false,
+    },
+    {
+      title: "My Swaps",
+      iconFilled: <ArrowLeftRight color="#007AFF"/>,
+      iconOutline: <ArrowLeftRight />,
+      link: PATHS.SWAPS,
+      showCount: true,
     },
     {
       title: "Saves",

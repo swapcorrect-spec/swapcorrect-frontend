@@ -81,7 +81,7 @@ const Marketplace: FC<Props> = ({
               </div>
             ) : (
               <Link href={PATHS.CATEGORY}>
-                <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer">View all</p>
+                <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer underline">View all</p>
               </Link>
             )}
           </div>

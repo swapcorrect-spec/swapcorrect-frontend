@@ -8,6 +8,7 @@ import { useState } from "react";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import EmptyItemsState from "@/components/shared/empty-items-state";
+import Title from "@/components/shared/tltle";
 
 const categoryList = [
   {
@@ -76,12 +77,7 @@ export default function ItemListing() {
   return (
     <div className="mx-auto my-10">
       <div className="flex items-end justify-between my-2">
-        <div className="flex flex-col gap-2">
-          <p className="text-[#007AFF] font-medium text-sm">MY LISTING</p>
-          <p className="text-[#222222] font-medium text-xl">
-            Track, edit, or swap your listed items in one place.
-          </p>
-        </div>
+        <Title title="MY LISTING" description="Track, edit, or swap your listed items in one place." />
         <Button className="rounded-full" onClick={handleNewListing}>
           Create New Listing
         </Button>

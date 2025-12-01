@@ -9,6 +9,8 @@ import { Plus, X, Upload } from "lucide-react";
 import { useUpdateListing, useGetListingDetails, useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
+import { SEARCH_ITEMS, LISTING_DETAILS } from "@/app/_constants/api_contant";
 
 const ITEM_CONDITIONS = ["New", "Fairly Used", "Used", "Needs Repair"];
 const CURRENCIES = [
@@ -25,6 +27,7 @@ const EditItemListing = () => {
   const router = useRouter();
   const params = useParams();
   const listingId = params.listingId as string;
+  const queryClient = useQueryClient();
 
   const [formData, setFormData] = useState({
     listType: "Swap",
@@ -49,6 +52,9 @@ const EditItemListing = () => {
   const { data: categoriesData } = useGetAllCategories({ enabler: true });
   const { updateListing, isPending } = useUpdateListing({
     onSuccess: () => {
+      // Invalidate queries to refresh data
+      queryClient.invalidateQueries({ queryKey: [SEARCH_ITEMS] });
+      queryClient.invalidateQueries({ queryKey: [LISTING_DETAILS, listingId] });
       router.push('/item-listing');
     }
   });
@@ -175,7 +181,6 @@ const EditItemListing = () => {
   };
 
   const handleSubmit = () => {
-    // Validate
     if (!formData.itemName || !formData.categoryId || !formData.itemCondition || !formData.location) {
       toast.error("Please fill all required fields!");
       return;
@@ -188,7 +193,7 @@ const EditItemListing = () => {
 
     const payload = {
       ...formData,
-      listingId: listingId,
+      listId: listingId,
       listMediaFiles: [uploadedMedia],
       listingSwapReq: requestedItems.filter(item => item.trim()).map(item => ({ itemNeededName: item })),
     };
