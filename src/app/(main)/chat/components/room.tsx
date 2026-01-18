@@ -1,10 +1,11 @@
 import EmptyMessageRoom from "./empty-room";
 import Image from "next/image";
 import { Send, Check, CheckCheck, Plus, X, File, FileVideo, Info, FileImage, ArrowLeft } from "lucide-react";
-import { useState, useEffect, useRef, SetStateAction, Dispatch } from "react";
+import { useState, useEffect, useRef, SetStateAction, Dispatch, useMemo } from "react";
 import SwapModalContent from "./swap-modal";
-import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { useCloseSwap } from "@/app/_hooks/queries/swap/swap";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
 import { useGetChatRoomMessages } from "@/app/_hooks/queries/chat/chat";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
@@ -22,7 +23,7 @@ type ChatListProps = IRoomMessage;
 interface MessageRoomProps {
   userName: string;
   userProfileUrl: string;
-  userId: string; // Add userId from selected chat
+  userId: string;
   setIsShowChat: Dispatch<SetStateAction<boolean>>;
 }
 
@@ -107,7 +108,7 @@ const MessageStatusIndicator = ({ status }: { status: string }) => {
 const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, userId, setIsShowChat }) => {
   const isMobile = useIsMobile();
 
-  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [modalType, setModalType] = useState<"swap" | "closeSwap" | "viewImage" | "infoDrawer" | null>(null);
   const [swapType, setSwapType] = useState<string>("");
   const [imageError, setImageError] = useState(false);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
@@ -119,9 +120,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const [uploadingFiles, setUploadingFiles] = useState<Set<number>>(new Set());
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [loadingMedia, setLoadingMedia] = useState<Set<number>>(new Set()); // Track media loading state
-  const [viewImageModal, setViewImageModal] = useState<boolean>(false);
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
-  const [showInfoDrawer, setShowInfoDrawer] = useState<boolean>(false);
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -139,6 +138,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const { data, isLoading, isError, error, refetch: refetchRoomMessages } = useGetChatRoomMessages({
     roomName,
     enabler: !!roomName,
+  });
+
+  const swappingProceeding = data?.result?.swappingProceeding;
+  const swapId = swappingProceeding?.id;
+
+  const { closeSwap, isPending: isClosingSwap } = useCloseSwap({
+    onSuccess: () => {
+      setModalType(null);
+      // Optionally refetch chat room messages
+      refetchRoomMessages();
+    },
   });
 
   // Sync GET request data with messages state
@@ -471,9 +481,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     setIsUploading(false);
   };
 
-  const onOpenChange = () => {
-    setIsOpen(!isOpen);
-  };
 
   return (
     <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
@@ -531,13 +538,27 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             </div> */}
           </div>
           <div className="flex gap-2">
-            <Button className="!h-9 rounded-xl font-medium" onClick={() => setIsOpen(!isOpen)}>
-              Swap
-            </Button>
+            {swappingProceeding != null &&
+              swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              swappingProceeding?.status?.toLowerCase() === "negotiation" &&
+              swappingProceeding?.isSwapper === false && (
+                <Button className="!h-9 rounded-xl font-medium" onClick={() => setModalType("swap")}>
+                  Update Swap
+                </Button>
+              )}
+            {swappingProceeding != null &&
+              swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              swappingProceeding?.isSwapper === false &&
+              swappingProceeding?.status?.toLowerCase() !== "closed" && (
+                <Button className="!h-9 rounded-xl font-medium" onClick={() => setModalType("closeSwap")}>
+                  Close Swap
+                </Button>
+              )}
             <Button
               className="!h-9 rounded-xl font-medium text-xs"
               onClick={() => {
-                // Try to manually start connection
                 if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
                   connection
                     .start()
@@ -555,7 +576,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             <Button
               className="!h-9 !w-9 rounded-xl"
               variant="outline"
-              onClick={() => setShowInfoDrawer(!showInfoDrawer)}
+              onClick={() => setModalType(modalType === "infoDrawer" ? null : "infoDrawer")}
               title="View profile and shared media"
             >
               <Info size={18} />
@@ -647,7 +668,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               style={{ height: "220px", objectFit: "cover" }}
                               onClick={() => {
                                 setSelectedImageUrl(chat.message);
-                                setViewImageModal(true);
+                                setModalType("viewImage");
                               }}
                               onLoad={() => {
                                 // Remove from loading state when image loads
@@ -761,7 +782,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         )}
       </div>
 
-      {/* File Preview Section */}
       {selectedFiles.length > 0 && (
         <div className="border-t border-b bg-white shadow-sm p-4 flex-shrink-0 relative z-20">
           <div className="flex items-center justify-between mb-3">
@@ -835,7 +855,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       )}
 
       <div className="border-t p-4 flex-shrink-0 relative">
-        {/* Hidden file input */}
         <input
           ref={fileInputRef}
           type="file"
@@ -845,7 +864,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           className="hidden"
         />
 
-        {/* Emoji Picker */}
         {showEmojiPicker && (
           <div
             ref={emojiPickerRef}
@@ -860,7 +878,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         )}
 
         <div className="flex gap-2 items-center">
-          {/* Emoji Icon Button */}
           <button
             type="button"
             onClick={() => setShowEmojiPicker(!showEmojiPicker)}
@@ -891,11 +908,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                   e.currentTarget.style.height = "auto";
                 }
               }
-              // Shift+Enter adds new line (default behavior, so we don't prevent)
             }}
           />
 
-          {/* Attachment Button */}
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
@@ -909,11 +924,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             size="sm"
             disabled={isUploading}
             onClick={async () => {
-              // If files are selected, upload them first
               if (selectedFiles.length > 0) {
                 await handleSendWithFiles();
               }
-              // If text message, send normally
               else if (messageInput.trim()) {
                 sendMessage(messageInput.trim());
                 setMessageInput("");
@@ -929,132 +942,195 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         </div>
       </div>
 
-      <Dialog open={isOpen} onOpenChange={onOpenChange}>
-        <DialogContent className="max-w-md">
-          <SwapModalContent swapType={swapType} setSwapType={setSwapType} handleClose={() => setIsOpen(false)} />
-        </DialogContent>
-      </Dialog>
-      <Dialog open={viewImageModal} onOpenChange={setViewImageModal}>
-        <DialogContent className="max-w-[90vw] max-h-[90vh] p-0 bg-black border-none">
-          <div className="relative w-full h-full flex items-center justify-center">
-            <button
-              onClick={() => setViewImageModal(false)}
-              className="absolute top-4 right-4 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2 transition-all"
-            >
-              <X size={24} />
-            </button>
-
-            <img src={selectedImageUrl} alt="Full view" className="max-w-full max-h-[85vh] object-contain" />
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Info Drawer - Slides from right */}
-      {showInfoDrawer && (
-        <>
-          {/* Backdrop */}
-          <div className="fixed inset-0 bg-black bg-opacity-50 z-40" onClick={() => setShowInfoDrawer(false)} />
-
-          {/* Drawer Panel */}
-          <div className="fixed right-0 top-0 bottom-0 w-[400px] bg-white shadow-2xl z-50 overflow-y-auto">
-            {/* Header */}
-            <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between z-10">
-              <h3 className="text-lg font-semibold text-gray-800">Profile & Media</h3>
-              <button
-                onClick={() => setShowInfoDrawer(false)}
-                className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-
-            {/* Profile Section */}
-            <div className="p-6 border-b">
-              <div className="flex flex-col items-center">
-                <div className="w-24 h-24 rounded-full bg-[#F4CE9B] flex items-center justify-center mb-3">
-                  <Image
-                    src={profileImageSrc}
-                    height={96}
-                    width={96}
-                    alt="User profile"
-                    className="w-24 h-24 rounded-full"
-                    onError={createImageErrorHandler(setImageError)}
+      {/* Consolidated Dialog */}
+      <Dialog open={modalType !== null} onOpenChange={(open) => !open && setModalType(null)}>
+        <DialogContent 
+          className={
+            modalType === "viewImage" 
+              ? "max-w-[90vw] max-h-[90vh] p-0 bg-black border-none" 
+              : modalType === "infoDrawer"
+              ? "!fixed !right-0 !top-0 !bottom-0 !left-auto !w-[400px] h-screen max-w-[90vw] !translate-x-0 !translate-y-0 m-0 p-0 border-none shadow-2xl !grid-none"
+              : "max-w-md"
+          }
+        >
+          {useMemo(() => {
+            switch (modalType) {
+              case "swap":
+                return (
+                  <SwapModalContent 
+                    swapType={swapType} 
+                    setSwapType={setSwapType} 
+                    handleClose={() => setModalType(null)} 
                   />
-                </div>
-                <h4 className="text-xl font-semibold text-gray-800">{userName}</h4>
-                <div className="flex items-center gap-2 mt-2">
-                  <div
-                    className={`w-2 h-2 rounded-full ${
-                      connectionStatus === "Connected" ? "bg-green-500" : "bg-gray-400"
-                    }`}
-                  ></div>
-                  <span className="text-sm text-gray-500">{connectionStatus}</span>
-                </div>
-              </div>
-            </div>
-
-            {/* Media Stats */}
-            <div className="p-6 border-b">
-              <h4 className="text-sm font-semibold text-gray-700 mb-4">Shared Files</h4>
-              <div className="grid grid-cols-3 gap-4">
-                <div className="text-center p-3 bg-blue-50 rounded-lg">
-                  <FileImage size={24} className="mx-auto text-blue-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-800">{mediaStats.images}</p>
-                  <p className="text-xs text-gray-600">Photos</p>
-                </div>
-                <div className="text-center p-3 bg-purple-50 rounded-lg">
-                  <FileVideo size={24} className="mx-auto text-purple-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-800">{mediaStats.videos}</p>
-                  <p className="text-xs text-gray-600">Videos</p>
-                </div>
-                <div className="text-center p-3 bg-green-50 rounded-lg">
-                  <File size={24} className="mx-auto text-green-500 mb-2" />
-                  <p className="text-2xl font-bold text-gray-800">{mediaStats.files}</p>
-                  <p className="text-xs text-gray-600">Files</p>
-                </div>
-              </div>
-            </div>
-
-            {/* Shared Media Grid */}
-            <div className="p-6">
-              <h4 className="text-sm font-semibold text-gray-700 mb-4">Recent Media</h4>
-              {allMedia.length > 0 ? (
-                <div className="grid grid-cols-3 gap-2">
-                  {allMedia.slice(0, 12).map((media, idx) => (
-                    <div
-                      key={idx}
-                      className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
-                      onClick={() => {
-                        if (media.messageType === "Image") {
-                          setSelectedImageUrl(media.message);
-                          setViewImageModal(true);
-                          setShowInfoDrawer(false);
-                        } else {
-                          window.open(media.message, "_blank");
-                        }
-                      }}
+                );
+              
+              case "closeSwap":
+                return (
+                  <div className="p-6">
+                    <DialogHeader>
+                      <DialogTitle className="text-[#222222] text-xl font-medium">
+                        Close Swap
+                      </DialogTitle>
+                      <DialogDescription className="text-[#737373] text-sm mt-2">
+                        Are you sure you want to close this swap? This action cannot be undone.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6">
+                      <Button 
+                        variant="outline" 
+                        onClick={() => setModalType(null)}
+                        disabled={isClosingSwap}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        className="bg-[#E42222] hover:bg-[#CC1E1E] text-white"
+                        onClick={() => {
+                          if (swapId) {
+                            closeSwap(swapId);
+                          }
+                        }}
+                        disabled={isClosingSwap || !swapId}
+                        loading={isClosingSwap}
+                      >
+                        Close Swap
+                      </Button>
+                    </DialogFooter>
+                  </div>
+                );
+              
+              case "viewImage":
+                return (
+                  <div className="relative w-full h-full flex items-center justify-center">
+                    <button
+                      onClick={() => setModalType(null)}
+                      className="absolute top-4 right-4 z-50 bg-white bg-opacity-20 hover:bg-opacity-30 text-white rounded-full p-2 transition-all"
                     >
-                      {media.messageType === "Image" ? (
-                        <img src={media.message} alt="Shared media" className="w-full h-full object-cover" />
-                      ) : media.messageType === "Video" ? (
-                        <div className="w-full h-full bg-purple-100 flex items-center justify-center">
-                          <FileVideo size={32} className="text-purple-500" />
+                      <X size={24} />
+                    </button>
+                    <img src={selectedImageUrl} alt="Full view" className="max-w-full max-h-[85vh] object-contain" />
+                  </div>
+                );
+              
+              case "infoDrawer":
+                return (
+                  <div className="w-full h-full bg-white overflow-y-auto">
+                    {/* Header */}
+                    <div className="sticky top-0 bg-white border-b p-4 flex items-center justify-between z-10">
+                      <h3 className="text-lg font-semibold text-gray-800">Profile & Media</h3>
+                      <button
+                        onClick={() => setModalType(null)}
+                        className="p-2 hover:bg-gray-100 rounded-full transition-colors"
+                      >
+                        <X size={20} />
+                      </button>
+                    </div>
+
+                    <div className="p-6 border-b">
+                      <div className="flex flex-col items-center">
+                        <div className="w-24 h-24 rounded-full bg-[#F4CE9B] flex items-center justify-center mb-3">
+                          <Image
+                            src={profileImageSrc}
+                            height={96}
+                            width={96}
+                            alt="User profile"
+                            className="w-24 h-24 rounded-full"
+                            onError={createImageErrorHandler(setImageError)}
+                          />
                         </div>
-                      ) : (
-                        <div className="w-full h-full bg-blue-100 flex items-center justify-center">
-                          <File size={32} className="text-blue-500" />
+                        <h4 className="text-xl font-semibold text-gray-800">{userName}</h4>
+                        <div className="flex items-center gap-2 mt-2">
+                          <div
+                            className={`w-2 h-2 rounded-full ${
+                              connectionStatus === "Connected" ? "bg-green-500" : "bg-gray-400"
+                            }`}
+                          ></div>
+                          <span className="text-sm text-gray-500">{connectionStatus}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Media Stats */}
+                    <div className="p-6 border-b">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-4">Shared Files</h4>
+                      <div className="grid grid-cols-3 gap-4">
+                        <div className="text-center p-3 bg-blue-50 rounded-lg">
+                          <FileImage size={24} className="mx-auto text-blue-500 mb-2" />
+                          <p className="text-2xl font-bold text-gray-800">{mediaStats.images}</p>
+                          <p className="text-xs text-gray-600">Photos</p>
+                        </div>
+                        <div className="text-center p-3 bg-purple-50 rounded-lg">
+                          <FileVideo size={24} className="mx-auto text-purple-500 mb-2" />
+                          <p className="text-2xl font-bold text-gray-800">{mediaStats.videos}</p>
+                          <p className="text-xs text-gray-600">Videos</p>
+                        </div>
+                        <div className="text-center p-3 bg-green-50 rounded-lg">
+                          <File size={24} className="mx-auto text-green-500 mb-2" />
+                          <p className="text-2xl font-bold text-gray-800">{mediaStats.files}</p>
+                          <p className="text-xs text-gray-600">Files</p>
+                        </div>
+                      </div>
+                    </div>
+                    {swappingProceeding != null &&
+                      swappingProceeding !== null &&
+                      Object.keys(swappingProceeding || {}).length > 0 &&
+                      swappingProceeding?.isSwapper === false &&
+                      swappingProceeding?.status?.toLowerCase() !== "closed" && (
+                        <div className="px-5">
+                          <Button 
+                            className="!h-9 rounded-xl font-medium w-full my-10" 
+                            onClick={() => setModalType("closeSwap")}
+                          >
+                            Close Swap
+                          </Button>
                         </div>
                       )}
+                    {/* Shared Media Grid */}
+                    <div className="p-6">
+                      <h4 className="text-sm font-semibold text-gray-700 mb-4">Recent Media</h4>
+                      {allMedia.length > 0 ? (
+                        <div className="grid grid-cols-3 gap-2">
+                          {allMedia.slice(0, 12).map((media, idx) => (
+                            <div
+                              key={idx}
+                              className="aspect-square bg-gray-100 rounded-lg overflow-hidden cursor-pointer hover:opacity-80 transition-opacity"
+                              onClick={() => {
+                                if (media.messageType === "Image") {
+                                  setSelectedImageUrl(media.message);
+                                  setModalType("viewImage");
+                                } else {
+                                  window.open(media.message, "_blank");
+                                }
+                              }}
+                            >
+                              {media.messageType === "Image" ? (
+                                <img src={media.message} alt="Shared media" className="w-full h-full object-cover" />
+                              ) : media.messageType === "Video" ? (
+                                <div className="w-full h-full bg-purple-100 flex items-center justify-center">
+                                  <FileVideo size={32} className="text-purple-500" />
+                                </div>
+                              ) : (
+                                <div className="w-full h-full bg-blue-100 flex items-center justify-center">
+                                  <File size={32} className="text-blue-500" />
+                                </div>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      ) : (
+                        <p className="text-sm text-gray-500 text-center py-8">No media shared yet</p>
+                      )}
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <p className="text-sm text-gray-500 text-center py-8">No media shared yet</p>
-              )}
-            </div>
-          </div>
-        </>
-      )}
+                  </div>
+                );
+              
+              default:
+                return null;
+            }
+          }, [modalType, swapType, selectedImageUrl, isClosingSwap, swapId, closeSwap, profileImageSrc, userName, connectionStatus, imageError, mediaStats, allMedia, swappingProceeding])}
+        </DialogContent>
+      </Dialog>
+
     </section>
   );
 };

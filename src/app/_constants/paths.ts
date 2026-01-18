@@ -10,4 +10,5 @@ export const PATHS = {
   CHAT: "/chat",
   CATEGORY: "/category",
   MYLISTING: "/item-listing",
+  WALLETS: "/wallet",
 };

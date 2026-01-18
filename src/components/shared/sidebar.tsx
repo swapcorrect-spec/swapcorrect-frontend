@@ -11,7 +11,7 @@ import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
 import { usePathname } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import Link from "next/link";
-import { ArrowLeftRight, X } from "lucide-react";
+import { ArrowLeftRight, BadgeDollarSign, ListCheck, X } from "lucide-react";
 
 type Props = {
   handleToggleMenu?: () => void;
@@ -58,8 +58,8 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
     },
     {
       title: "My Listing",
-      iconFilled: <SaveFilled />,
-      iconOutline: <SaveOutline />,
+      iconFilled: <ListCheck color="#007AFF" />,
+      iconOutline: <ListCheck />,
       link: PATHS.MYLISTING,
       showCount: false,
     },
@@ -70,6 +70,13 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
       link: PATHS.CHAT,
       showCount: true,
     },
+    {
+      title: "Wallet",
+      iconFilled: <BadgeDollarSign color="#007AFF" />,
+      iconOutline: <BadgeDollarSign />,
+      link: PATHS.WALLETS,
+      showCount: false,
+    }
   ];
 
   return (
