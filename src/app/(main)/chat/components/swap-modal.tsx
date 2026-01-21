@@ -30,7 +30,7 @@ const SwapModalContent: React.FC<iProps> = ({
           onValueChange={setSwapType}
           className="space-y-4"
         >
-          <div className="text-center lg:text-left flex flex-col items-start">
+          {/* <div className="text-center lg:text-left flex flex-col items-start">
             <label
               htmlFor="basic"
               className={`p-3 rounded-xl border border-[#EEEEEE] ${
@@ -53,7 +53,7 @@ const SwapModalContent: React.FC<iProps> = ({
                 <RadioGroupItem value="basic" id="basic" />
               </div>
             </label>
-          </div>
+          </div> */}
           <div className="text-center lg:text-left flex flex-col items-start">
             <label
               htmlFor="advanced"
@@ -83,7 +83,7 @@ const SwapModalContent: React.FC<iProps> = ({
       </div>
       <div className="flex gap-4 mt-10">
         <Button className="!h-10 rounded-xl font-medium w-full">
-          Request Swap
+          Request Advanced Swap
         </Button>
         <Button
           className="!h-10 rounded-xl font-medium w-full bg-[#B2B2B2] text-white"

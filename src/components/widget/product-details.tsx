@@ -19,7 +19,6 @@ interface MediaItem {
 }
 
 interface iProps {
-  // New API fields
   listingId?: string | number;
   listType?: string;
   itemName?: string;

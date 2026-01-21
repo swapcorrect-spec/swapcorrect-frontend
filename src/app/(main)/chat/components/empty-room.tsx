@@ -23,7 +23,7 @@ export default function EmptyChatRoom({ hideMarketplaceLink = false }: EmptyChat
       </p>
       {!hideMarketplaceLink && (
         <Link 
-          href={`${PATHS.MARKETPLACE}`}
+          href={`${PATHS.CATEGORY}`}
           className="w-full rounded-full mb-2 inline-block"
         >
           <Button 

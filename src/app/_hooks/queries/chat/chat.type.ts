@@ -24,6 +24,13 @@ export interface IRoomMessage {
   isMe: boolean;
 }
 
+export interface SwappingProceeding {
+  id: string;
+  isSwapper: boolean;
+  status: string;
+  [key: string]: any;
+}
+
 export interface IGetChatRoomMessagesResponseData {
   statusCode: number;
   displayMessage: string;
@@ -32,6 +39,7 @@ export interface IGetChatRoomMessagesResponseData {
     imageCount: number;
     videoCount: number;
     fileCount: number;
+    swappingProceeding?: SwappingProceeding | null;
   };
   errorMessages: null | string;
 }

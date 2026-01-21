@@ -43,6 +43,7 @@
     "shadcn-ui": "^0.9.5",
     "sharp": "^0.34.3",
     "sonner": "^2.0.6",
+    "styled-jsx": "^5.1.7",
     "swiper": "^11.2.6",
     "tailwind-merge": "^3.3.0",
     "tailwindcss-animate": "^1.0.7",

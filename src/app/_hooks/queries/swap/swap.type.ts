@@ -29,3 +29,10 @@ export interface SwapSearchResponseInterface {
   errorMessages: null | string;
 }
 
+export interface CloseSwapResponseData {
+  statusCode: number;
+  displayMessage: string;
+  result: any;
+  errorMessages: null | string;
+}
+

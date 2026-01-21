@@ -1,6 +1,7 @@
-import { useQuery } from "@tanstack/react-query";
-import { getRequestParams } from "@/app/_config/request-methods";
-import { SwapSearchResponseInterface } from "./swap.type";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import { getRequestParams, postRequest } from "@/app/_config/request-methods";
+import { SwapSearchResponseInterface, CloseSwapResponseData } from "./swap.type";
+import { toast } from "sonner";
 
 export interface UseSearchSwapsProps {
   enabler: boolean;
@@ -66,6 +67,36 @@ export const useSearchSwaps = (props: UseSearchSwapsProps) => {
     isError,
     error,
     isSuccess,
+  };
+};
+
+export const useCloseSwap = (props?: { onSuccess?: () => void }) => {
+  const { onSuccess } = props || {};
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (swapId: string) =>
+      postRequest<{}, CloseSwapResponseData>({
+        url: `/listing_item/close/swap_now?swapId=${swapId}`,
+        payload: {},
+      }),
+    onSuccess: (response) => {
+      toast.success(response.displayMessage || "Swap closed successfully!", {
+        onAutoClose: () => {
+          if (onSuccess) onSuccess();
+        },
+      });
+    },
+    onError: (err: any) => {
+      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to close swap. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+
+  return {
+    closeSwap: mutate,
+    isPending,
+    isError,
+    error,
   };
 };
 
