@@ -55,7 +55,6 @@ export interface SwapResponseInterface<T = any> {
   displayMessage: string;
 }
 
-
 export interface SearchResponseInterface {
   result: {
     items: Array<{
@@ -145,4 +144,18 @@ export interface IDeleteListingResponse {
   displayMessage: string;
   result: any;
   errorMessages: string | null;
+}
+
+export type SwitchSwapStatus = {
+  swapId: string;
+  status: string;
+};
+
+export type SwitchSwapStatusPayload = Prettify<BaseApiPayloadDto<SwitchSwapStatus>>;
+
+export interface ISwitchSwapStatusResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
 }

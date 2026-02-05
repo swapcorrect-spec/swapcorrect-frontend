@@ -1,9 +1,28 @@
 import EmptyMessageRoom from "./empty-room";
 import Image from "next/image";
-import { Send, Check, CheckCheck, Plus, X, File, FileVideo, Info, FileImage, ArrowLeft } from "lucide-react";
+import {
+  Send,
+  Check,
+  CheckCheck,
+  Plus,
+  X,
+  File,
+  FileVideo,
+  Info,
+  FileImage,
+  ArrowLeft,
+  EllipsisVertical,
+} from "lucide-react";
 import { useState, useEffect, useRef, SetStateAction, Dispatch, useMemo } from "react";
 import SwapModalContent from "./swap-modal";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useCloseSwap } from "@/app/_hooks/queries/swap/swap";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
@@ -17,6 +36,17 @@ import EmojiPicker from "emoji-picker-react";
 import ReactPlayer from "react-player";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import { useQueryClient } from "@tanstack/react-query";
+import { useInitializePayment } from "@/app/_hooks/queries/payment/payment";
+import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuGroup,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "../../../../components/ui/dropdown-menu";
+import Link from "next/link";
+import { useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
 
 type ChatListProps = IRoomMessage;
 
@@ -105,10 +135,30 @@ const MessageStatusIndicator = ({ status }: { status: string }) => {
   return null;
 };
 
-const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, userId, setIsShowChat }) => {
+const SwapStatus = {
+  Negotiation: "Negotiation",
+  Resolution: "Resolution",
+  Swapped: "Swapped",
+  Closed: "Closed",
+  AwaitingConfirmation: "Awaiting Confirmation",
+  RequestAdvNegotiation: "Request Advance Negotiation",
+  AdvanceChargePaymentCompleted: "Advance Charge Payment Completed",
+  AwaitingVendorHoldingFee: "Awaiting Vendor Holding Fee",
+  AdvNegotiation: "Advance Negotiation",
+  AdvNegotiationSwapped: "Advance Negotiation Swapped",
+};
+
+const MessageRoom: React.FC<MessageRoomProps> = ({
+  userName,
+  userProfileUrl,
+  userId,
+  setIsShowChat,
+}) => {
   const isMobile = useIsMobile();
 
-  const [modalType, setModalType] = useState<"swap" | "closeSwap" | "viewImage" | "infoDrawer" | null>(null);
+  const [modalType, setModalType] = useState<
+    "swap" | "closeSwap" | "viewImage" | "infoDrawer" | null
+  >(null);
   const [swapType, setSwapType] = useState<string>("");
   const [imageError, setImageError] = useState(false);
   const [connection, setConnection] = useState<signalR.HubConnection | null>(null);
@@ -130,18 +180,44 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
   });
-  
-  const currentUserId = currentUserData?.result?.id || '';
-  
+
+  const currentUserId = currentUserData?.result?.id || "";
+
   const queryClient = useQueryClient();
-  
-  const { data, isLoading, isError, error, refetch: refetchRoomMessages } = useGetChatRoomMessages({
+
+  const {
+    data,
+    isLoading,
+    isError,
+    error,
+    refetch: refetchRoomMessages,
+  } = useGetChatRoomMessages({
     roomName,
     enabler: !!roomName,
   });
 
+  const { mutate, isPending } = useInitializePayment({
+    onSuccess(_val: { result: { data: { authorization_url: string } } }) {
+      const redirect_url = _val?.result?.data?.authorization_url;
+      window.open(redirect_url, "_blank", "noopener,noreferrer");
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
+  const { mutate: mutateSwitchSwapStatus, isPending: isPendingSwitchSwap } = useSwitchSwapStatus({
+    onSuccess(_val: { displayMessage: string }) {
+      toast.success(_val.displayMessage);
+      queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
+
   const swappingProceeding = data?.result?.swappingProceeding;
   const swapId = swappingProceeding?.id;
+  const isSwapper = data?.result?.isSwapper;
 
   const { closeSwap, isPending: isClosingSwap } = useCloseSwap({
     onSuccess: () => {
@@ -155,29 +231,29 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   // Only update if we don't have messages or if this is initial load
   useEffect(() => {
     if (data?.result?.roomMessages && Array.isArray(data.result.roomMessages)) {
-      setMessages(prev => {
+      setMessages((prev) => {
         // If we already have messages (from SignalR), merge them intelligently
         if (prev.length > 0) {
           // Create a map of existing messages by unique key
           const existingMessagesMap = new Map(
-            prev.map(msg => [`${msg.message}-${msg.dateTime}-${msg.senderId}`, msg])
+            prev.map((msg) => [`${msg.message}-${msg.dateTime}-${msg.senderId}`, msg])
           );
-          
+
           // Add new messages from API that don't exist yet
           const apiMessages = [...data.result.roomMessages].reverse();
-          apiMessages.forEach(msg => {
+          apiMessages.forEach((msg) => {
             const key = `${msg.message}-${msg.dateTime}-${msg.senderId}`;
             if (!existingMessagesMap.has(key)) {
               existingMessagesMap.set(key, msg);
             }
           });
-          
+
           // Convert back to array and sort by dateTime
-          return Array.from(existingMessagesMap.values()).sort((a, b) => 
-            new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+          return Array.from(existingMessagesMap.values()).sort(
+            (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
           );
         }
-        
+
         // Initial load - just reverse the API messages
         return [...data.result.roomMessages].reverse();
       });
@@ -198,14 +274,18 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
   // Get all media messages for the grid display
   const allMedia = messages.filter(
-    (msg) => msg.messageType === "Image" || msg.messageType === "Video" || msg.messageType === "File"
+    (msg) =>
+      msg.messageType === "Image" || msg.messageType === "Video" || msg.messageType === "File"
   );
 
   // SignalR Connection Setup
   useEffect(() => {
     const hubUrl = process.env.NEXT_PUBLIC_API_BASE_URL + "/chathub";
 
-    const newConnection = new signalR.HubConnectionBuilder().withUrl(hubUrl).withAutomaticReconnect().build();
+    const newConnection = new signalR.HubConnectionBuilder()
+      .withUrl(hubUrl)
+      .withAutomaticReconnect()
+      .build();
 
     // Track connection status
     newConnection.onclose(() => {
@@ -245,7 +325,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
         // Register handler - remove old handler first to prevent duplicates
         connection.off("ReceiveMessage");
         connection.on("ReceiveMessage", (message) => {
-
           if (typeof message === "string") {
             console.warn("Received string instead of message object, ignoring:", message);
             return;
@@ -265,7 +344,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
           // Transform message to match IRoomMessage format
           const transformedMessage: IRoomMessage = {
             message: message.message || message.content || "",
-            dateTime: message.dateTime || message.time || message.timestamp || new Date().toISOString(),
+            dateTime:
+              message.dateTime || message.time || message.timestamp || new Date().toISOString(),
             status: message.status || "Sent",
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
@@ -273,25 +353,29 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId,
           };
 
-          setMessages(prev => {
+          setMessages((prev) => {
             // Check if message already exists to prevent duplicates
             const messageExists = prev.some(
-              msg => msg.message === transformedMessage.message && 
-                     msg.dateTime === transformedMessage.dateTime &&
-                     msg.senderId === transformedMessage.senderId
+              (msg) =>
+                msg.message === transformedMessage.message &&
+                msg.dateTime === transformedMessage.dateTime &&
+                msg.senderId === transformedMessage.senderId
             );
             if (messageExists) {
               return prev;
             }
-            
+
             const newMessages = [...prev, transformedMessage];
             // Mark as loading if it's media content
-            if (transformedMessage.messageType === "Image" || transformedMessage.messageType === "Video") {
+            if (
+              transformedMessage.messageType === "Image" ||
+              transformedMessage.messageType === "Video"
+            ) {
               setLoadingMedia((prevLoading) => new Set(prevLoading).add(newMessages.length - 1));
             }
             return newMessages;
           });
-          
+
           // Invalidate sidebar query to update chat list
           queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         });
@@ -324,9 +408,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
   const sendMessage = async (message: string, messageType: string = "Text") => {
     if (connection && roomName && currentUserId) {
       try {
-      
         await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
-        
+
         queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         refetchRoomMessages();
       } catch (error) {
@@ -386,10 +469,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     try {
       setUploadingFiles((prev) => new Set(prev).add(fileIndex));
 
-      const response = await fetch(`https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`, {
-        method: "POST",
-        body: formData,
-      });
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${cloudName}/${resourceType}/upload`,
+        {
+          method: "POST",
+          body: formData,
+        }
+      );
 
       const data = await response.json();
 
@@ -421,7 +507,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     const file = selectedFiles[0];
     const fileType = getFileType(file);
 
-
     // 1. Upload to Cloudinary
     const uploadResult = await uploadToCloudinary(file, 0);
 
@@ -430,7 +515,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       setIsUploading(false);
       return;
     }
-
 
     // 2. Add message optimistically to chat with "Sending" status
     const optimisticMessage: IRoomMessage = {
@@ -454,9 +538,10 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     try {
       await sendMessage(uploadResult.secure_url, fileType);
 
-     
       setMessages((prev) =>
-        prev.map((msg, idx) => (idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg))
+        prev.map((msg, idx) =>
+          idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg
+        )
       );
 
       queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
@@ -481,10 +566,30 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
     setIsUploading(false);
   };
 
+  const handlePayment = () => {
+    mutate({
+      payload: {
+        proceedingId: swappingProceeding?.id as string,
+        isChargeFee: !isSwapper,
+        roomName: roomName,
+      },
+    });
+  };
+
+  const handleConfirmSwap = () => {
+    mutateSwitchSwapStatus({
+      payload: {
+        status: "AdvNegotiationSwapped",
+        swapId: swappingProceeding?.id as string,
+      },
+    });
+  };
 
   return (
     <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
-      <div className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}>
+      <div
+        className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
+      >
         <div className="flex flex-col items-start md:flex-row md:items-center gap-3 w-full">
           <div className="flex items-center gap-2">
             {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
@@ -499,23 +604,32 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
               />
             </div>
             <div>
-              <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5>
-              <div className="flex items-center gap-2">
-                <div
-                  className={`w-2 h-2 rounded-full ${
-                    connectionStatus === "Connected"
-                      ? "bg-green-500"
-                      : connectionStatus === "Connecting"
-                      ? "bg-yellow-500"
-                      : connectionStatus === "Reconnecting"
-                      ? "bg-yellow-500"
-                      : connectionStatus === "Error"
-                      ? "bg-red-500"
-                      : "bg-gray-400"
-                  }`}
-                ></div>
-                <span className="text-xs text-gray-500">{connectionStatus}</span>
+              <div className="flex items-center gap-2 justify-center">
+                <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5>
+                {connectionStatus && (
+                  <div className="flex items-center gap-2">
+                    <div
+                      className={`w-2 h-2 rounded-full ${
+                        connectionStatus === "Connected"
+                          ? "bg-green-500"
+                          : connectionStatus === "Connecting"
+                            ? "bg-yellow-500"
+                            : connectionStatus === "Reconnecting"
+                              ? "bg-yellow-500"
+                              : connectionStatus === "Error"
+                                ? "bg-red-500"
+                                : "bg-gray-400"
+                      }`}
+                    />
+                    <span className="text-xs text-gray-500">{connectionStatus}</span>
+                  </div>
+                )}
               </div>
+              {swappingProceeding?.status && (
+                <p className="text-xs bg-green-800 w-fit px-1 py-1 rounded-md text-white">
+                  {SwapStatus[swappingProceeding?.status as keyof typeof SwapStatus]}
+                </p>
+              )}
             </div>
           </div>
           <div className="me-auto">
@@ -538,49 +652,155 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             </div> */}
           </div>
           <div className="flex gap-2">
-            {swappingProceeding != null &&
-              swappingProceeding !== null &&
+            {/* {swappingProceeding !== null &&
               Object.keys(swappingProceeding || {}).length > 0 &&
               swappingProceeding?.status?.toLowerCase() === "negotiation" &&
-              swappingProceeding?.isSwapper === false && (
-                <Button className="!h-9 rounded-xl font-medium" onClick={() => setModalType("swap")}>
+              isSwapper === false && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={() => setModalType("swap")}
+                >
                   Update Swap
                 </Button>
-              )}
-            {swappingProceeding != null &&
-              swappingProceeding !== null &&
+              )} */}
+
+            {swappingProceeding !== null &&
               Object.keys(swappingProceeding || {}).length > 0 &&
-              swappingProceeding?.isSwapper === false &&
-              swappingProceeding?.status?.toLowerCase() !== "closed" && (
-                <Button className="!h-9 rounded-xl font-medium" onClick={() => setModalType("closeSwap")}>
-                  Close Swap
+              !isSwapper &&
+              ["Negotiation"].includes(swappingProceeding?.status as string) && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={handlePayment}
+                  loading={isPending}
+                >
+                  Make Payment
                 </Button>
               )}
-            <Button
-              className="!h-9 rounded-xl font-medium text-xs"
-              onClick={() => {
-                if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
-                  connection
-                    .start()
-                    .then(() => {
-                      setConnectionStatus("Connected");
-                    })
-                    .catch((error) => {
-                      setConnectionStatus("Error");
-                    });
-                }
-              }}
-            >
-              Retry
-            </Button>
-            <Button
+            {swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              isSwapper &&
+              ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={handlePayment}
+                  loading={isPending}
+                >
+                  Make Payment
+                </Button>
+              )}
+            {swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              !isSwapper &&
+              ["AdvNegotiation"].includes(swappingProceeding?.status as string) && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={handleConfirmSwap}
+                  loading={isPendingSwitchSwap}
+                >
+                  Complete Swap
+                </Button>
+              )}
+            {/* {swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              !isSwapper &&
+              swappingProceeding?.status?.toLowerCase() === "negotiation" && (
+                <Button
+                  className="!h-9 rounded-xl font-medium "
+                  onClick={() => setModalType("closeSwap")}
+                  variant={"outline"}
+                >
+                  Close Swap
+                </Button>
+              )} */}
+            {connection && connection.state === signalR.HubConnectionState.Disconnected && (
+              <Button
+                className="!h-9 rounded-xl font-medium text-xs"
+                onClick={() => {
+                  if (connection && connection.state === signalR.HubConnectionState.Disconnected) {
+                    connection
+                      .start()
+                      .then(() => {
+                        setConnectionStatus("Connected");
+                      })
+                      .catch((error) => {
+                        setConnectionStatus("Error");
+                      });
+                  }
+                }}
+              >
+                Retry
+              </Button>
+            )}
+            {/* <Button
               className="!h-9 !w-9 rounded-xl"
               variant="outline"
               onClick={() => setModalType(modalType === "infoDrawer" ? null : "infoDrawer")}
               title="View profile and shared media"
             >
               <Info size={18} />
-            </Button>
+            </Button> */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  className="!h-9 !w-9 rounded-xl"
+                  variant="outline"
+                  // onClick={() => setModalType(modalType === "infoDrawer" ? null : "infoDrawer")}
+                  title="View profile and shared media"
+                >
+                  <EllipsisVertical cursor={"pointer"} />
+                </Button>
+                {/* <button className="flex items-center !border-0 gap-2">
+                  <div className="w-[42px] h-[42px] border rounded-md  flex items-center justify-center">
+                    <EllipsisVertical cursor={"pointer"} />
+                  </div>
+                </button> */}
+              </DropdownMenuTrigger>
+              <DropdownMenuContent className="w-40">
+                <DropdownMenuGroup>
+                  <DropdownMenuItem asChild>
+                    <div
+                      className="cursor-pointer"
+                      // variant="outline"
+                      onClick={() => setModalType(modalType === "infoDrawer" ? null : "infoDrawer")}
+                      title="View profile and shared media"
+                    >
+                      View
+                    </div>
+                    {/* <Link href="/settings">View</Link> */}
+                  </DropdownMenuItem>
+                  {swappingProceeding !== null &&
+                    Object.keys(swappingProceeding || {}).length > 0 &&
+                    !isSwapper &&
+                    ["Negotiation"].includes(swappingProceeding?.status as string) && (
+                      <>
+                        <DropdownMenuItem>
+                          <div onClick={handlePayment} className="cursor-pointer">
+                            Make Payment
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <div
+                            className="text-red-700 cursor-pointer"
+                            onClick={() => setModalType("closeSwap")}
+                          >
+                            Close Swap
+                          </div>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  {swappingProceeding !== null &&
+                    Object.keys(swappingProceeding || {}).length > 0 &&
+                    isSwapper &&
+                    ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
+                      <DropdownMenuItem>
+                        <div onClick={handlePayment} className="cursor-pointer">
+                          Make Payment
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                </DropdownMenuGroup>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </div>
       </div>
@@ -629,7 +849,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               className="w-8 h-8 rounded-full"
                             />
                           ) : (
-                            <span className="text-xs font-medium">{chat.isMe ? "Me" : userName.charAt(0)}</span>
+                            <span className="text-xs font-medium">
+                              {chat.isMe ? "Me" : userName.charAt(0)}
+                            </span>
                           )}
                         </div>
                       </div>
@@ -708,7 +930,10 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               <span className="text-white text-xs font-medium">Video</span>
                             </div>
 
-                            <div className="relative w-full rounded-xl overflow-hidden" style={{ height: "220px" }}>
+                            <div
+                              className="relative w-full rounded-xl overflow-hidden"
+                              style={{ height: "220px" }}
+                            >
                               <ReactPlayer
                                 src={chat.message}
                                 width="100%"
@@ -752,7 +977,10 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               rel="noopener noreferrer"
                               className="flex items-center gap-2 hover:underline"
                             >
-                              <File size={24} className={chat.isMe ? "text-white" : "text-blue-500"} />
+                              <File
+                                size={24}
+                                className={chat.isMe ? "text-white" : "text-blue-500"}
+                              />
                               <div className="flex-1">
                                 <p className="text-sm font-medium">Document</p>
                                 <p className="text-xs opacity-70">Click to view</p>
@@ -785,7 +1013,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
       {selectedFiles.length > 0 && (
         <div className="border-t border-b bg-white shadow-sm p-4 flex-shrink-0 relative z-20">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-sm font-semibold text-gray-800">{selectedFiles.length} file(s) selected</span>
+            <span className="text-sm font-semibold text-gray-800">
+              {selectedFiles.length} file(s) selected
+            </span>
             <button
               onClick={clearAllFiles}
               className="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 font-medium px-3 py-1.5 rounded-md transition-colors"
@@ -825,10 +1055,16 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                   </button>
 
                   {/* File preview */}
-                  <div className={`flex flex-col items-center gap-2 ${isUploading ? "opacity-50" : ""}`}>
+                  <div
+                    className={`flex flex-col items-center gap-2 ${isUploading ? "opacity-50" : ""}`}
+                  >
                     {isImage ? (
                       <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
-                        <img src={URL.createObjectURL(file)} alt={file.name} className="w-full h-full object-cover" />
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-full h-full object-cover"
+                        />
                       </div>
                     ) : (
                       <div className="w-full h-16 bg-gray-100 rounded flex items-center justify-center">
@@ -926,8 +1162,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
             onClick={async () => {
               if (selectedFiles.length > 0) {
                 await handleSendWithFiles();
-              }
-              else if (messageInput.trim()) {
+              } else if (messageInput.trim()) {
                 sendMessage(messageInput.trim());
                 setMessageInput("");
               }
@@ -944,26 +1179,26 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
 
       {/* Consolidated Dialog */}
       <Dialog open={modalType !== null} onOpenChange={(open) => !open && setModalType(null)}>
-        <DialogContent 
+        <DialogContent
           className={
-            modalType === "viewImage" 
-              ? "max-w-[90vw] max-h-[90vh] p-0 bg-black border-none" 
+            modalType === "viewImage"
+              ? "max-w-[90vw] max-h-[90vh] p-0 bg-black border-none"
               : modalType === "infoDrawer"
-              ? "!fixed !right-0 !top-0 !bottom-0 !left-auto !w-[400px] h-screen max-w-[90vw] !translate-x-0 !translate-y-0 m-0 p-0 border-none shadow-2xl !grid-none"
-              : "max-w-md"
+                ? "!fixed !right-0 !top-0 !bottom-0 !left-auto !w-[400px] h-screen max-w-[90vw] !translate-x-0 !translate-y-0 m-0 p-0 border-none shadow-2xl !grid-none"
+                : "max-w-md"
           }
         >
           {useMemo(() => {
             switch (modalType) {
               case "swap":
                 return (
-                  <SwapModalContent 
-                    swapType={swapType} 
-                    setSwapType={setSwapType} 
-                    handleClose={() => setModalType(null)} 
+                  <SwapModalContent
+                    swapType={swapType}
+                    setSwapType={setSwapType}
+                    handleClose={() => setModalType(null)}
                   />
                 );
-              
+
               case "closeSwap":
                 return (
                   <div className="p-6">
@@ -976,8 +1211,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                       </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-6">
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         onClick={() => setModalType(null)}
                         disabled={isClosingSwap}
                       >
@@ -998,7 +1233,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                     </DialogFooter>
                   </div>
                 );
-              
+
               case "viewImage":
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
@@ -1008,10 +1243,14 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                     >
                       <X size={24} />
                     </button>
-                    <img src={selectedImageUrl} alt="Full view" className="max-w-full max-h-[85vh] object-contain" />
+                    <img
+                      src={selectedImageUrl}
+                      alt="Full view"
+                      className="max-w-full max-h-[85vh] object-contain"
+                    />
                   </div>
                 );
-              
+
               case "infoDrawer":
                 return (
                   <div className="w-full h-full bg-white overflow-y-auto">
@@ -1077,8 +1316,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                       swappingProceeding?.isSwapper === false &&
                       swappingProceeding?.status?.toLowerCase() !== "closed" && (
                         <div className="px-5">
-                          <Button 
-                            className="!h-9 rounded-xl font-medium w-full my-10" 
+                          <Button
+                            className="!h-9 rounded-xl font-medium w-full my-10"
                             onClick={() => setModalType("closeSwap")}
                           >
                             Close Swap
@@ -1104,7 +1343,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                               }}
                             >
                               {media.messageType === "Image" ? (
-                                <img src={media.message} alt="Shared media" className="w-full h-full object-cover" />
+                                <img
+                                  src={media.message}
+                                  alt="Shared media"
+                                  className="w-full h-full object-cover"
+                                />
                               ) : media.messageType === "Video" ? (
                                 <div className="w-full h-full bg-purple-100 flex items-center justify-center">
                                   <FileVideo size={32} className="text-purple-500" />
@@ -1118,19 +1361,34 @@ const MessageRoom: React.FC<MessageRoomProps> = ({ userName, userProfileUrl, use
                           ))}
                         </div>
                       ) : (
-                        <p className="text-sm text-gray-500 text-center py-8">No media shared yet</p>
+                        <p className="text-sm text-gray-500 text-center py-8">
+                          No media shared yet
+                        </p>
                       )}
                     </div>
                   </div>
                 );
-              
+
               default:
                 return null;
             }
-          }, [modalType, swapType, selectedImageUrl, isClosingSwap, swapId, closeSwap, profileImageSrc, userName, connectionStatus, imageError, mediaStats, allMedia, swappingProceeding])}
+          }, [
+            modalType,
+            swapType,
+            selectedImageUrl,
+            isClosingSwap,
+            swapId,
+            closeSwap,
+            profileImageSrc,
+            userName,
+            connectionStatus,
+            imageError,
+            mediaStats,
+            allMedia,
+            swappingProceeding,
+          ])}
         </DialogContent>
       </Dialog>
-
     </section>
   );
 };

@@ -39,6 +39,7 @@ export interface IGetChatRoomMessagesResponseData {
     imageCount: number;
     videoCount: number;
     fileCount: number;
+    isSwapper: boolean;
     swappingProceeding?: SwappingProceeding | null;
   };
   errorMessages: null | string;
