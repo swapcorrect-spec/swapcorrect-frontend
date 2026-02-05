@@ -1,5 +1,3 @@
-
-
 import {
   HOT_PICKS,
   RECOMMENDED_ITEMS,
@@ -7,17 +5,34 @@ import {
   SEARCH_ITEMS,
   ALL_CATEGORIES,
   START_SWAP,
-  LISTING_DETAILS
+  LISTING_DETAILS,
 } from "@/app/_constants/api_contant";
 import { useMutation, useQuery } from "@tanstack/react-query";
-import { getRequestParams, postRequest, getRequest, deleteRequest, putRequest } from "@/app/_config/request-methods";
-import { SwapResponseInterface, SearchResponseInterface, CategoriesResponseInterface, ListingDetailsResponseInterface, ICreateListingPayload, ICreateListingResponse, IUpdateListingPayload, IUpdateListingResponse, IDeleteListingResponse } from "./listing.type";
+import {
+  getRequestParams,
+  postRequest,
+  getRequest,
+  deleteRequest,
+  putRequest,
+} from "@/app/_config/request-methods";
+import {
+  SwapResponseInterface,
+  SearchResponseInterface,
+  CategoriesResponseInterface,
+  ListingDetailsResponseInterface,
+  ICreateListingPayload,
+  ICreateListingResponse,
+  IUpdateListingPayload,
+  IUpdateListingResponse,
+  IDeleteListingResponse,
+  SwitchSwapStatusPayload,
+  ISwitchSwapStatusResponse,
+} from "./listing.type";
 import { toast } from "sonner";
+import { MutationProps } from "@/app/_types/mutation-prop-types";
+import handleApiError from "@/app/_utils/handle-api-error";
 
-export const useGetListingDetails = (props: { 
-  enabler: boolean;
-  listingId: string;
-}) => {
+export const useGetListingDetails = (props: { enabler: boolean; listingId: string }) => {
   const { enabler, listingId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [LISTING_DETAILS, listingId],
@@ -38,12 +53,12 @@ export const useGetListingDetails = (props: {
   };
 };
 
-export const useGetItemByRaterHotPick = (props: { enabler: boolean, userId?: string; }) => {
+export const useGetItemByRaterHotPick = (props: { enabler: boolean; userId?: string }) => {
   const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [HOT_PICKS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
+      getRequestParams<{ limit: number; userId?: string }, SwapResponseInterface>({
         url: "/listing_item/GetItemByRaterHotPick",
         params: { limit: 10, userId },
         config: { signal },
@@ -60,12 +75,12 @@ export const useGetItemByRaterHotPick = (props: { enabler: boolean, userId?: str
   };
 };
 
-export const useGetRecommendedItems = (props: { enabler: boolean, userId?: string; }) => {
+export const useGetRecommendedItems = (props: { enabler: boolean; userId?: string }) => {
   const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [RECOMMENDED_ITEMS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
+      getRequestParams<{ limit: number; userId?: string }, SwapResponseInterface>({
         url: "/listing_item/recommended",
         params: { limit: 10, userId },
         config: { signal },
@@ -82,12 +97,12 @@ export const useGetRecommendedItems = (props: { enabler: boolean, userId?: strin
   };
 };
 
-export const useGetElectronicsItems = (props: { enabler: boolean, userId?: string; }) => {
+export const useGetElectronicsItems = (props: { enabler: boolean; userId?: string }) => {
   const { enabler = true, userId } = props;
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [ELECTRONICS_ITEMS],
     queryFn: async ({ signal }) =>
-      getRequestParams<{ limit: number, userId?: string }, SwapResponseInterface>({
+      getRequestParams<{ limit: number; userId?: string }, SwapResponseInterface>({
         url: "/listing_item/electronic",
         params: { limit: 10, userId },
         config: { signal },
@@ -104,7 +119,7 @@ export const useGetElectronicsItems = (props: { enabler: boolean, userId?: strin
   };
 };
 
-export const useSearchItems = (props: { 
+export const useSearchItems = (props: {
   enabler: boolean;
   listingUserId?: string;
   searhParam?: string;
@@ -117,7 +132,7 @@ export const useSearchItems = (props: {
   perpageSize?: number;
   userId?: string;
 }) => {
-  const { 
+  const {
     enabler = true,
     searhParam,
     categoryld,
@@ -128,24 +143,38 @@ export const useSearchItems = (props: {
     pageNumber,
     perpageSize = 20,
     listingUserId,
-    userId
+    userId,
   } = props;
-  
+
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
-    queryKey: [SEARCH_ITEMS, searhParam, categoryld, location, lowestRange, highestRange, listingDate, pageNumber, perpageSize, userId],
+    queryKey: [
+      SEARCH_ITEMS,
+      searhParam,
+      categoryld,
+      location,
+      lowestRange,
+      highestRange,
+      listingDate,
+      pageNumber,
+      perpageSize,
+      userId,
+    ],
     queryFn: async ({ signal }) =>
-      getRequestParams<{
-        searhParam?: string;
-        categoryld?: string;
-        location?: string;
-        lowestRange?: number;
-        highestRange?: number;
-        listingDate?: string;
-        pageNumber?: number;
-        perpageSize?: number;
-        listingUserId?: string;
-        userId?: string;
-      }, SearchResponseInterface>({
+      getRequestParams<
+        {
+          searhParam?: string;
+          categoryld?: string;
+          location?: string;
+          lowestRange?: number;
+          highestRange?: number;
+          listingDate?: string;
+          pageNumber?: number;
+          perpageSize?: number;
+          listingUserId?: string;
+          userId?: string;
+        },
+        SearchResponseInterface
+      >({
         url: "/listing_item/paginated/search_item",
         params: {
           searhParam,
@@ -157,7 +186,7 @@ export const useSearchItems = (props: {
           pageNumber,
           perpageSize,
           listingUserId,
-          userId
+          userId,
         },
         config: { signal },
       }),
@@ -175,7 +204,7 @@ export const useSearchItems = (props: {
 
 export const useGetAllCategories = (props: { enabler: boolean }) => {
   const { enabler = true } = props;
-  
+
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
     queryKey: [ALL_CATEGORIES],
     queryFn: async ({ signal }) =>
@@ -196,18 +225,15 @@ export const useGetAllCategories = (props: { enabler: boolean }) => {
   };
 };
 
-export const useStartSwap = (props: { 
-  listingId: string;
-  onSuccess?: () => void;
-}) => {
+export const useStartSwap = (props: { listingId: string; onSuccess?: () => void }) => {
   const { listingId, onSuccess } = props;
-  
+
   const { mutate, isPending, isError, error } = useMutation({
     mutationKey: [START_SWAP, listingId],
     mutationFn: async () =>
       postRequest<{}, SwapResponseInterface>({
         url: `/listing_item/start/swap_now?listingId=${listingId}`,
-      payload: {},
+        payload: {},
       }),
     onSuccess: (data) => {
       toast.success(data.displayMessage || "Swap started successfully!", {
@@ -217,7 +243,10 @@ export const useStartSwap = (props: {
       });
     },
     onError: (err: any) => {
-      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to start swap. Please try again.";
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to start swap. Please try again.";
       toast.error(errorMessage);
     },
   });
@@ -247,7 +276,10 @@ export const useCreateListing = (props?: { onSuccess?: () => void }) => {
       });
     },
     onError: (err: any) => {
-      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to create listing. Please try again.";
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to create listing. Please try again.";
       toast.error(errorMessage);
     },
   });
@@ -277,7 +309,10 @@ export const useUpdateListing = (props?: { onSuccess?: () => void }) => {
       });
     },
     onError: (err: any) => {
-      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to update listing. Please try again.";
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to update listing. Please try again.";
       toast.error(errorMessage);
     },
   });
@@ -306,7 +341,10 @@ export const useDeleteListing = (props?: { onSuccess?: () => void }) => {
       });
     },
     onError: (err: any) => {
-      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to delete listing. Please try again.";
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to delete listing. Please try again.";
       toast.error(errorMessage);
     },
   });
@@ -316,5 +354,32 @@ export const useDeleteListing = (props?: { onSuccess?: () => void }) => {
     isPending,
     isError,
     error,
+  };
+};
+
+export const useSwitchSwapStatus = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: SwitchSwapStatusPayload) =>
+      postRequest<SwitchSwapStatusPayload["payload"], ISwitchSwapStatusResponse>({
+        url: "/listing_item/switch-swap-status",
+        payload,
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
   };
 };
