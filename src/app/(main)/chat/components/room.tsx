@@ -655,16 +655,13 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             {/* {swappingProceeding !== null &&
               Object.keys(swappingProceeding || {}).length > 0 &&
               swappingProceeding?.status?.toLowerCase() === "negotiation" &&
-              isSwapper === false && (
-                <Button
-                  className="!h-9 rounded-xl font-medium"
-                  onClick={() => setModalType("swap")}
-                >
-                  Update Swap
-                </Button>
-              )} */}
+              isSwapper === false && ( */}
+            {/* <Button className="!h-9 rounded-xl font-medium" onClick={() => setModalType("swap")}>
+              Update Swap
+            </Button> */}
+            {/* )} */}
 
-            {swappingProceeding !== null &&
+            {/* {swappingProceeding !== null &&
               Object.keys(swappingProceeding || {}).length > 0 &&
               !isSwapper &&
               ["Negotiation"].includes(swappingProceeding?.status as string) && (
@@ -675,8 +672,19 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                 >
                   Make Payment
                 </Button>
-              )}
+              )} */}
             {swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              !isSwapper &&
+              ["Negotiation"].includes(swappingProceeding?.status as string) && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={() => setModalType("swap")}
+                >
+                  Update Swap
+                </Button>
+              )}
+            {/* {swappingProceeding !== null &&
               Object.keys(swappingProceeding || {}).length > 0 &&
               isSwapper &&
               ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
@@ -686,6 +694,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                   loading={isPending}
                 >
                   Make Payment
+                </Button>
+              )} */}
+            {swappingProceeding !== null &&
+              Object.keys(swappingProceeding || {}).length > 0 &&
+              isSwapper &&
+              ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
+                <Button
+                  className="!h-9 rounded-xl font-medium"
+                  onClick={() => setModalType("swap")}
+                >
+                  Update Swap
                 </Button>
               )}
             {swappingProceeding !== null &&
@@ -768,7 +787,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                     </div>
                     {/* <Link href="/settings">View</Link> */}
                   </DropdownMenuItem>
-                  {swappingProceeding !== null &&
+                  {/* {swappingProceeding !== null &&
                     Object.keys(swappingProceeding || {}).length > 0 &&
                     !isSwapper &&
                     ["Negotiation"].includes(swappingProceeding?.status as string) && (
@@ -787,14 +806,44 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                           </div>
                         </DropdownMenuItem>
                       </>
-                    )}
+                    )} */}
                   {swappingProceeding !== null &&
+                    Object.keys(swappingProceeding || {}).length > 0 &&
+                    !isSwapper &&
+                    ["Negotiation"].includes(swappingProceeding?.status as string) && (
+                      <>
+                        <DropdownMenuItem>
+                          <div onClick={() => setModalType("swap")} className="cursor-pointer">
+                            Update Swap
+                          </div>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem asChild>
+                          <div
+                            className="text-red-700 cursor-pointer"
+                            onClick={() => setModalType("closeSwap")}
+                          >
+                            Close Swap
+                          </div>
+                        </DropdownMenuItem>
+                      </>
+                    )}
+                  {/* {swappingProceeding !== null &&
                     Object.keys(swappingProceeding || {}).length > 0 &&
                     isSwapper &&
                     ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
                       <DropdownMenuItem>
                         <div onClick={handlePayment} className="cursor-pointer">
                           Make Payment
+                        </div>
+                      </DropdownMenuItem>
+                    )} */}
+                  {swappingProceeding !== null &&
+                    Object.keys(swappingProceeding || {}).length > 0 &&
+                    isSwapper &&
+                    ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
+                      <DropdownMenuItem>
+                        <div onClick={() => setModalType("swap")} className="cursor-pointer">
+                          Update Swap
                         </div>
                       </DropdownMenuItem>
                     )}
@@ -1196,6 +1245,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                     swapType={swapType}
                     setSwapType={setSwapType}
                     handleClose={() => setModalType(null)}
+                    handlePayment={handlePayment}
                   />
                 );
 
