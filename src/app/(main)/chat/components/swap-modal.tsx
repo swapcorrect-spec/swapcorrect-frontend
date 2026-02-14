@@ -8,28 +8,23 @@ interface iProps {
   swapType: string;
   setSwapType: React.Dispatch<React.SetStateAction<string>>;
   handleClose: () => void;
+  handlePayment: () => void;
 }
 
 const SwapModalContent: React.FC<iProps> = ({
   swapType,
   setSwapType,
   handleClose,
+  handlePayment,
 }) => {
   return (
     <section>
-      <h6 className="text-[#222222] font-medium text-xl mb-3 text-center">
-        Select Swap mode
-      </h6>
+      <h6 className="text-[#222222] font-medium text-xl mb-3 text-center">Select Swap mode</h6>
       <p className="text-[#737373] text-sm text-center mb-5">
-        Choose your desired swap mode for the trade, you can adjust your options
-        later
+        Choose your desired swap mode for the trade, you can adjust your options later
       </p>
       <div className="flex  flex-col gap-4 mt-6 w-full">
-        <RadioGroup
-          value={swapType}
-          onValueChange={setSwapType}
-          className="space-y-4"
-        >
+        <RadioGroup value={swapType} onValueChange={setSwapType} className="space-y-4">
           {/* <div className="text-center lg:text-left flex flex-col items-start">
             <label
               htmlFor="basic"
@@ -64,14 +59,11 @@ const SwapModalContent: React.FC<iProps> = ({
               <div className="flex-1">
                 <div className="flex gap-3 items-center">
                   <ShieldStar />
-                  <h4 className="text-[#222222] font-medium text-base mb-1">
-                    Advanced
-                  </h4>
+                  <h4 className="text-[#222222] font-medium text-base mb-1">Advanced</h4>
                 </div>
                 <p className="text-xs text-[#737373]">
-                  Advanced swaps include escrow protection and verified
-                  shipping. Both parties must confirm receipt before the swap is
-                  complete
+                  Advanced swaps include escrow protection and verified shipping. Both parties must
+                  confirm receipt before the swap is complete
                 </p>
               </div>
               <div className="w-fit">
@@ -82,14 +74,18 @@ const SwapModalContent: React.FC<iProps> = ({
         </RadioGroup>
       </div>
       <div className="flex gap-4 mt-10">
-        <Button className="!h-10 rounded-xl font-medium w-full">
-          Request Advanced Swap
-        </Button>
         <Button
-          className="!h-10 rounded-xl font-medium w-full bg-[#B2B2B2] text-white"
+          className="!h-10 rounded-xl font-medium w-full bg-white text-black border border-black hover:bg-white hover:border-black"
           onClick={handleClose}
         >
           Cancel
+        </Button>
+        <Button
+          className="!h-10 rounded-xl font-medium w-full"
+          onClick={handlePayment}
+          disabled={!swapType}
+        >
+          Request Advanced Swap
         </Button>
       </div>
     </section>

@@ -24,6 +24,7 @@ import { mockNotifications, notifyType } from "@/app/_constants/notifications";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
+import { Auth } from "@/app/_config/auth";
 
 interface Props {
   data?: IGetUserInfoResponseData;
@@ -34,6 +35,11 @@ interface Props {
 const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+  const user_role =
+    Auth.getDecodedJwt()["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
+
+  console.log(user_role, "101");
 
   useEffect(() => {
     if (localStorage.getItem("comms-access-token")) {
@@ -63,17 +69,23 @@ const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
         </Link>
       </div>
       <div className="max-w-[749px] w-full me-auto">
-        <Input startIcon={<Search />} className="w-full !h-11 rounded-[2rem]" placeholder="Search items..." />
+        <Input
+          startIcon={<Search />}
+          className="w-full !h-11 rounded-[2rem]"
+          placeholder="Search items..."
+        />
       </div>
       {isLoggedIn ? (
         <div className="flex gap-5 items-center">
-          <Button
-            variant={"default"}
-            className="rounded-full font-medium text-sm py-3 !px-[11px] flex items-center gap-1 !h-auto w-full"
-            size={"lg"}
-          >
-            Upgrade to Swapper <SwapperUpgradeLogo />
-          </Button>
+          {user_role === "Visitor" && (
+            <Button
+              variant={"default"}
+              className="rounded-full font-medium text-sm py-3 !px-[11px] flex items-center gap-1 !h-auto w-full"
+              size={"lg"}
+            >
+              Upgrade to Swapper <SwapperUpgradeLogo />
+            </Button>
+          )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <div className="relative cursor-pointer">
@@ -84,7 +96,10 @@ const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
               </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-[500px] flex flex-col gap-1 h-[75vh] pb-2 mt-5 py-0">
-              <Tabs defaultValue="item-description" className="w-full mb-6 sticky top-0 bg-white py-3">
+              <Tabs
+                defaultValue="item-description"
+                className="w-full mb-6 sticky top-0 bg-white py-3"
+              >
                 <TabsList className="flex w-full">
                   {notifyType.map((_, index: number) => (
                     <TabsTrigger value={_.value} className={`rounded-[26px] w-full`} key={index}>
