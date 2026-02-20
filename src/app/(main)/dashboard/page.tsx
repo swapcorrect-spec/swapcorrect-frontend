@@ -82,8 +82,7 @@ const DashboardPage: FC = () => {
       const otherUserName = isSwapper ? swap.visitorName : swap.swapperName;
       const otherUserImage = isSwapper ? swap.visitorImage : swap.swapperImage;
 
-      const displayStatus =
-        swap.status === "Negotiation" ? "Negotiating" : swap.status;
+      const displayStatus = swap.status === "Negotiation" ? "Negotiating" : swap.status;
 
       return {
         name: otherUserName,
@@ -100,68 +99,56 @@ const DashboardPage: FC = () => {
 
   return (
     <section className="p-6">
-      <div className="border border-[#E9E9E9] rounded-lg p-6 mb-6">
+      <div className="border border-[#E9E9E9] rounded-lg p-4 md:p-6 mb-6">
         <Title title="Dashboard" description="Overview of your swap activities." />
-        <div className="grid grid-cols-4 gap-4 mt-6">
-          {isLoading ? (
-            Array.from({ length: 4 }).map((_, index) => (
-              <Card
-                className="border-1 border-[#E9E9E9] p-3 bg-[#F5F5F5]"
-                key={index}
-              >
-                <CardContent className="p-0">
-                  <div className="flex justify-between items-center bg-white rounded-md py-[5px] px-2.5 mb-5 text-black">
-                    <Skeleton className="h-4 w-16" />
-                    <Skeleton className="w-[30px] h-[30px] rounded-full" />
-                  </div>
-                  <div className="px-2.5">
-                    <Skeleton className="h-8 w-12 mb-3" />
-                    <Skeleton className="h-3 w-24" />
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          ) : (
-            cardList.map((cardItem, index) => (
-              <Card
-                className="border-1 border-[#E9E9E9] p-3 bg-[#F5F5F5]"
-                key={index}
-              >
-                <CardContent className="p-0">
-                  <div className="flex justify-between items-center bg-white rounded-md py-[5px] px-2.5 mb-5 text-black">
-                    <p className="text-sm text-[#000000]">{cardItem.title}</p>
-                    <div
-                      className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
-                      style={{ backgroundColor: cardItem.color }}
-                    >
-                      {cardItem.icon}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+          {isLoading
+            ? Array.from({ length: 4 }).map((_, index) => (
+                <Card className="border-1 border-[#E9E9E9] p-3 bg-[#F5F5F5]" key={index}>
+                  <CardContent className="p-0">
+                    <div className="flex justify-between items-center bg-white rounded-md py-[5px] px-2.5 mb-5 text-black">
+                      <Skeleton className="h-4 w-16" />
+                      <Skeleton className="w-[30px] h-[30px] rounded-full" />
                     </div>
-                  </div>
-                  <div className="px-2.5">
-                    <p className="text-2xl font-medium mb-3">{cardItem.value}</p>
-                    <p className="text-xs font-medium text-[#646464]">
-                      {cardItem.description}
-                    </p>
-                  </div>
-                </CardContent>
-              </Card>
-            ))
-          )}
+                    <div className="px-2.5">
+                      <Skeleton className="h-8 w-12 mb-3" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </CardContent>
+                </Card>
+              ))
+            : cardList.map((cardItem, index) => (
+                <Card className="border-1 border-[#E9E9E9] p-3 bg-[#F5F5F5]" key={index}>
+                  <CardContent className="p-0">
+                    <div className="flex justify-between items-center bg-white rounded-md py-[5px] px-2.5 mb-5 text-black">
+                      <p className="text-sm text-[#000000]">{cardItem.title}</p>
+                      <div
+                        className="w-[30px] h-[30px] rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: cardItem.color }}
+                      >
+                        {cardItem.icon}
+                      </div>
+                    </div>
+                    <div className="px-2.5">
+                      <p className="text-2xl font-medium mb-3">{cardItem.value}</p>
+                      <p className="text-xs font-medium text-[#646464]">{cardItem.description}</p>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
         </div>
       </div>
       <div className="border border-[#E9E9E9] rounded-lg p-6">
         <div className="flex items-center justify-between">
-        <div className="flex flex-col gap-2 font-medium mb-4">
-          <p className="text-[#222222] text-lg font-medium">
-            Recent items Activity
-          </p>
-          <p className="text-[#737373] text-sm">
-            Your latest swap interactions
-          </p>
-        </div>
-        <Link href={PATHS.SWAPS}>
-                <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer underline">View all</p>
-              </Link>
+          <div className="flex flex-col gap-2 font-medium mb-4">
+            <p className="text-[#222222] text-lg font-medium">Recent items Activity</p>
+            <p className="text-[#737373] text-sm">Your latest swap interactions</p>
+          </div>
+          <Link href={PATHS.SWAPS}>
+            <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer underline">
+              View all
+            </p>
+          </Link>
         </div>
         {isLoadingSwaps ? (
           <div className="grid grid-cols-1 gap-5">
@@ -175,14 +162,10 @@ const DashboardPage: FC = () => {
           </div>
         ) : recentList.length > 0 ? (
           recentList.map((item) => (
-            <SwapCardItem
-              key={item.key}
-              item={item}
-              getStatusColor={getStatusColor}
-            />
+            <SwapCardItem key={item.key} item={item} getStatusColor={getStatusColor} />
           ))
         ) : (
-          <EmptyItemsState 
+          <EmptyItemsState
             title="No recent swap activities"
             description="You haven't had any swap interactions yet. Start swapping to see your activities here!"
           />
