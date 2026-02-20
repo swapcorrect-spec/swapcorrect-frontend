@@ -47,6 +47,7 @@ import {
 } from "../../../../components/ui/dropdown-menu";
 import Link from "next/link";
 import { useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
+import { truncateName } from "@/app/_utils/truncate";
 
 type ChatListProps = IRoomMessage;
 
@@ -590,51 +591,54 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       <div
         className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
       >
-        <div className="flex flex-col items-start md:flex-row md:items-center gap-3 w-full">
-          <div className="flex items-center gap-2">
-            {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
-            <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] rounded-full">
-              <Image
-                src={profileImageSrc}
-                height={40}
-                width={40}
-                alt="User profile"
-                className="w-10 h-10 rounded-full"
-                onError={createImageErrorHandler(setImageError)}
-              />
-            </div>
-            <div>
-              <div className="flex items-center gap-2 justify-center">
-                <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5>
-                {connectionStatus && (
-                  <div className="flex items-center gap-2">
-                    <div
-                      className={`w-2 h-2 rounded-full ${
-                        connectionStatus === "Connected"
-                          ? "bg-green-500"
-                          : connectionStatus === "Connecting"
-                            ? "bg-yellow-500"
-                            : connectionStatus === "Reconnecting"
+        <div className="flex flex-row justify-between items-center md:flex-row md:items-center gap-3 w-full">
+          <div>
+            <div className="flex items-center gap-2">
+              {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
+              <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] ">
+                <Image
+                  src={profileImageSrc}
+                  height={40}
+                  width={40}
+                  alt="User profile"
+                  className="w-10 h-10 rounded-full"
+                  onError={createImageErrorHandler(setImageError)}
+                />
+              </div>
+              <div>
+                <div className="flex items-center gap-2 justify-center">
+                  <h5 className={`text-[#222222] text-lg font-medium`}>
+                    {truncateName(userName, 8)}
+                  </h5>
+                  {connectionStatus && (
+                    <div className="flex items-center gap-2">
+                      <div
+                        className={`w-2 h-2 rounded-full ${
+                          connectionStatus === "Connected"
+                            ? "bg-green-500"
+                            : connectionStatus === "Connecting"
                               ? "bg-yellow-500"
-                              : connectionStatus === "Error"
-                                ? "bg-red-500"
-                                : "bg-gray-400"
-                      }`}
-                    />
-                    <span className="text-xs text-gray-500">{connectionStatus}</span>
-                  </div>
+                              : connectionStatus === "Reconnecting"
+                                ? "bg-yellow-500"
+                                : connectionStatus === "Error"
+                                  ? "bg-red-500"
+                                  : "bg-gray-400"
+                        }`}
+                      />
+                      <span className="text-xs text-gray-500">{connectionStatus}</span>
+                    </div>
+                  )}
+                </div>
+                {swappingProceeding?.status && (
+                  <p className="text-xs bg-green-800 w-fit px-1 py-1 rounded-md text-white">
+                    {SwapStatus[swappingProceeding?.status as keyof typeof SwapStatus]}
+                  </p>
                 )}
               </div>
-              {swappingProceeding?.status && (
-                <p className="text-xs bg-green-800 w-fit px-1 py-1 rounded-md text-white">
-                  {SwapStatus[swappingProceeding?.status as keyof typeof SwapStatus]}
-                </p>
-              )}
             </div>
-          </div>
-          <div className="me-auto">
-            {/* <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5> */}
-            {/* <div className="flex items-center gap-2">
+            <div className="me-auto">
+              {/* <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5> */}
+              {/* <div className="flex items-center gap-2">
               <div
                 className={`w-2 h-2 rounded-full ${
                   connectionStatus === "Connected"
@@ -650,6 +654,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               ></div>
               <span className="text-xs text-gray-500">{connectionStatus}</span>
             </div> */}
+            </div>
           </div>
           <div className="flex gap-2">
             {/* {swappingProceeding !== null &&
@@ -678,7 +683,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               !isSwapper &&
               ["Negotiation"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="!h-9 rounded-xl font-medium"
+                  className="!h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Update Swap
@@ -701,7 +706,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               isSwapper &&
               ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="!h-9 rounded-xl font-medium"
+                  className="!h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Update Swap

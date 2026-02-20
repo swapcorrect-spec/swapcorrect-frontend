@@ -54,7 +54,7 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor }) => {
             </span>
           </div>
 
-          <div className="me-auto text-sm flex items-center gap-3">
+          <div className="me-auto text-sm items-center gap-3 hidden md:flex">
             <div className="w-[24px] h-[24px] rounded-full overflow-hidden">
               <Image
                 className="w-full h-full rounded-full object-cover"
@@ -73,6 +73,29 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor }) => {
               <MomentAgo createdAt={item.time} />
             </p>
           </div>
+          <div className="me-auto text-sm items-center gap-3 block md:hidden">
+            <div className="flex items-center gap-2 mb-1">
+              <div className="w-[24px] h-[24px] rounded-full overflow-hidden">
+                <Image
+                  className="w-full h-full rounded-full object-cover"
+                  src={getImageSrcWithFallback(item.image || "", profileImageError)}
+                  height={24}
+                  width={24}
+                  alt="Profile picture"
+                  onError={createImageErrorHandler(setProfileImageError)}
+                />
+              </div>
+              <p className="text-[#222222]">{item.name}</p>
+            </div>
+            {/* <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div> */}
+            <div className="flex items-center gap-2">
+              <p className="text-[#737373]">{item.type}</p>
+              <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div>
+              <p className="text-[#737373]">
+                <MomentAgo createdAt={item.time} />
+              </p>
+            </div>
+          </div>
         </div>
         {item.roomName && (
           <Link href={`/chat?roomName=${item.roomName}`}>
@@ -90,4 +113,3 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor }) => {
 };
 
 export default SwapCardItem;
-
