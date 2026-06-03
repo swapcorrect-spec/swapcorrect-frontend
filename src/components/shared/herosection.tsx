@@ -7,8 +7,10 @@ import Hero_RightOne from "@/app/assets/images/pngs/right_1.png";
 import Hero_RightTwo from "@/app/assets/images/pngs/right_2.png";
 import Hero_LeftOne from "@/app/assets/images/pngs/left_1.png";
 import Hero_LeftTwo from "@/app/assets/images/pngs/left_2.png";
+import Circle from "@/app/assets/images/pngs/circle.png";
 import { PATHS } from "@/app/_constants/paths";
 import { useEffect } from "react";
+import { ArrowRight } from "lucide-react";
 
 const Herosection = () => {
   const router = useRouter();
@@ -26,10 +28,24 @@ const Herosection = () => {
       className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-contain bg-bottom bg-no-repeat  flex flex-col items-center justify-center relative py-36`}
     >
       <div className="max-w-[839px] w-full mx-auto">
-        <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center leading-tight">
+        {/* <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center leading-tight">
           E-commerce Without Cash
+        </h1> */}
+        <h1 className="text-[#2A2A2A] mb-8 text-8xl font-medium text-center leading-tight">
+          E-commerce
+          <br />
+          <span className="relative inline-block">
+            <span className="relative z-10 pr-3">Without</span>
+
+            <Image
+              src={Circle}
+              alt=""
+              className="absolute inset-0 z-0 w-[75%] h-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+            />
+          </span>
+          Cash
         </h1>
-        <p className="text-2xl text-[#737373] text-center">
+        <p className="text-2xl text-[#737373] text-center w-[85%] mx-auto">
           The dormant item in your hand could get you a useful item in someone’s home
         </p>
         <Button
@@ -39,7 +55,9 @@ const Herosection = () => {
           onClick={handleNavigate}
         >
           Swap Now
-          <span className="bg-white w-7 h-7 rounded-full"></span>
+          <span className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
+            <ArrowRight className="text-black" size={20} />
+          </span>
         </Button>
       </div>
       <Image

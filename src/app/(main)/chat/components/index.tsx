@@ -48,7 +48,6 @@ const ChatRoom: React.FC = () => {
 
   const { mutate } = useConfirmPayment({
     onSuccess(_val: { result: string }) {
-      console.log(_val);
       cleanPaymentParams();
       queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
       setIsConfirmingPayment(false);

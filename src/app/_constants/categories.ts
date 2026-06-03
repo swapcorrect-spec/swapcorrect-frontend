@@ -1,95 +1,119 @@
-import AllItemsIcon from '@/app/assets/images/svgs/category_all_items.svg'
-import ElectronicIcon from '@/app/assets/images/svgs/category_electronic.svg'
-import FashionIcon from '@/app/assets/images/svgs/category_fashion.svg'
-import FurnitureIcon from '@/app/assets/images/svgs/category_funiture.svg'
-import SportsIcon from '@/app/assets/images/svgs/category_sport.svg'
-import ApplianceIcon from '@/app/assets/images/svgs/category_appliance.svg'
-import ToolsIcon from '@/app/assets/images/svgs/category_tools.svg'
-import AccessoriesIcon from '@/app/assets/images/svgs/category_tech.svg'
-import HealthIcon from '@/app/assets/images/svgs/category_health.svg'
-import NewSnapIcon from '@/app/assets/images/svgs/featured_new_snap.svg'
-import BestDealIcon from '@/app/assets/images/svgs/featured_best_deals.svg'
-import OnDiscountIcon from '@/app/assets/images/svgs/featured_on_discount.svg'
+import AllItemsIcon from "@/app/assets/images/svgs/category_all_items.svg";
+import ElectronicIcon from "@/app/assets/images/svgs/category_electronic.svg";
+import FashionIcon from "@/app/assets/images/svgs/category_fashion.svg";
+import FurnitureIcon from "@/app/assets/images/svgs/category_funiture.svg";
+import SportsIcon from "@/app/assets/images/svgs/category_sport.svg";
+import ApplianceIcon from "@/app/assets/images/svgs/category_appliance.svg";
+import ToolsIcon from "@/app/assets/images/svgs/category_tools.svg";
+import AccessoriesIcon from "@/app/assets/images/svgs/category_tech.svg";
+import HealthIcon from "@/app/assets/images/svgs/category_health.svg";
+import NewSnapIcon from "@/app/assets/images/svgs/featured_new_snap.svg";
+import BestDealIcon from "@/app/assets/images/svgs/featured_best_deals.svg";
+import OnDiscountIcon from "@/app/assets/images/svgs/featured_on_discount.svg";
 
 export type CategoryProps = {
   tab: string;
-  options:{
+  options: {
     label: string;
     path: string;
-    Icon: string,
-  }[],
-}[]
-
+    Icon: string;
+  }[];
+}[];
 
 export const CATEGORIES: CategoryProps = [
   {
-  tab: 'CATEGORY',
-  options: [
-    {
-      label: 'All items',
-      path: 'categories',
-      Icon: AllItemsIcon
-    },
+    tab: "CATEGORY",
+    options: [
       {
-      label: 'Electronics',
-      path: 'electronics',
-      Icon: ElectronicIcon
-    },
+        label: "All items",
+        path: "categories",
+        Icon: AllItemsIcon,
+      },
       {
-      label: 'Fashion',
-      path: 'fashion',
-      Icon: FashionIcon
-    },
+        label: "Electronics",
+        path: "electronics",
+        Icon: ElectronicIcon,
+      },
       {
-      label: 'Furniture',
-      path: 'furniture',
-      Icon: FurnitureIcon
-    },
+        label: "Fashion",
+        path: "fashion",
+        Icon: FashionIcon,
+      },
       {
-      label: 'Sports',
-      path: 'sports',
-      Icon: SportsIcon
-    },
+        label: "Furniture",
+        path: "furniture",
+        Icon: FurnitureIcon,
+      },
       {
-      label: 'Home Appliances',
-      path: 'home-appliances',
-      Icon: ApplianceIcon
-    },
+        label: "Sports",
+        path: "sports",
+        Icon: SportsIcon,
+      },
       {
-      label: 'Tools & DIY',
-      path: 'tools',
-      Icon: ToolsIcon
-    },
+        label: "Home Appliances",
+        path: "home-appliances",
+        Icon: ApplianceIcon,
+      },
       {
-      label: 'Tech Accessories',
-      path: 'tech-accessories',
-      Icon: AccessoriesIcon
-    },
+        label: "Tools & DIY",
+        path: "tools",
+        Icon: ToolsIcon,
+      },
       {
-      label: 'Health and Beauty',
-      path: 'health-and-beauty',
-      Icon: HealthIcon
-    },
-  ]
-},
-{
-  tab: 'FEATURED',
-  options: [
-    {
-      label: 'New Snap',
-      path: 'new-snap',
-      Icon: NewSnapIcon
-    },
-    {
-      label: 'Best Deals',
-      path: 'best-deals',
-      Icon: BestDealIcon
-    },
-    {
-      label: 'On Discount',
-      path: 'on-discount',
-      Icon: OnDiscountIcon
-    }
-  ]
-}
-]
+        label: "Tech Accessories",
+        path: "tech-accessories",
+        Icon: AccessoriesIcon,
+      },
+      {
+        label: "Health and Beauty",
+        path: "health-and-beauty",
+        Icon: HealthIcon,
+      },
+      {
+        label: "Phone and Tablets",
+        path: "phone-and-tablets",
+        Icon: HealthIcon,
+      },
+      {
+        label: "Computing",
+        path: "computing",
+        Icon: AccessoriesIcon,
+      },
+      {
+        label: "Gaming",
+        path: "gaming",
+        Icon: SportsIcon,
+      },
+      {
+        label: "Toys and Games",
+        path: "toys-and-games",
+        Icon: SportsIcon,
+      },
+      {
+        label: "FoodStuff",
+        path: "foodstuff",
+        Icon: ToolsIcon,
+      },
+    ],
+  },
+  // {
+  //   tab: "FEATURED",
+  //   options: [
+  //     {
+  //       label: "New Snap",
+  //       path: "new-snap",
+  //       Icon: NewSnapIcon,
+  //     },
+  //     {
+  //       label: "Best Deals",
+  //       path: "best-deals",
+  //       Icon: BestDealIcon,
+  //     },
+  //     {
+  //       label: "On Discount",
+  //       path: "on-discount",
+  //       Icon: OnDiscountIcon,
+  //     },
+  //   ],
+  // },
+];

@@ -76,8 +76,11 @@ export default function ItemListing() {
 
   return (
     <div className="mx-auto my-10">
-      <div className="flex items-end justify-between my-2">
-        <Title title="MY LISTING" description="Track, edit, or swap your listed items in one place." />
+      <div className="flex items-start md:items-end justify-between my-2">
+        <Title
+          title="MY LISTING"
+          description="Track, edit, or swap your listed items in one place."
+        />
         <Button className="rounded-full" onClick={handleNewListing}>
           Create New Listing
         </Button>
