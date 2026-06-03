@@ -33,7 +33,7 @@ export interface ILoginResponse {
   displayMessage: string;
   result: {
     jwt: string;
-    userRole: Array<"Visitor">;
+    userRole: Array<"Visitor" | "Swapper">;
   };
   errorMessages: string | null;
 }
@@ -101,6 +101,7 @@ export interface IGetUserInfoResponseData {
     state: string;
     country: string;
     created: string;
+    userRole: Array<"Visitor" | "Swapper">;
   };
   errorMessages: null | string;
 }
@@ -132,5 +133,19 @@ export interface IGetGeneralUserInfoResponseData {
     rating: number;
     created: string;
   };
+  errorMessages: null | string;
+}
+
+export type UpdateRole = {
+  role: "Visitor" | "Swapper";
+};
+
+// export type UpdateRolePayload = Prettify<BaseApiPayloadDto<{}>>;
+export type UpdateRolePayload = Prettify<UpdateRole>;
+
+export interface IUpdateRoleResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
   errorMessages: null | string;
 }

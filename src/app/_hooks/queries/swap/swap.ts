@@ -7,10 +7,13 @@ export interface UseSearchSwapsProps {
   enabler: boolean;
   listingUserId?: string;
   searhParam?: string;
-  swapListingStatus?: "Published" | "Negotiation" | "Swapped" | "All";
+  swapListingStatus?: "Published" | "Negotiation" | "Swapped" | "All" | undefined;
   listingDate?: "All" | "LastWeek" | "LastMonth";
   pageNumber?: number;
   perpageSize?: number;
+  lowestRange?: number;
+  highestRange?: number;
+  categoryld?: string;
 }
 
 export const useSearchSwaps = (props: UseSearchSwapsProps) => {
@@ -22,6 +25,9 @@ export const useSearchSwaps = (props: UseSearchSwapsProps) => {
     listingDate,
     pageNumber = 1,
     perpageSize = 20,
+    lowestRange,
+    highestRange,
+    categoryld,
   } = props;
 
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
@@ -33,6 +39,9 @@ export const useSearchSwaps = (props: UseSearchSwapsProps) => {
       listingDate,
       pageNumber,
       perpageSize,
+      lowestRange,
+      highestRange,
+      categoryld,
     ],
     queryFn: async ({ signal }) =>
       getRequestParams<
@@ -43,6 +52,8 @@ export const useSearchSwaps = (props: UseSearchSwapsProps) => {
           listingDate?: string;
           pageNumber?: number;
           perpageSize?: number;
+          lowestRange?: number;
+          highestRange?: number;
         },
         SwapSearchResponseInterface
       >({
@@ -50,10 +61,13 @@ export const useSearchSwaps = (props: UseSearchSwapsProps) => {
         params: {
           listingUserId,
           searhParam,
-          swapListingStatus,
+          // swapListingStatus,
           listingDate,
           pageNumber,
           perpageSize,
+          lowestRange,
+          highestRange,
+          swapListingStatus,
         },
         config: { signal },
       }),
@@ -87,7 +101,10 @@ export const useCloseSwap = (props?: { onSuccess?: () => void }) => {
       });
     },
     onError: (err: any) => {
-      const errorMessage = err?.response?.data?.errorMessages?.[0] || err?.message || "Failed to close swap. Please try again.";
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to close swap. Please try again.";
       toast.error(errorMessage);
     },
   });
@@ -99,4 +116,3 @@ export const useCloseSwap = (props?: { onSuccess?: () => void }) => {
     error,
   };
 };
-

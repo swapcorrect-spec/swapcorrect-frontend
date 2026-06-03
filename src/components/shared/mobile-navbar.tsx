@@ -27,6 +27,8 @@ const MobileNavbar: FC<Props> = ({ data }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  console.log(data, "1p");
+
   useEffect(() => {
     if (localStorage.getItem("comms-access-token")) {
       setIsLoggedIn(true);
@@ -46,7 +48,10 @@ const MobileNavbar: FC<Props> = ({ data }) => {
     <header className="w-full bg-white">
       <nav className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <div className="flex items-center gap-3">
-          <button onClick={() => setIsOpen(true)} className="p-2 rounded-md hover:bg-gray-100 transition">
+          <button
+            onClick={() => setIsOpen(true)}
+            className="p-2 rounded-md hover:bg-gray-100 transition"
+          >
             <Menu className="h-6 w-6 text-gray-700" />
           </button>
           <div className="flex items-center gap-2">
@@ -59,7 +64,7 @@ const MobileNavbar: FC<Props> = ({ data }) => {
             <div className="relative">
               <Bell className="h-6 w-6 text-gray-700" />
               <span className="absolute -top-1 -right-1 text-[10px] bg-red-500 text-white rounded-full h-4 w-4 flex items-center justify-center">
-                4
+                0
               </span>
             </div>
             <DropdownMenu>
@@ -87,7 +92,12 @@ const MobileNavbar: FC<Props> = ({ data }) => {
             </DropdownMenu>
           </div>
         ) : (
-          <Button variant={"outline"} size={"sm"} className="rounded-2xl shadow-none" onClick={handleLogin}>
+          <Button
+            variant={"outline"}
+            size={"sm"}
+            className="rounded-2xl shadow-none"
+            onClick={handleLogin}
+          >
             Log in
           </Button>
         )}
@@ -95,7 +105,10 @@ const MobileNavbar: FC<Props> = ({ data }) => {
 
       {isOpen && (
         <div>
-          <div className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40" onClick={() => setIsOpen(false)}></div>
+          <div
+            className="fixed inset-0 bg-black/40 backdrop-blur-sm z-40"
+            onClick={() => setIsOpen(false)}
+          ></div>
           <div
             className={`fixed top-0 left-0 h-full w-[260px] bg-white shadow-xl z-50 transform transition-transform duration-300 ease-in-out ${
               isOpen ? "translate-x-0" : "-translate-x-full"
@@ -124,9 +137,11 @@ const MobileNavbar: FC<Props> = ({ data }) => {
                   <a href={PATHS.SAVES} className="hover:text-[#007AFF] transition">
                     Saves
                   </a>
-                  <a href={PATHS.MYLISTING} className="hover:text-[#007AFF] transition">
-                    My Listing
-                  </a>
+                  {data && data?.result?.userRole[0] === "Swapper" && (
+                    <a href={PATHS.MYLISTING} className="hover:text-[#007AFF] transition">
+                      My Listing
+                    </a>
+                  )}
                   <a href={PATHS.CHAT} className="hover:text-[#007AFF] transition">
                     Chat
                   </a>

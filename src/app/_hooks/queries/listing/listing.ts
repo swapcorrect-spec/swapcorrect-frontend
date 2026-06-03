@@ -163,7 +163,7 @@ export const useSearchItems = (props: {
       getRequestParams<
         {
           searhParam?: string;
-          categoryld?: string;
+          categoryId?: string | null;
           location?: string;
           lowestRange?: number;
           highestRange?: number;
@@ -178,7 +178,7 @@ export const useSearchItems = (props: {
         url: "/listing_item/paginated/search_item",
         params: {
           searhParam,
-          categoryld,
+          categoryId: categoryld,
           location,
           lowestRange,
           highestRange,
@@ -199,6 +199,7 @@ export const useSearchItems = (props: {
     isError,
     error,
     isSuccess,
+    totalPage: data?.result?.totalPages,
   };
 };
 

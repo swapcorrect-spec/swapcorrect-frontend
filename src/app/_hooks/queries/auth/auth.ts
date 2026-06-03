@@ -1,6 +1,11 @@
 import { useMutation, useQuery } from "@tanstack/react-query";
 
-import { getRequest, getRequestParams, postRequest } from "@/app/_config/request-methods";
+import {
+  getRequest,
+  getRequestParams,
+  postRequest,
+  putRequest,
+} from "@/app/_config/request-methods";
 
 import { MutationProps } from "@/app/_types/mutation-prop-types";
 
@@ -17,6 +22,9 @@ import {
   RegisterPayload,
   ResetPasswordPayload,
   VerifyEmailPayload,
+  UpdateRolePayload,
+  UpdateRole,
+  IUpdateRoleResponse,
 } from "@/app/_hooks/queries/auth/auth.type";
 import handleApiError from "@/app/_utils/handle-api-error";
 
@@ -195,5 +203,32 @@ export const useGetGeneralUserInfo = (props: { userId: string; enabler: boolean 
     isError,
     error,
     isSuccess,
+  };
+};
+
+export const useUpdateRole = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: { payload: UpdateRole }) =>
+      putRequest<{}, IUpdateRoleResponse>({
+        url: `/auth/update/user_role?role=${payload.role}`,
+        payload: {},
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
   };
 };
