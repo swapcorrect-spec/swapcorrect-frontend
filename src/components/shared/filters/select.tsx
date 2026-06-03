@@ -22,6 +22,7 @@ interface IProps {
   label?: string;
   name?: string;
   error?: string;
+  value?: string;
 }
 
 export function SelectFilter({
@@ -32,18 +33,18 @@ export function SelectFilter({
   name,
   error,
   label = "",
+  value,
 }: IProps) {
   return (
     <div className="w-full">
       <Select
+        value={value}
         onValueChange={(value) => {
           setFilter(value);
         }}
         name={name}
       >
-        {label && (
-          <p className="text-[#01190F] font-medium text-sm mb-2">{label}</p>
-        )}
+        {label && <p className="text-[#01190F] font-medium text-sm mb-2">{label}</p>}
         <SelectTrigger className={cn("w-full h-10", className)}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
@@ -57,9 +58,7 @@ export function SelectFilter({
           </SelectGroup>
         </SelectContent>
       </Select>
-      {error && (
-        <p className="mt-1 text-sm text-red-500 min-h-[1rem]">{error}</p>
-      )}
+      {error && <p className="mt-1 text-sm text-red-500 min-h-[1rem]">{error}</p>}
     </div>
   );
 }

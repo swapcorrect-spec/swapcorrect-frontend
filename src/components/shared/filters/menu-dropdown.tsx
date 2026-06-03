@@ -20,21 +20,25 @@ interface selectType {
 
 interface iProps {
   setCategory: React.Dispatch<React.SetStateAction<string>>;
+  setListing?: React.Dispatch<React.SetStateAction<string>>;
   setLocation: React.Dispatch<React.SetStateAction<string>>;
   setLowestRange?: React.Dispatch<React.SetStateAction<number | undefined>>;
   setHighestRange?: React.Dispatch<React.SetStateAction<number | undefined>>;
   setSearchParam?: React.Dispatch<React.SetStateAction<string>>;
   onApplyFilters?: (filters: {
     category: string;
+    listing: string;
     location: string;
     lowestRange?: number;
     highestRange?: number;
   }) => void;
-  categoryList: selectType[];
+  categoryList?: selectType[];
   locationList: selectType[];
+  listingDate?: selectType[];
 }
 const FilterMenu: React.FC<iProps> = ({
   setCategory,
+  setListing,
   setLocation,
   setLowestRange,
   setHighestRange,
@@ -42,13 +46,16 @@ const FilterMenu: React.FC<iProps> = ({
   onApplyFilters,
   categoryList,
   locationList,
+  listingDate,
 }) => {
   const { data: categoriesData, isLoading, error } = useGetAllCategories({ enabler: true });
   const [rangeValue, setRangeValue] = useState(0);
   const [tempCategory, setTempCategory] = useState("");
+  const [tempListingDate, setTempListingDate] = useState("");
   const [tempLocation, setTempLocation] = useState("");
   const [searchValue, setSearchValue] = useState("");
-  
+  const [open, setOpen] = useState(false);
+
   // Debounce search value with 500ms delay
   const debouncedSearchValue = useDebounce(searchValue, 500);
 
@@ -60,20 +67,30 @@ const FilterMenu: React.FC<iProps> = ({
   }, [debouncedSearchValue, setSearchParam]);
 
   // Transform API data to selectType format
-  const apiCategoryList = useMemo(()=> categoriesData?.map(category => ({
-    value: category.id, // Use ID for filtering
-    text: category.categoryName
-  })) || [], [categoriesData]);
+  const apiCategoryList = useMemo(
+    () =>
+      categoriesData?.map((category) => ({
+        value: category.id, // Use ID for filtering
+        text: category.categoryName,
+      })) || [],
+    [categoriesData]
+  );
 
-  const finalCategoryList = apiCategoryList.length > 0 ? apiCategoryList : categoryList;
+  // const finalCategoryList = apiCategoryList.length > 0 ? apiCategoryList : categoryList;
+  const finalCategoryList = categoryList
+    ? categoryList
+    : apiCategoryList.length > 0
+      ? apiCategoryList
+      : [];
 
   const handleApplyFilters = () => {
     if (onApplyFilters) {
       onApplyFilters({
         category: tempCategory,
+        listing: tempListingDate,
         location: tempLocation,
         lowestRange: 0,
-        highestRange: rangeValue
+        highestRange: rangeValue,
       });
     }
     // Update the actual states
@@ -81,6 +98,7 @@ const FilterMenu: React.FC<iProps> = ({
     setLocation(tempLocation);
     if (setLowestRange) setLowestRange(0);
     if (setHighestRange) setHighestRange(rangeValue);
+    setOpen(false);
   };
 
   const handleResetFilters = () => {
@@ -89,13 +107,15 @@ const FilterMenu: React.FC<iProps> = ({
     setRangeValue(0);
     setCategory("");
     setLocation("");
+    if (setListing) setListing("");
     if (setLowestRange) setLowestRange(undefined);
     if (setHighestRange) setHighestRange(undefined);
+    setOpen(false);
   };
 
   return (
     <div className="flex gap-4 items-cente mb-5">
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild className="h-9">
           <Button
             variant="outline"
@@ -105,48 +125,56 @@ const FilterMenu: React.FC<iProps> = ({
             Filter
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="w-[900px] p-5 mt-3" align="start">
+        <DropdownMenuContent className="min-w-80 md:w-[900px] p-5 mt-3" align="start">
           <DropdownMenuGroup className="w-full">
-            <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xs">
-              FILTER
-            </h6>
-            <div className="flex gap-5">
+            <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xs">FILTER</h6>
+            <div className="flex flex-col md:flex-row gap-5">
               <SelectFilter
                 list={finalCategoryList}
                 setFilter={setTempCategory}
                 placeholder="Category"
                 className="!w-full"
                 label="Category"
+                value={tempCategory}
               />
-              <div className="w-full">
-                <label className="flex justify-between text-sm mb-2 font-medium">
-                  <p>Estimated Value</p>
-                  <p className="text-[#007AFF]">₦0 - ₦{rangeValue.toLocaleString()}</p>
-                </label>
-                <div className="bg-[#F3F9FF] !h-10 relative flex items-center justify-center rounded-lg px-2">
-                  <input
-                    type="range"
-                    min="0"
-                    max="1000000"
-                    step="10000"
-                    value={rangeValue}
-                    onChange={(e) => setRangeValue(Number(e.target.value))}
-                    className="w-full rounded-lg !border-0 border-[#D9D9D994]"
-                  />
+              {listingDate && (
+                <SelectFilter
+                  list={listingDate}
+                  setFilter={setTempListingDate}
+                  placeholder="Select"
+                  className="!w-full"
+                  label="Listing Date"
+                  value={tempListingDate}
+                />
+              )}
+              {!listingDate && (
+                <div className="w-full">
+                  <label className="flex justify-between text-sm mb-2 font-medium">
+                    <p>Estimated Value</p>
+                    <p className="text-[#007AFF]">₦0 - ₦{rangeValue.toLocaleString()}</p>
+                  </label>
+                  <div className="bg-[#F3F9FF] !h-10 relative flex items-center justify-center rounded-lg px-2">
+                    <input
+                      type="range"
+                      min="0"
+                      max="1000000"
+                      step="10000"
+                      value={rangeValue}
+                      onChange={(e) => setRangeValue(Number(e.target.value))}
+                      className="w-full rounded-lg !border-0 border-[#D9D9D994]"
+                    />
+                  </div>
                 </div>
-              </div>
+              )}
             </div>
             <div className="flex gap-3 justify-end mt-10">
-              <Button 
+              <Button
                 onClick={handleResetFilters}
                 className="bg-[#B2B2B2] text-white font-medium text-sm rounded-[1rem]"
               >
                 Reset
               </Button>
-              <Button 
-                onClick={handleApplyFilters}
-                className="font-medium text-sm rounded-[1rem]"
-              >
+              <Button onClick={handleApplyFilters} className="font-medium text-sm rounded-[1rem]">
                 Apply Filter
               </Button>
             </div>

@@ -15,9 +15,10 @@ import { ArrowLeftRight, BadgeDollarSign, ListCheck, X } from "lucide-react";
 
 type Props = {
   handleToggleMenu?: () => void;
+  role?: "Visitor" | "Swapper";
 };
 
-const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
+const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
   const path = usePathname();
 
   const SIDEBAR_LIST = [
@@ -44,7 +45,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
     },
     {
       title: "My Swaps",
-      iconFilled: <ArrowLeftRight color="#007AFF"/>,
+      iconFilled: <ArrowLeftRight color="#007AFF" />,
       iconOutline: <ArrowLeftRight />,
       link: PATHS.SWAPS,
       showCount: true,
@@ -62,6 +63,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
       iconOutline: <ListCheck />,
       link: PATHS.MYLISTING,
       showCount: false,
+      hideFor: ["Visitor"],
     },
     {
       title: "Chat",
@@ -70,13 +72,13 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
       link: PATHS.CHAT,
       showCount: true,
     },
-    {
-      title: "Wallet",
-      iconFilled: <BadgeDollarSign color="#007AFF" />,
-      iconOutline: <BadgeDollarSign />,
-      link: PATHS.WALLETS,
-      showCount: false,
-    }
+    // {
+    //   title: "Wallet",
+    //   iconFilled: <BadgeDollarSign color="#007AFF" />,
+    //   iconOutline: <BadgeDollarSign />,
+    //   link: PATHS.WALLETS,
+    //   showCount: false,
+    // },
   ];
 
   return (
@@ -85,24 +87,30 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu }) => {
         <X className="cursor-pointer" onClick={handleToggleMenu} />
       </div>
       <ul className="flex flex-col gap-6 items-center jsutify-center">
-        {SIDEBAR_LIST.map(({ title, iconFilled, iconOutline, link }, index) => {
-          const isActive = path === link;
+        {SIDEBAR_LIST.filter((item) => !item.hideFor?.includes(role as string)).map(
+          ({ title, iconFilled, iconOutline, link }, index) => {
+            const isActive = path === link;
 
-          return (
-            <li key={index}>
-              <Link href={link}>
-                <span
-                  className={`hover:bg-[#F1F8FF] px-1 py-[6px] rounded-lg flex items-center justify-center ${
-                    isActive ? "bg-[#F1F8FF]" : "bg-transparent"
-                  }`}
-                >
-                  {isActive ? iconFilled : iconOutline}
-                </span>
-                <p className={`font-medium text-xs ${isActive ? "text-[#007AFF]" : "text-[#222222]"}`}>{title}</p>
-              </Link>
-            </li>
-          );
-        })}
+            return (
+              <li key={index}>
+                <Link href={link}>
+                  <span
+                    className={`hover:bg-[#F1F8FF] px-1 py-[6px] rounded-lg flex items-center justify-center ${
+                      isActive ? "bg-[#F1F8FF]" : "bg-transparent"
+                    }`}
+                  >
+                    {isActive ? iconFilled : iconOutline}
+                  </span>
+                  <p
+                    className={`font-medium text-xs ${isActive ? "text-[#007AFF]" : "text-[#222222]"}`}
+                  >
+                    {title}
+                  </p>
+                </Link>
+              </li>
+            );
+          }
+        )}
       </ul>
     </section>
   );

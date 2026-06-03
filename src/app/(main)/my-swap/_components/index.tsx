@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import ReactPaginate from "react-paginate";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import SwapCardItem, { SwapCardItemData } from "@/components/shared/swap-card-item";
 import Title from "@/components/shared/tltle";
@@ -10,15 +11,39 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent } from "@/components/ui/card";
 import EmptyItemsState from "@/components/shared/empty-items-state";
 import { getStatusColor } from "@/lib/utils";
+import { useRouter, useSearchParams } from "next/navigation";
 
 const categoryList = [
   {
-    text: "Electronics",
-    value: "electronics",
+    text: "All",
+    value: "All",
   },
   {
-    text: "Textiles",
-    value: "textiles",
+    text: "Published",
+    value: "Published",
+  },
+  {
+    text: "Negotiation",
+    value: "Negotiation",
+  },
+  {
+    text: "Swapped",
+    value: "Swapped",
+  },
+];
+
+const listingDateList = [
+  {
+    text: "All",
+    value: "All",
+  },
+  {
+    text: "Last Week",
+    value: "LastWeek",
+  },
+  {
+    text: "Last Month",
+    value: "LastMonth",
   },
 ];
 
@@ -34,15 +59,23 @@ const locationList = [
 ];
 
 export default function MySwaps() {
+  const search = useSearchParams();
+  const router = useRouter();
+
+  const pageNumber = Number(search.get("page") || 1);
+
   const [category, setCategory] = useState<string>("");
+  const [listing, setListing] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [searchParam, setSearchParam] = useState<string>("");
-  const [swapListingStatus, setSwapListingStatus] = useState<
-    "Published" | "Negotiation" | "Swapped" | "All"
-  >("All");
-  const [listingDate, setListingDate] = useState<"All" | "LastWeek" | "LastMonth">("All");
-  const [pageNumber, setPageNumber] = useState<number>(1);
+  // const [swapListingStatus, setSwapListingStatus] = useState<
+  //   "Published" | "Negotiation" | "Swapped" | "All"
+  // >("All");
+  // const [listingDate, setListingDate] = useState<"All" | "LastWeek" | "LastMonth">("All");
+  // const [pageNumber, setPageNumber] = useState<number>(1);
   const perpageSize = 10;
+  // const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
+  // const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
 
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
@@ -50,12 +83,19 @@ export default function MySwaps() {
 
   const currentUserId = currentUserData?.result?.id || "";
 
+  // const categoryId = tab && tab !== "categories" && tab.length > 10 ? tab : category;
+
   const { data: swapsData, isLoading } = useSearchSwaps({
     enabler: !!currentUserId,
     listingUserId: currentUserId,
     searhParam: searchParam || undefined,
-    swapListingStatus,
-    listingDate,
+    // lowestRange: lowestRange,
+    // highestRange: highestRange,
+    // categoryld: category,
+    swapListingStatus:
+      (category as "Published" | "Negotiation" | "Swapped" | "All" | undefined) || "All",
+    // swapListingStatus: category as "Published" | "Negotiation" | "Swapped" | "All" | undefined,
+    listingDate: (listing as "All" | "LastWeek" | "LastMonth" | undefined) || "All",
     pageNumber,
     perpageSize,
   });
@@ -70,8 +110,7 @@ export default function MySwaps() {
       const otherUserName = isSwapper ? swap.visitorName : swap.swapperName;
       const otherUserImage = isSwapper ? swap.visitorImage : swap.swapperImage;
 
-      const displayStatus =
-        swap.status === "Negotiation" ? "Negotiating" : swap.status;
+      const displayStatus = swap.status === "Negotiation" ? "Negotiating" : swap.status;
 
       return {
         name: otherUserName,
@@ -88,15 +127,28 @@ export default function MySwaps() {
 
   const totalPages = swapsData?.totalPages || 1;
 
+  console.log(totalPages, "total pages", swapsData?.totalPages);
+
   const handleApplyFilters = (filters: {
     category: string;
+    listing: string;
     location: string;
     lowestRange?: number;
     highestRange?: number;
   }) => {
     setCategory(filters.category);
+    setListing(filters.listing);
     setLocation(filters.location);
-    setPageNumber(1); 
+    // setLowestRange(filters.lowestRange);
+    // setHighestRange(filters.highestRange);
+    // setPageNumber(1);
+  };
+
+  const handlePageClick = (selectedItem: { selected: number }) => {
+    const page = selectedItem.selected + 1;
+    const params = new URLSearchParams(search.toString());
+    params.set("page", String(page));
+    router.push(`?${params.toString()}`);
   };
 
   return (
@@ -112,6 +164,10 @@ export default function MySwaps() {
           setLocation={setLocation}
           setSearchParam={setSearchParam}
           onApplyFilters={handleApplyFilters}
+          // setLowestRange={setLowestRange}
+          // setHighestRange={setHighestRange}
+          listingDate={listingDateList}
+          setListing={setListing}
         />
       </div>
 
@@ -129,16 +185,36 @@ export default function MySwaps() {
         <>
           <div className="grid grid-cols-1 gap-5 border border-[#E9E9E9] rounded-lg p-6">
             {swapList.map((item) => (
-              <SwapCardItem
-                key={item.key}
-                item={item}
-                getStatusColor={getStatusColor}
-              />
+              <SwapCardItem key={item.key} item={item} getStatusColor={getStatusColor} />
             ))}
+          </div>
+          <div className="flex justify-center mt-8">
+            <ReactPaginate
+              breakLabel="..."
+              nextLabel="Next ›"
+              previousLabel="‹ Previous"
+              pageRangeDisplayed={5}
+              pageCount={totalPages as number}
+              renderOnZeroPageCount={null}
+              onPageChange={handlePageClick}
+              forcePage={pageNumber - 1}
+              pageClassName="w-10 h-10"
+              previousLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
+              nextLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
+              containerClassName="flex items-center gap-2"
+              pageLinkClassName="w-full h-full flex items-center justify-center rounded-lg border hover:bg-gray-100"
+              activeLinkClassName="bg-blue-500 text-white border-blue-500 hover:bg-blue-500"
+              previousClassName={pageNumber === 1 ? "pointer-events-none opacity-40" : ""}
+              nextClassName={
+                pageNumber === totalPages || totalPages === 0
+                  ? "pointer-events-none opacity-40"
+                  : ""
+              }
+            />
           </div>
         </>
       ) : (
-        <EmptyItemsState 
+        <EmptyItemsState
           title="No swaps found"
           description="You don't have any swap interactions yet. Start swapping to see your activities here!"
         />

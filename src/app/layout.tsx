@@ -28,7 +28,9 @@ export default function RootLayout({
   const [queryClient] = useState(
     () =>
       new QueryClient({
-        defaultOptions: { queries: { staleTime: 60 * 1000, refetchOnWindowFocus: false, retry: 0 } },
+        defaultOptions: {
+          queries: { staleTime: 60 * 1000, refetchOnWindowFocus: false, retry: 0 },
+        },
       })
   );
 

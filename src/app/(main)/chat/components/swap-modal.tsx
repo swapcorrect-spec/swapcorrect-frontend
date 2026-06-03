@@ -62,8 +62,11 @@ const SwapModalContent: React.FC<iProps> = ({
                   <h4 className="text-[#222222] font-medium text-base mb-1">Advanced</h4>
                 </div>
                 <p className="text-xs text-[#737373]">
-                  Advanced swaps include escrow protection and verified shipping. Both parties must
-                  confirm receipt before the swap is complete
+                  {/* Advanced swaps include escrow protection and verified shipping. Both parties must
+                  confirm receipt before the swap is complete */}
+                  To access Advanced Mode, a non-refundable protection fee is required. This fee
+                  helps ensure a more secure and guaranteed swap experience by providing additional
+                  protection for both parties during the exchange process.
                 </p>
               </div>
               <div className="w-fit">

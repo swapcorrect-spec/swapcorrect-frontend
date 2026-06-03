@@ -53,8 +53,8 @@ const SavedItems: React.FC = () => {
   return (
     <section className="p-6">
       <Title title="SAVED SWAPS" description="All the items you've marked to trade later" />
-     
-      <div>
+
+      {/* <div>
         <FilterMenu
           categoryList={categoryList}
           locationList={locationList}
@@ -65,8 +65,8 @@ const SavedItems: React.FC = () => {
           setSearchParam={setSearchParam}
           onApplyFilters={handleApplyFilters}
         />
-      </div>
-      
+      </div> */}
+
       {isLoading ? (
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
@@ -76,11 +76,7 @@ const SavedItems: React.FC = () => {
       ) : data && data.length > 0 ? (
         <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
           {data.map((item: any) => (
-            <ProductDetails
-              key={item.listingId || item.id}
-              {...item}
-              isFavItem={true}
-            />
+            <ProductDetails key={item.listingId || item.id} {...item} isFavItem={true} />
           ))}
         </div>
       ) : (

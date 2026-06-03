@@ -17,29 +17,35 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Input } from "../ui/input";
+// import { Input } from "../ui/input";
 import Notification from "../widget/notification";
 import { PATHS } from "@/app/_constants/paths";
 import { mockNotifications, notifyType } from "@/app/_constants/notifications";
 import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
-import { Auth } from "@/app/_config/auth";
+// import { Auth } from "@/app/_config/auth";
 
 interface Props {
   data?: IGetUserInfoResponseData;
   handleToggleMenu?: () => void;
   isOpen?: boolean;
+  role?: "Visitor" | "Swapper";
+  handleToggleSwapperUpgrade?: () => void;
 }
 
-const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
+const Navbar: React.FC<Props> = ({
+  data,
+  handleToggleMenu,
+  isOpen,
+  role,
+  handleToggleSwapperUpgrade,
+}) => {
   const router = useRouter();
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  const user_role =
-    Auth.getDecodedJwt()["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
-
-  console.log(user_role, "101");
+  // const user_role =
+  //   Auth.getDecodedJwt()["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
 
   useEffect(() => {
     if (localStorage.getItem("comms-access-token")) {
@@ -61,30 +67,36 @@ const Navbar: React.FC<Props> = ({ data, handleToggleMenu, isOpen }) => {
   };
 
   return (
-    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex items-center gap-[110px] z-50 w-full">
+    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex justify-between gap-[110px] z-50 w-full">
       <div className="flex gap-4 items-center justify-center">
         {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
         <Link href={`${isLoggedIn ? "/home" : "/"}`} className="flex justify-center">
           <Logo />
         </Link>
       </div>
-      <div className="max-w-[749px] w-full me-auto">
+      {/* <div className="max-w-[749px] w-full me-auto">
         <Input
           startIcon={<Search />}
           className="w-full !h-11 rounded-[2rem]"
           placeholder="Search items..."
         />
-      </div>
+      </div> */}
       {isLoggedIn ? (
         <div className="flex gap-5 items-center">
-          {user_role === "Visitor" && (
+          {role === "Visitor" ? (
             <Button
               variant={"default"}
               className="rounded-full font-medium text-sm py-3 !px-[11px] flex items-center gap-1 !h-auto w-full"
               size={"lg"}
+              onClick={handleToggleSwapperUpgrade}
             >
               Upgrade to Swapper <SwapperUpgradeLogo />
             </Button>
+          ) : (
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+              <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+              Swapper
+            </div>
           )}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
