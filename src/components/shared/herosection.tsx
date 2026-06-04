@@ -35,7 +35,7 @@ const Herosection = () => {
           E-commerce
           <br />
           <span className="relative inline-block">
-            <span className="relative z-10 pr-3">Without</span>
+            <span className="relative z-0 pr-3">Without</span>
 
             <Image
               src={Circle}
