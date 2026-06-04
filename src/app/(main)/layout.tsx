@@ -48,7 +48,7 @@ const ConfirmModal = ({
     <section>
       <h6 className="text-[#222222] font-medium text-xl mb-3 text-center">Upgrade to Swapper</h6>
       <p className="text-[#737373] text-sm text-center mb-5">
-        Lorem, ipsum dolor sit amet consectetur adipisicing elit. Architecto, quas.
+        Note: Upgrading to swapper enables you to list your items.
       </p>
 
       <div className="flex gap-4 mt-10">
@@ -128,7 +128,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         </section>
       </section>
       <Dialog open={isToggleUpgrade}>
-        <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-sm" />
+        <DialogOverlay className="fixed inset-0 bg-black/40 backdrop-blur-sm z-99999" />
 
         <DialogContent
           className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 

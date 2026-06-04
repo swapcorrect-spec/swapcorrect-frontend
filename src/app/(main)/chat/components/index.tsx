@@ -158,7 +158,7 @@ const ChatRoom: React.FC = () => {
     ${isShowChat ? "hidden md:flex" : "flex"} 
   `}
         >
-          <div className={`sticky top-0 z-10 p-4 bg-white border-b border-[#EEEEEE]`}>
+          <div className={`sticky top-0 z-1 p-4 bg-white border-b border-[#EEEEEE]`}>
             <div className={`flex justify-between items-center mb-4`}>
               <h2 className={`text-base text-[#007AFF] capitalize`}>CHAT</h2>
             </div>
