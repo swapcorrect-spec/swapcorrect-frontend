@@ -25,6 +25,8 @@ import {
   UpdateRolePayload,
   UpdateRole,
   IUpdateRoleResponse,
+  IUpdateProfileResponse,
+  UpdateProfile,
 } from "@/app/_hooks/queries/auth/auth.type";
 import handleApiError from "@/app/_utils/handle-api-error";
 
@@ -213,6 +215,33 @@ export const useUpdateRole = (props: MutationProps) => {
       putRequest<{}, IUpdateRoleResponse>({
         url: `/auth/update/user_role?role=${payload.role}`,
         payload: {},
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useUpdateProfile = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: { payload: UpdateProfile }) =>
+      putRequest<{}, IUpdateProfileResponse>({
+        url: `/auth/user/update_user_info`,
+        payload,
       }),
     onSuccess(values) {
       onSuccess(values);

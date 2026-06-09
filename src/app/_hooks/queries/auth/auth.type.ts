@@ -149,3 +149,16 @@ export interface IUpdateRoleResponse {
   result: string;
   errorMessages: null | string;
 }
+
+export interface IUpdateProfileResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
+
+export type UpdateProfile = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+};
