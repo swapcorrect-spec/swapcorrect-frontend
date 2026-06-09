@@ -1,6 +1,13 @@
 "use client";
 
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -8,24 +15,54 @@ import { z } from "zod";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { useGetUserInfo, useUpdateProfile, useUpdateRole } from "@/app/_hooks/queries/auth/auth";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
+import { CircularProgress } from "@/components/shared/circular-progress";
 
 const formSchema = z.object({
   firstname: z.string().nonempty("Required"),
   lastname: z.string().nonempty("Required"),
+  phone: z.string().nonempty("Required"),
   username: z.string().min(5, "Username must be greater 4"),
   address: z.string(),
   email: z.string().email().nonempty("Required"),
-  type: z.enum(["all", "mentions", "none"], {
-    required_error: "You need to select a notification type.",
+  type: z.enum(["", "Swapper", "Visitor"], {
+    required_error: "You need to select a role type.",
   }),
 });
 
 type FormSchemaType = z.infer<typeof formSchema>;
 
 const PersonalInfo: React.FC = () => {
+  const queryClient = useQueryClient();
   const { data } = useGetUserInfo({ enabler: true });
+
+  const { mutate, isPending } = useUpdateRole({
+    onSuccess(_val: { result: string }) {
+      // handleToggleSwapperUpgrade();
+      queryClient.invalidateQueries({ queryKey: ["useGetUserInfo"] });
+      toast.success(_val.result, {
+        onAutoClose: () => {},
+      });
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
+
+  const { mutate: mutateProfile, isPending: isPendingProfile } = useUpdateProfile({
+    onSuccess(_val: { result: string }) {
+      queryClient.invalidateQueries({ queryKey: ["useGetUserInfo"] });
+      toast.success(_val.result, {
+        onAutoClose: () => {},
+      });
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
 
   const form = useForm<FormSchemaType>({
     resolver: zodResolver(formSchema),
@@ -35,7 +72,8 @@ const PersonalInfo: React.FC = () => {
       username: data?.result.userName || "",
       address: data?.result.deliveryAddress || "",
       email: data?.result.email || "",
-      type: "all",
+      phone: data?.result.phoneNumber || "",
+      type: "",
     },
   });
 
@@ -43,6 +81,26 @@ const PersonalInfo: React.FC = () => {
     await Promise.resolve(true);
     console.warn(values);
   }
+
+  const handleUpgradeRole = (role: "Visitor" | "Swapper") => {
+    mutate({
+      payload: {
+        role,
+      },
+    });
+  };
+
+  const handleSave = () => {
+    const values = form.getValues();
+
+    mutateProfile({
+      payload: {
+        firstName: values.firstname,
+        lastName: values.lastname,
+        phoneNumber: values.phone,
+      },
+    });
+  };
 
   return (
     <div>
@@ -106,19 +164,45 @@ const PersonalInfo: React.FC = () => {
               )}
             />
           </div>
-          <FormField
-            control={form.control}
-            name="username"
-            render={({ field }) => (
-              <FormItem className="w-full mb-4">
-                <FormLabel className="text-[#1D2433]">Username</FormLabel>
-                <FormControl>
-                  <Input type="text" placeholder="Enter username" {...field} className="h-12" />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex gap-4">
+            <FormField
+              control={form.control}
+              name="username"
+              render={({ field }) => (
+                <FormItem className="w-full mb-4">
+                  <FormLabel className="text-[#1D2433]">Username</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter username"
+                      {...field}
+                      className="h-12"
+                      disabled
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="phone"
+              render={({ field }) => (
+                <FormItem className="w-full mb-4">
+                  <FormLabel className="text-[#1D2433]">Phone Number</FormLabel>
+                  <FormControl>
+                    <Input
+                      type="text"
+                      placeholder="Enter phone number"
+                      {...field}
+                      className="h-12"
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
           <FormField
             control={form.control}
@@ -127,7 +211,13 @@ const PersonalInfo: React.FC = () => {
               <FormItem className="w-full mb-4">
                 <FormLabel className="text-[#1D2433]">Email Address</FormLabel>
                 <FormControl>
-                  <Input type="text" placeholder="Enter email address" {...field} className="h-12" />
+                  <Input
+                    type="text"
+                    placeholder="Enter email address"
+                    {...field}
+                    className="h-12"
+                    disabled
+                  />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -152,24 +242,35 @@ const PersonalInfo: React.FC = () => {
             name="type"
             render={({ field }) => (
               <FormItem className="space-y-3">
-                <FormLabel>Swap Role</FormLabel>
+                <FormLabel className="flex items-center gap-2">
+                  Swap Role
+                  {isPending && <CircularProgress size={14} color="blue" />}
+                </FormLabel>
                 <FormControl>
                   <RadioGroup
-                    onValueChange={field.onChange}
-                    defaultValue={field.value}
+                    onValueChange={(value) => {
+                      // console.log(value);
+                      field.onChange(value);
+                      handleUpgradeRole(value === "Swapper" ? "Swapper" : "Visitor");
+                    }}
+                    defaultValue={data?.result?.userRole[0]}
                     className="flex flex-col space-y-1"
                   >
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
-                        <RadioGroupItem value="all" />
+                        <RadioGroupItem value="Visitor" />
                       </FormControl>
-                      <FormLabel className="font-normal">Visitor (browse and request swaps)</FormLabel>
+                      <FormLabel className="font-normal">
+                        Visitor (browse and request swaps)
+                      </FormLabel>
                     </FormItem>
                     <FormItem className="flex items-center space-x-3 space-y-0">
                       <FormControl>
-                        <RadioGroupItem value="mentions" />
+                        <RadioGroupItem value="Swapper" />
                       </FormControl>
-                      <FormLabel className="font-normal">Swapper (list items and accept swaps)</FormLabel>
+                      <FormLabel className="font-normal">
+                        Swapper (list items and accept swaps)
+                      </FormLabel>
                     </FormItem>
                   </RadioGroup>
                 </FormControl>
@@ -178,7 +279,13 @@ const PersonalInfo: React.FC = () => {
             )}
           />
           <div className="gap-5 justify-end flex mt-6">
-            <Button className="w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]">Save Change</Button>
+            <Button
+              className="w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]"
+              onClick={form.handleSubmit(handleSave)}
+              loading={isPendingProfile}
+            >
+              Save Change
+            </Button>
           </div>
         </form>
       </Form>
