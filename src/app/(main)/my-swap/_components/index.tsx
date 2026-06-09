@@ -127,7 +127,7 @@ export default function MySwaps() {
 
   const totalPages = swapsData?.totalPages || 1;
 
-  console.log(totalPages, "total pages", swapsData?.totalPages);
+  // console.log(totalPages, "total pages", swapsData?.totalPages);
 
   const handleApplyFilters = (filters: {
     category: string;
