@@ -15,9 +15,7 @@ const Account: React.FC = () => {
       <p className="text-sm text-[#737373] mb-8">Manage your account access and status.</p>
       {/* <div className="bg-[#FFF4F4] py-5 px-4 flex gap-3 mb-4">
         <div className="flex-1">
-          <h6 className="text-[#E42222] font-medium text-base">
-            Account Deactivation
-          </h6>
+          <h6 className="text-[#E42222] font-medium text-base">Account Deactivation</h6>
           <p className="text-sm text-[#737373]">
             Temporarily disable your account. You can reactivate it anytime.
           </p>

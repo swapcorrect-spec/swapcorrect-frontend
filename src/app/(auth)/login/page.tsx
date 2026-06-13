@@ -65,18 +65,15 @@ const Login: FC = () => {
   const { values, handleBlur, handleChange, handleSubmit, errors } = formik;
 
   return (
-    <AuthForm
-      title="Welcome Back, Swapper!"
-      subtitle="Log in to continue your swap journey."
-    >
+    <AuthForm title="Welcome Back, Swapper!" subtitle="Log in to continue your swap journey.">
       {/* <Button variant={"secondary"} className="w-full py-6 border-[#EEEEEE] border text-[#000000] font-medium text-lg">
         <GoogleIcon style={{ width: "30px", height: "30px" }} /> Continue with Google
       </Button> */}
-      <div className="flex items-center justify-center w-full my-8">
+      {/* <div className="flex items-center justify-center w-full my-8">
         <div className="border-t border-gray-300 flex-grow"></div>
         <span className="mx-4 text-gray-500">OR</span>
         <div className="border-t border-gray-300 flex-grow"></div>
-      </div>
+      </div> */}
       <form className="flex flex-col gap-6 mt-4" onSubmit={handleSubmit}>
         <Input
           type="email"
@@ -94,11 +91,7 @@ const Login: FC = () => {
             placeholder="Password"
             startIcon={<PasswordIcon />}
             endIcon={
-              <button
-                type="button"
-                onClick={toggleVisibility}
-                className="focus:outline-none"
-              >
+              <button type="button" onClick={toggleVisibility} className="focus:outline-none">
                 {showPassword ? <EyeOpenIcon /> : <EyeClosedIcon />}
               </button>
             }
@@ -109,10 +102,7 @@ const Login: FC = () => {
             error={errors.password}
           />
           <div className="flex justify-end pt-2">
-            <Link
-              href={PATHS.FORGOT_PASSWORD}
-              className="text-[#898989] text-xs w-fit"
-            >
+            <Link href={PATHS.FORGOT_PASSWORD} className="text-[#898989] text-xs w-fit">
               Forgot Password
             </Link>
           </div>

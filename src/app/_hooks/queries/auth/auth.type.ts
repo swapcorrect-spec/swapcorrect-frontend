@@ -150,12 +150,25 @@ export interface IUpdateRoleResponse {
   errorMessages: null | string;
 }
 
+export interface IUpdateProfileResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
+
+export type UpdateProfile = {
+  firstName: string;
+  lastName: string;
+  phoneNumber: string;
+  profileImageUrl: string;
+};
+
 export type ChangePassword = {
   oldPassword: string;
   newPassword: string;
 };
 
-// export type UpdateRolePayload = Prettify<BaseApiPayloadDto<{}>>;
 export type ChangePasswordPayload = Prettify<ChangePassword>;
 
 export interface IChangePasswordResponse {
