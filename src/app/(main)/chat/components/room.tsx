@@ -48,6 +48,32 @@ import {
 import Link from "next/link";
 import { useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
 import { truncateName } from "@/app/_utils/truncate";
+import { useReportUser } from "@/app/_hooks/queries/report/report";
+import { z } from "zod";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+
+const reportUserSchema = z.object({
+  reportType: z.enum(["Conflict", "Fraud", "Foul Language"], {
+    errorMap: () => ({ message: "Please select a report type" }),
+  }),
+
+  description: z
+    .string()
+    .min(1, "Description is required")
+    .min(5, "Description must be at least 5 characters"),
+
+  evidenceMediaFiles: z
+    .array(
+      z.object({
+        mediaType: z.string(),
+        url: z.string().url(),
+      })
+    )
+    .min(1, "At least one evidence file is required"),
+
+  reportedUserId: z.string().min(1),
+});
 
 type ChatListProps = IRoomMessage;
 
@@ -57,6 +83,20 @@ interface MessageRoomProps {
   userId: string;
   setIsShowChat: Dispatch<SetStateAction<boolean>>;
 }
+
+type ReportType = "Conflict" | "Fraud" | "Foul Language";
+
+type EvidenceMedia = {
+  mediaType: string;
+  url: string;
+};
+
+type ReportUserPayload = {
+  reportedUserId: string;
+  description: string;
+  reportType: ReportType;
+  evidenceMediaFiles: EvidenceMedia[];
+};
 
 const formatTime = (dateString: string) => {
   try {
@@ -158,7 +198,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const isMobile = useIsMobile();
 
   const [modalType, setModalType] = useState<
-    "swap" | "closeSwap" | "viewImage" | "infoDrawer" | null
+    "swap" | "closeSwap" | "viewImage" | "infoDrawer" | "reportUser" | null
   >(null);
   const [swapType, setSwapType] = useState<string>("");
   const [imageError, setImageError] = useState(false);
@@ -174,12 +214,50 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [reportType, setReportType] = useState<ReportType | "">("");
+  const [reportDescription, setReportDescription] = useState("");
+  const [reportFiles, setReportFiles] = useState<File[]>([]);
+
+  const REPORT_TYPES = ["Conflict", "Fraud", "Foul Language"] as const;
 
   const searchParams = useSearchParams();
   const roomName = searchParams.get("roomName") || "";
 
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
+  });
+
+  const { mutate: reportUser, isPending: isReporting } = useReportUser({
+    onSuccess(val: { result: string }) {
+      toast.success(val.result);
+      setModalType(null);
+      setReportFiles([]);
+      setReportDescription("");
+      setReportType("");
+      reset();
+    },
+    onError(err) {
+      toast.error(err);
+    },
+  });
+
+  type ReportForm = z.infer<typeof reportUserSchema>;
+
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors },
+    reset,
+  } = useForm<ReportForm>({
+    resolver: zodResolver(reportUserSchema),
+    defaultValues: {
+      reportType: "" as any,
+      description: "",
+      evidenceMediaFiles: [],
+      reportedUserId: userId,
+    },
   });
 
   const currentUserId = currentUserData?.result?.id || "";
@@ -325,11 +403,65 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
         // Register handler - remove old handler first to prevent duplicates
         connection.off("ReceiveMessage");
-        connection.on("ReceiveMessage", (message) => {
-          if (typeof message === "string") {
-            console.warn("Received string instead of message object, ignoring:", message);
-            return;
-          }
+        // connection.on("ReceiveMessage", (id, message) => {
+        //   console.log({ "message here": message, id: id, ti: message.dateTime });
+        //   console.log("parsed", message.dateTime, new Date(message.dateTime).toISOString());
+        //   if (typeof message === "string") {
+        //     console.warn("Received string instead of message object, ignoring:", message);
+        //     return;
+        //   }
+
+        //   const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
+        //     const lowerType = (type || "text").toLowerCase();
+        //     const typeMap: Record<string, "Text" | "Image" | "Video" | "File"> = {
+        //       text: "Text",
+        //       image: "Image",
+        //       video: "Video",
+        //       file: "File",
+        //     };
+        //     return typeMap[lowerType] || "Text";
+        //   };
+
+        //   // Transform message to match IRoomMessage format
+        //   const transformedMessage: IRoomMessage = {
+        //     message: message.message || message.content || "",
+        //     dateTime:
+        //       message.dateTime || message.time || message.timestamp || new Date().toISOString(),
+        //     status: message.status || "Sent",
+        //     messageType: normalizeMessageType(message.messageType),
+        //     senderImgUrl: message.senderImgUrl || null,
+        //     senderId: message.senderId || message.userId || "unknown",
+        //     isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId,
+        //   };
+
+        //   setMessages((prev) => {
+        //     // Check if message already exists to prevent duplicates
+        //     const messageExists = prev.some(
+        //       (msg) =>
+        //         msg.message === transformedMessage.message &&
+        //         msg.dateTime === transformedMessage.dateTime &&
+        //         msg.senderId === transformedMessage.senderId
+        //     );
+        //     if (messageExists) {
+        //       return prev;
+        //     }
+
+        //     const newMessages = [...prev, transformedMessage];
+        //     // Mark as loading if it's media content
+        //     if (
+        //       transformedMessage.messageType === "Image" ||
+        //       transformedMessage.messageType === "Video"
+        //     ) {
+        //       setLoadingMedia((prevLoading) => new Set(prevLoading).add(newMessages.length - 1));
+        //     }
+        //     return newMessages;
+        //   });
+
+        //   // Invalidate sidebar query to update chat list
+        //   queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+        // });
+        connection.on("ReceiveMessage", (id, message) => {
+          if (typeof message === "string") return;
 
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
             const lowerType = (type || "text").toLowerCase();
@@ -342,42 +474,60 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             return typeMap[lowerType] || "Text";
           };
 
-          // Transform message to match IRoomMessage format
-          const transformedMessage: IRoomMessage = {
+          // 🛠️ FIX THE DATE FORMATTING BUG HERE
+          let safeDateTime = message.dateTime || new Date().toISOString();
+
+          // If the backend only sent a time string like "14:02", construct a valid ISO string
+          if (
+            safeDateTime.includes(":") &&
+            !safeDateTime.includes("-") &&
+            safeDateTime.length <= 5
+          ) {
+            const [hours, minutes] = safeDateTime.split(":");
+            const today = new Date();
+            today.setHours(parseInt(hours, 10));
+            today.setMinutes(parseInt(minutes, 10));
+            today.setSeconds(0);
+            safeDateTime = today.toISOString(); // Converts "14:02" -> "2026-06-13T14:02:00.000Z"
+          }
+
+          const incomingSenderId = String(message.senderId || id || "unknown").toLowerCase();
+          const localizedCurrentUserId = String(currentUserId).toLowerCase();
+
+          const transformedMessage: ChatListProps = {
             message: message.message || message.content || "",
-            dateTime:
-              message.dateTime || message.time || message.timestamp || new Date().toISOString(),
+            dateTime: safeDateTime, // <--- Now fully parseable and matchable!
             status: message.status || "Sent",
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
-            senderId: message.senderId || message.userId || "unknown",
-            isMe: message.isMe !== undefined ? message.isMe : message.senderId === currentUserId,
+            senderId: message.senderId || id || "unknown",
+            isMe:
+              message.isMe !== undefined
+                ? message.isMe
+                : incomingSenderId === localizedCurrentUserId,
           };
 
           setMessages((prev) => {
-            // Check if message already exists to prevent duplicates
+            // Check duplicates safely using sanitized properties
             const messageExists = prev.some(
               (msg) =>
                 msg.message === transformedMessage.message &&
-                msg.dateTime === transformedMessage.dateTime &&
-                msg.senderId === transformedMessage.senderId
+                msg.senderId === transformedMessage.senderId &&
+                // Compare structural hour/minute components so slight latency shifts don't cause duplicates
+                new Date(msg.dateTime).getHours() ===
+                  new Date(transformedMessage.dateTime).getHours() &&
+                new Date(msg.dateTime).getMinutes() ===
+                  new Date(transformedMessage.dateTime).getMinutes()
             );
-            if (messageExists) {
-              return prev;
-            }
+
+            if (messageExists) return prev;
 
             const newMessages = [...prev, transformedMessage];
-            // Mark as loading if it's media content
-            if (
-              transformedMessage.messageType === "Image" ||
-              transformedMessage.messageType === "Video"
-            ) {
-              setLoadingMedia((prevLoading) => new Set(prevLoading).add(newMessages.length - 1));
-            }
-            return newMessages;
+            return newMessages.sort(
+              (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+            );
           });
 
-          // Invalidate sidebar query to update chat list
           queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         });
       } catch (error) {
@@ -440,6 +590,53 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const clearAllFiles = () => {
     setSelectedFiles([]);
     setUploadingFiles(new Set());
+  };
+
+  const uploadEvidenceFiles = async (files: File[]) => {
+    const uploaded = await Promise.all(
+      files.map(async (file, index) => {
+        // <div> Pass the index here
+        const result = await uploadToCloudinary(file, index); // <div> Use it here
+
+        if (!result) return null;
+
+        return {
+          mediaType: file.type.split("/")[1] || "file",
+          url: result.secure_url,
+        };
+      })
+    );
+
+    return uploaded.filter(Boolean) as EvidenceMedia[];
+  };
+
+  const handleManualSubmit = async () => {
+    if (!watch("reportType") || !watch("description")) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    try {
+      setIsUploading(true);
+
+      // 1. Upload media files to Cloudinary
+      const uploaded = await uploadEvidenceFiles(reportFiles);
+
+      // 2. Build the payload explicitly from state hooks
+      const payload = {
+        reportType: watch("reportType"),
+        description: watch("description"),
+        evidenceMediaFiles: uploaded,
+        reportedUserId: userId,
+      };
+
+      // 3. Dispatch straight to mutation hook
+      reportUser({ payload });
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   // Upload file to Cloudinary
@@ -852,6 +1049,16 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                         </div>
                       </DropdownMenuItem>
                     )}
+                  <DropdownMenuItem asChild>
+                    <div
+                      className="text-red-700 cursor-pointer"
+                      onClick={() => setModalType("reportUser")}
+                      title="Report user"
+                    >
+                      Report User
+                    </div>
+                    {/* <Link href="/settings">View</Link> */}
+                  </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -1239,7 +1446,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               ? "max-w-[90vw] max-h-[90vh] p-0 bg-black border-none"
               : modalType === "infoDrawer"
                 ? "!fixed !right-0 !top-0 !bottom-0 !left-auto !w-[400px] h-screen max-w-[90vw] !translate-x-0 !translate-y-0 m-0 p-0 border-none shadow-2xl !grid-none"
-                : "max-w-md"
+                : "w-[95vw] max-w-md mx-auto rounded-xl"
           }
         >
           {useMemo(() => {
@@ -1420,6 +1627,116 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                           No media shared yet
                         </p>
                       )}
+                    </div>
+                  </div>
+                );
+              case "reportUser":
+                return (
+                  <div className="w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4">
+                    <h2 className="text-lg font-semibold">Report User</h2>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Report Type</label>
+                      <select
+                        className="w-full border rounded-md p-2"
+                        value={watch("reportType")}
+                        onChange={(e) =>
+                          setValue("reportType", e.target.value as ReportForm["reportType"])
+                        }
+                      >
+                        <option value="">Select report type</option>
+
+                        {REPORT_TYPES.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+
+                      {errors.reportType && (
+                        <p className="text-red-500 text-xs mt-1">{errors.reportType.message}</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <label className="text-sm font-medium">Description</label>
+                      <textarea
+                        className="w-full border rounded-md p-2 min-h-[100px]"
+                        {...register("description")}
+                      />
+
+                      {errors.description && (
+                        <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
+                      )}
+                    </div>
+
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        if (!e.target.files) return;
+
+                        const newFiles = Array.from(e.target.files);
+
+                        setReportFiles((prev) => {
+                          const updated = [...prev, ...newFiles];
+
+                          setValue("evidenceMediaFiles", updated as any, {
+                            shouldValidate: true,
+                            shouldDirty: true,
+                          });
+
+                          return updated;
+                        });
+
+                        e.target.value = "";
+                      }}
+                    />
+                    {reportFiles.length > 0 && (
+                      <div className="grid grid-cols-3 gap-2 mt-3">
+                        {reportFiles.map((file, idx) => {
+                          const isImage = file.type.startsWith("image/");
+
+                          return (
+                            <div key={idx} className="relative border rounded-md p-1">
+                              {isImage ? (
+                                <img
+                                  src={URL.createObjectURL(file)}
+                                  className="w-full h-20 object-cover rounded"
+                                />
+                              ) : (
+                                <div className="h-20 flex items-center justify-center text-xs text-gray-500">
+                                  {file.name}
+                                </div>
+                              )}
+
+                              <button
+                                className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded"
+                                onClick={() =>
+                                  setReportFiles((prev) => prev.filter((_, i) => i !== idx))
+                                }
+                              >
+                                ✕
+                              </button>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+
+                    {/* Actions */}
+                    <div className="flex justify-end gap-2 mt-4">
+                      <Button variant="outline" onClick={() => setModalType(null)}>
+                        Cancel
+                      </Button>
+
+                      <Button
+                        disabled={isReporting || isUploading}
+                        onClick={handleManualSubmit}
+                        loading={isReporting || isUploading}
+                      >
+                        Submit Report
+                      </Button>
                     </div>
                   </div>
                 );

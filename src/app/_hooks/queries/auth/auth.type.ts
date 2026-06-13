@@ -161,4 +161,19 @@ export type UpdateProfile = {
   firstName: string;
   lastName: string;
   phoneNumber: string;
+  profileImageUrl: string;
 };
+
+export type ChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};
+
+export type ChangePasswordPayload = Prettify<ChangePassword>;
+
+export interface IChangePasswordResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
