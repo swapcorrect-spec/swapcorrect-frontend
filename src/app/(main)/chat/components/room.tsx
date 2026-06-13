@@ -325,7 +325,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
         // Register handler - remove old handler first to prevent duplicates
         connection.off("ReceiveMessage");
-        connection.on("ReceiveMessage", (message) => {
+        connection.on("ReceiveMessage", (id, message) => {
+          console.log({ "message here": message, id: id, ti: message.dateTime });
+          console.log("parsed", message.dateTime, new Date(message.dateTime).toISOString());
           if (typeof message === "string") {
             console.warn("Received string instead of message object, ignoring:", message);
             return;

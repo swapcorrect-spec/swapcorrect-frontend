@@ -149,3 +149,18 @@ export interface IUpdateRoleResponse {
   result: string;
   errorMessages: null | string;
 }
+
+export type ChangePassword = {
+  oldPassword: string;
+  newPassword: string;
+};
+
+// export type UpdateRolePayload = Prettify<BaseApiPayloadDto<{}>>;
+export type ChangePasswordPayload = Prettify<ChangePassword>;
+
+export interface IChangePasswordResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}

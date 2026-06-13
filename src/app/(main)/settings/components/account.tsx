@@ -11,13 +11,9 @@ const Account: React.FC = () => {
   };
   return (
     <div>
-      <h6 className="text-[#222222] font-medium text-xl">
-        Log Out & Account Actions
-      </h6>
-      <p className="text-sm text-[#737373] mb-8">
-        Manage your account access and status.
-      </p>
-      <div className="bg-[#FFF4F4] py-5 px-4 flex gap-3 mb-4">
+      <h6 className="text-[#222222] font-medium text-xl">Log Out & Account Actions</h6>
+      <p className="text-sm text-[#737373] mb-8">Manage your account access and status.</p>
+      {/* <div className="bg-[#FFF4F4] py-5 px-4 flex gap-3 mb-4">
         <div className="flex-1">
           <h6 className="text-[#E42222] font-medium text-base">
             Account Deactivation
@@ -33,15 +29,13 @@ const Account: React.FC = () => {
         >
           Deactivate
         </Button>
-      </div>
+      </div> */}
       <div className="bg-[#FFF4F4] py-5 px-4 flex gap-3 mb-4">
         <div className="flex-1">
-          <h6 className="text-[#E42222] font-medium text-base">
-            Delete Account
-          </h6>
+          <h6 className="text-[#E42222] font-medium text-base">Delete Account</h6>
           <p className="text-sm text-[#737373]">
-            Permanently delete your account and all associated data. This action
-            cannot be undone.{" "}
+            Permanently delete your account and all associated data. This action cannot be
+            undone.{" "}
           </p>
         </div>
         <Button
