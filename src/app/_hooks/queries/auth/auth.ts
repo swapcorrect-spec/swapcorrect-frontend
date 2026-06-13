@@ -27,6 +27,8 @@ import {
   IUpdateRoleResponse,
   IUpdateProfileResponse,
   UpdateProfile,
+  IChangePasswordResponse,
+  ChangePassword,
 } from "@/app/_hooks/queries/auth/auth.type";
 import handleApiError from "@/app/_utils/handle-api-error";
 
@@ -242,6 +244,33 @@ export const useUpdateProfile = (props: MutationProps) => {
       putRequest<{}, IUpdateProfileResponse>({
         url: `/auth/user/update_user_info`,
         payload,
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useChangePassword = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: { payload: ChangePassword }) =>
+      putRequest<{}, IChangePasswordResponse>({
+        url: `/auth/user/reset_password_signedIn_user?oldPassword=${payload.oldPassword}&newPassword=${payload.newPassword}`,
+        payload: {},
       }),
     onSuccess(values) {
       onSuccess(values);
