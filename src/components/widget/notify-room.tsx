@@ -1,6 +1,7 @@
 import MomentAgo from "@/components/moment-ago";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useQueryClient } from "@tanstack/react-query";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FileImage, FileVideo, File } from "lucide-react";
@@ -47,6 +48,7 @@ const formatMessagePreview = (message: string): { text: string; icon?: JSX.Eleme
 };
 
 const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
+  const queryClient = useQueryClient();
   const router = useRouter();
   const isMobile = useIsMobile();
   const searchParams = useSearchParams();
@@ -59,6 +61,9 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
     if (isMobile) {
       setIsShowChat(true);
     }
+
+    queryClient.invalidateQueries({ queryKey: ["useGetChatRoomMessages"] });
+    queryClient.invalidateQueries({ queryKey: ["useGetUserInfo"] });
   };
 
   const imageSrc = getImageSrcWithFallback(chat.userImgUrl, imageError);
@@ -83,7 +88,9 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
         <div className="flex items-center gap-2">
           <p className="text-[#222222] font-medium text-lg mb-1">{chat.fullName}</p>
 
-          {chat.userStatus?.toLowerCase() !== "offline" && <div className="w-2 h-2 bg-green-500 rounded-full"></div>}
+          {chat.userStatus?.toLowerCase() !== "offline" && (
+            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+          )}
         </div>
         <p className="text-sm text-[#666666] truncate">
           {messagePreview.icon}

@@ -15,6 +15,7 @@ export interface IGetActiveChatUsersResponseData {
 }
 
 export interface IRoomMessage {
+  id?: string;
   message: string;
   dateTime: string;
   status: "Read" | "Unread" | "Sent" | "Sending" | "Failed";
