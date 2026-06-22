@@ -217,6 +217,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const [reportType, setReportType] = useState<ReportType | "">("");
   const [reportDescription, setReportDescription] = useState("");
   const [reportFiles, setReportFiles] = useState<File[]>([]);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+  const initialScrollDone = useRef(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const REPORT_TYPES = ["Conflict", "Fraud", "Foul Language"] as const;
 
@@ -334,10 +337,15 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         }
 
         // Initial load - just reverse the API messages
-        return [...data.result.roomMessages].reverse();
+        // return [...data.result.roomMessages].reverse();
+        return [...data.result.roomMessages]
+          .reverse()
+          .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
       });
     }
   }, [data]);
+
+  // console.log(messages, "121");
 
   const profileImageSrc = getImageSrcWithFallback(userProfileUrl, imageError);
 
@@ -461,6 +469,15 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         //   queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         // });
         connection.on("ReceiveMessage", (id, message) => {
+          console.log("ARG1", id);
+          console.log("ARG2", message);
+
+          console.log("ReceiveMessage fired", {
+            id,
+            message,
+            time: new Date().toISOString(),
+          });
+
           if (typeof message === "string") return;
 
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
@@ -495,40 +512,53 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
           const localizedCurrentUserId = String(currentUserId).toLowerCase();
 
           const transformedMessage: ChatListProps = {
+            id: message.id || crypto.randomUUID(),
             message: message.message || message.content || "",
             dateTime: safeDateTime, // <--- Now fully parseable and matchable!
             status: message.status || "Sent",
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
             senderId: message.senderId || id || "unknown",
-            isMe:
-              message.isMe !== undefined
-                ? message.isMe
-                : incomingSenderId === localizedCurrentUserId,
+            // isMe:
+            //   message.isMe !== undefined
+            //     ? message.isMe
+            //     : incomingSenderId === localizedCurrentUserId,
+            isMe: incomingSenderId === localizedCurrentUserId,
           };
 
+          // setMessages((prev) => {
+          //   // Check duplicates safely using sanitized properties
+          //   const messageExists = prev.some(
+          //     (msg) =>
+          //       msg.message === transformedMessage.message &&
+          //       msg.senderId === transformedMessage.senderId
+          //     // Compare structural hour/minute components so slight latency shifts don't cause duplicates
+          //     // new Date(msg.dateTime).getHours() ===
+          //     //   new Date(transformedMessage.dateTime).getHours() &&
+          //     // new Date(msg.dateTime).getMinutes() ===
+          //     //   new Date(transformedMessage.dateTime).getMinutes()
+          //   );
+
+          //   if (messageExists) return prev;
+
+          //   const newMessages = [...prev, transformedMessage];
+          //   return newMessages.sort(
+          //     (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
+          //   );
+          // });
           setMessages((prev) => {
-            // Check duplicates safely using sanitized properties
-            const messageExists = prev.some(
-              (msg) =>
-                msg.message === transformedMessage.message &&
-                msg.senderId === transformedMessage.senderId &&
-                // Compare structural hour/minute components so slight latency shifts don't cause duplicates
-                new Date(msg.dateTime).getHours() ===
-                  new Date(transformedMessage.dateTime).getHours() &&
-                new Date(msg.dateTime).getMinutes() ===
-                  new Date(transformedMessage.dateTime).getMinutes()
-            );
+            // const messageExists = prev.some((m) => m.id === transformedMessage.id);
 
-            if (messageExists) return prev;
+            // if (messageExists) return prev;
 
-            const newMessages = [...prev, transformedMessage];
-            return newMessages.sort(
-              (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-            );
+            // return [...prev, transformedMessage];
+            const exists = prev.some((msg) => msg.id === transformedMessage.id);
+            if (exists) return prev;
+
+            return [...prev, transformedMessage];
           });
 
-          queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+          // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         });
       } catch (error) {
         console.error("Error setting up SignalR:", error);
@@ -556,13 +586,45 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
     };
   }, [showEmojiPicker]);
 
+  // useEffect(() => {
+  //   if (!messages.length) return;
+
+  //   const container = messagesContainerRef.current;
+
+  //   if (container) {
+  //     container.scrollTop = container.scrollHeight;
+  //   }
+  // }, [messages]);
+  // useEffect(() => {
+  //   messagesEndRef.current?.scrollIntoView({
+  //     behavior: "smooth",
+  //     block: "end",
+  //   });
+  // }, [messages]);
+  useEffect(() => {
+    if (!messages.length) return;
+
+    messagesEndRef.current?.scrollIntoView({
+      behavior: initialScrollDone.current ? "smooth" : "auto",
+    });
+
+    initialScrollDone.current = true;
+  }, [messages]);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+      block: "end",
+    });
+  }, [messages]);
+
   const sendMessage = async (message: string, messageType: string = "Text") => {
     if (connection && roomName && currentUserId) {
       try {
         await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
 
-        queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-        refetchRoomMessages();
+        // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+        // refetchRoomMessages();
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -716,6 +778,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
     // 2. Add message optimistically to chat with "Sending" status
     const optimisticMessage: IRoomMessage = {
+      id: crypto.randomUUID(),
       message: uploadResult.secure_url,
       dateTime: new Date().toISOString(),
       status: "Sending", // Custom status to show spinner
@@ -742,8 +805,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         )
       );
 
-      queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-      refetchRoomMessages();
+      // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+      // refetchRoomMessages();
 
       setSelectedFiles([]);
       setUploadingFiles(new Set());
@@ -782,6 +845,10 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       },
     });
   };
+
+  // const sortedChatList = [...chatList]
+  //   .map((m) => ({ ...m, dateTime: normalizeDate(m.dateTime) }))
+  //   .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
   return (
     <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
@@ -1065,12 +1132,12 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
           </div>
         </div>
       </div>
-      <div className="flex-1 overflow-y-auto hide-scrollbar">
-        {chatList.length === 0 ? (
+      <div className="flex-1 overflow-y-auto hide-scrollbar" ref={messagesContainerRef}>
+        {messages.length === 0 ? (
           <EmptyMessageRoom hideMarketplaceLink={true} />
         ) : (
           <div className="p-4">
-            {chatList.map((chat, index) => {
+            {messages.map((chat, index) => {
               // Check if next message is from the same sender (for avatar)
               const nextMessage = index < chatList.length - 1 ? chatList[index + 1] : null;
               const isNextSameSender = nextMessage && nextMessage.senderId === chat.senderId;
@@ -1267,6 +1334,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                 </div>
               );
             })}
+            <div ref={messagesEndRef} />
           </div>
         )}
       </div>
