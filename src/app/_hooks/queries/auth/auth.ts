@@ -29,6 +29,8 @@ import {
   UpdateProfile,
   IChangePasswordResponse,
   ChangePassword,
+  DeleteUserPayload,
+  IDeleteUserResponse,
 } from "@/app/_hooks/queries/auth/auth.type";
 import handleApiError from "@/app/_utils/handle-api-error";
 
@@ -271,6 +273,33 @@ export const useChangePassword = (props: MutationProps) => {
       putRequest<{}, IChangePasswordResponse>({
         url: `/auth/user/reset_password_signedIn_user?oldPassword=${payload.oldPassword}&newPassword=${payload.newPassword}`,
         payload: {},
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useDeleteUser = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: DeleteUserPayload) =>
+      postRequest<DeleteUserPayload["payload"], IDeleteUserResponse>({
+        url: "/auth/user/delete_user",
+        payload,
       }),
     onSuccess(values) {
       onSuccess(values);

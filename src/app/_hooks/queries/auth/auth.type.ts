@@ -177,3 +177,14 @@ export interface IChangePasswordResponse {
   result: string;
   errorMessages: null | string;
 }
+
+export type DeleteUser = {};
+
+export type DeleteUserPayload = Prettify<BaseApiPayloadDto<DeleteUser>>;
+
+export interface IDeleteUserResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string;
+}
