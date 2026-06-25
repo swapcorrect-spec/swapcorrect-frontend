@@ -15,11 +15,17 @@ import useIsMobile from "@/app/_hooks/useIsMobile";
 import Banner from "@/app/assets/images/pngs/mobile_ad.png";
 import { Auth } from "@/app/_config/auth";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { IProduct } from "@/interface/IProduct";
 
 const HomePage: FC = () => {
   const isMobile = useIsMobile();
   const isAuthenticated = Auth.isAuthenticated();
-  const { data: userData, isLoading, isError, error } = useGetUserInfo({
+  const {
+    data: userData,
+    isLoading,
+    isError,
+    error,
+  } = useGetUserInfo({
     enabler: isAuthenticated,
   });
   const userId = userData?.result?.id;
@@ -27,8 +33,14 @@ const HomePage: FC = () => {
     enabler: true,
     userId: userId || undefined,
   });
-  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({ enabler: true, userId: userId || undefined  });
-  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({ enabler: true, userId: userId || undefined  });
+  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({
+    enabler: true,
+    userId: userId || undefined,
+  });
+  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({
+    enabler: true,
+    userId: userId || undefined,
+  });
 
   return (
     <section>
@@ -37,7 +49,9 @@ const HomePage: FC = () => {
           className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-cover bg-no-repeat h-[calc(100vh-82px)] bg-top flex flex-col items-center justify-center`}
         >
           <div className="max-w-[839px] w-full mx-auto">
-            <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center">E-commerce Without Cash</h1>
+            <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center">
+              E-commerce Without Cash
+            </h1>
             <p className="text-2xl text-[#737373] text-center">
               The dormant item in your hand could get you a useful item in someone’s home
             </p>
@@ -71,25 +85,26 @@ const HomePage: FC = () => {
       )}
       <div className="w-[90%] mx-auto">
         <div className="my-8 flex flex-col gap-12">
+          <p>some</p>
           <Marketplace
             title="FEATURED"
             subtitle="Hot Picks, Fast Swaps."
             description="Discover trending items that everyone wants — swap quick"
-            products={data || HOT_PICKS}
+            products={data as IProduct[]}
             isLoading={isLoadingHotPicks}
           />
           <Marketplace
             title="FEATURED"
             subtitle="Swaps Just for You."
             description="Our spotlight trades are secure, high-value, and worth every click."
-            products={recommendedItems || HOT_PICKS}
+            products={recommendedItems as IProduct[]}
             isLoading={isLoadingRecommendedItems}
           />
           <Marketplace
             title="OUR RECOMMENDATION"
             subtitle="Advanced Tech Gadgets"
             description="Our spotlight trades are secure, high-value, and worth every click."
-            products={electronicsItems || HOT_PICKS}
+            products={electronicsItems as IProduct[]}
             isLoading={isLoadingElectronicsItems}
             showSliderArrows
           />

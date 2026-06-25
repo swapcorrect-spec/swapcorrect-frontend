@@ -1,7 +1,14 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
 import Image from "next/image";
 import Link from "next/link";
 import { FC, useState } from "react";
@@ -11,6 +18,7 @@ import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import { useDeleteListing } from "@/app/_hooks/queries/listing/listing";
 import { useQueryClient } from "@tanstack/react-query";
 import { SEARCH_ITEMS } from "@/app/_constants/api_contant";
+import { Avatar, AvatarImage } from "@/components/ui/avatar";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -58,7 +66,7 @@ const Listing: FC<Props> = ({
       setShowDeleteModal(false);
       // Invalidate search query to refetch listings
       queryClient.invalidateQueries({ queryKey: [SEARCH_ITEMS] });
-    }
+    },
   });
 
   // Get first media item
@@ -72,31 +80,32 @@ const Listing: FC<Props> = ({
   const handleImageError = createImageErrorHandler(setImageError);
   const handleProfileImageError = createImageErrorHandler(setProfileImageError);
 
-
   const handleDelete = () => {
     if (listingId) {
       deleteListing(listingId);
     }
   };
 
-
   return (
     <div className="rounded-xl hover:border hover:border-[#e3e0e0] cursor-pointer p-2">
       <div className="mb-4 w-full h-[350px] relative transition-all duration-200 rounded-xl">
         {isVideo ? (
           <ReactPlayer
-            src={typeof mediaUrl === 'string' ? mediaUrl : ''}
+            src={typeof mediaUrl === "string" ? mediaUrl : ""}
             width="100%"
             height="100%"
             controls={true}
             className="rounded-xl overflow-hidden"
-            style={{ borderRadius: '12px' }}
+            style={{ borderRadius: "12px" }}
           />
         ) : (
           <Image
             alt="Product Preview"
             fill
-            src={getImageSrcWithFallback(typeof mediaUrl === 'string' ? mediaUrl : (mediaUrl as any).src || '', imageError)}
+            src={getImageSrcWithFallback(
+              typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
+              imageError
+            )}
             className="rounded-xl object-cover"
             onError={handleImageError}
           />
@@ -141,14 +150,9 @@ const Listing: FC<Props> = ({
       </div>
       <div className="rounded-xl mb-4 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
         <div className="flex items-center gap-2">
-          <Image
-            src={getImageSrcWithFallback(displayPhoto, profileImageError)}
-            alt="user photo"
-            width={24}
-            height={24}
-            className="rounded-full"
-            onError={handleProfileImageError}
-          />
+          <Avatar>
+            <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
+          </Avatar>
           <p className="font-medium">{displayAuthor}</p>
         </div>
         <p className="flex items-center gap-1">
@@ -158,10 +162,14 @@ const Listing: FC<Props> = ({
       <div className="flex items-center justify-between">
         {listingId ? (
           <Link href={`/item-listing/${listingId}`}>
-            <Button className="" variant={"outline"}>Edit</Button>
+            <Button className="" variant={"outline"}>
+              Edit
+            </Button>
           </Link>
         ) : (
-          <Button className="" variant={"outline"} disabled>Edit</Button>
+          <Button className="" variant={"outline"} disabled>
+            Edit
+          </Button>
         )}
         <Button variant={"outline"} onClick={() => setShowDeleteModal(true)}>
           Delete
@@ -171,7 +179,9 @@ const Listing: FC<Props> = ({
             <Button variant={"outline"}>View</Button>
           </Link>
         ) : (
-          <Button variant={"outline"} disabled>View</Button>
+          <Button variant={"outline"} disabled>
+            View
+          </Button>
         )}
         {/* <Button variant={"outline"}>Feature</Button> */}
       </div>
@@ -193,11 +203,7 @@ const Listing: FC<Props> = ({
             >
               Cancel
             </Button>
-            <Button
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
+            <Button variant="destructive" onClick={handleDelete} disabled={isDeleting}>
               {isDeleting ? (
                 <div className="flex items-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
