@@ -23,7 +23,7 @@ export interface IProduct {
   media: MediaItem[];
   swapListRequest: string[];
   itemCondition: string;
-  
+
   // Legacy fields for backward compatibility
   id?: number;
   wants?: string[];
@@ -33,4 +33,10 @@ export interface IProduct {
   image?: string | StaticImport;
   name?: string;
   author?: string;
+  //
+
+  userId?: string;
+  swapCount: string | number;
+
+  isFlagged: boolean;
 }

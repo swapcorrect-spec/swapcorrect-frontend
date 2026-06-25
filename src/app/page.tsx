@@ -2,7 +2,7 @@
 import "react-multi-carousel/lib/styles.css";
 import Herosection from "@/components/shared/herosection";
 import Navbar from "@/components/shared/navbar";
-import { HOT_PICKS } from "./mocks/hot-picks";
+// import { HOT_PICKS } from "./mocks/hot-picks";
 import Marketplace from "@/components/shared/marketplace";
 import {
   useGetItemByRaterHotPick,
@@ -15,19 +15,25 @@ import { redirect } from "next/navigation";
 import Footer from "@/components/shared/footer";
 import useIsMobile from "./_hooks/useIsMobile";
 import MobileNavbar from "@/components/shared/mobile-navbar";
+import { IProduct } from "@/interface/IProduct";
 
 export default function Home() {
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
     enabler: true,
   });
-  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({ enabler: true });
-  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({ enabler: true });
+  const { isLoading: isLoadingRecommendedItems, data: recommendedItems } = useGetRecommendedItems({
+    enabler: true,
+  });
+  const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({
+    enabler: true,
+  });
   const isAuthenticated = Auth.isAuthenticated();
   const isMobile = useIsMobile();
 
   if (isAuthenticated) {
     redirect(`${PATHS.DASHBOARD}`);
   }
+  console.log(recommendedItems, "123");
   return (
     <>
       <div className="flex flex-col min-h-screen">
@@ -39,7 +45,7 @@ export default function Home() {
               title="FEATURED"
               subtitle="Hot Picks, Fast Swaps."
               description="Discover trending items that everyone wants — swap quick"
-              products={data || HOT_PICKS}
+              products={data as IProduct[]}
               isLoading={isLoadingHotPicks}
               isAuthenticated={isAuthenticated}
             />
@@ -47,7 +53,7 @@ export default function Home() {
               title="FEATURED"
               subtitle="Swaps Just for You."
               description="Our spotlight trades are secure, high-value, and worth every click."
-              products={recommendedItems || HOT_PICKS}
+              products={recommendedItems as IProduct[]}
               isLoading={isLoadingRecommendedItems}
               isAuthenticated={isAuthenticated}
             />
@@ -55,7 +61,7 @@ export default function Home() {
               title="OUR RECOMMENDATIONs"
               subtitle="Advanced Tech Gadgets"
               description="Our spotlight trades are secure, high-value, and worth every click."
-              products={electronicsItems || HOT_PICKS}
+              products={electronicsItems as IProduct[]}
               showSliderArrows
               isLoading={isLoadingElectronicsItems}
               isAuthenticated={isAuthenticated}

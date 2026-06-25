@@ -30,6 +30,7 @@ export interface ListingDetailsResponseInterface {
 
 export interface SwapResponseInterface<T = any> {
   result: Array<{
+    userId?: string;
     listingId: string;
     listType: string;
     itemName: string;
@@ -58,6 +59,7 @@ export interface SwapResponseInterface<T = any> {
 export interface SearchResponseInterface {
   result: {
     items: Array<{
+      userId?: string;
       listingId: string;
       listType: string;
       itemName: string;
