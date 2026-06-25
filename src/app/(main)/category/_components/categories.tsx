@@ -118,9 +118,11 @@ const Categories = () => {
         ) : data && data.length > 0 ? (
           <>
             <div className="grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-4">
-              {data.map((item: any) => (
-                <ProductDetails key={item.listingId} {...item} />
-              ))}
+              {data
+                .filter((item) => item.userId != userId)
+                .map((item: any) => (
+                  <ProductDetails key={item.listingId} {...item} />
+                ))}
             </div>
             <div className="flex justify-center mt-8">
               <ReactPaginate

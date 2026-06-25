@@ -9,12 +9,14 @@ import EmptyState from "@/components/shared/empty-state";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import Link from "next/link";
 import { PATHS } from "@/app/_constants/paths";
+import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 
 type Props = {
   title: string;
   subtitle: string;
   description: string;
   products: IProduct[];
+  // products: any;
   showSliderArrows?: boolean;
   isLoading?: boolean;
   emptyStateTitle?: string;
@@ -57,8 +59,12 @@ const Marketplace: FC<Props> = ({
   onEmptyStateAction,
   isAuthenticated = true,
 }) => {
+  const { data: userData } = useGetUserInfo({ enabler: true });
+
   const carouselRef = useRef<Carousel | null>(null);
   const isMobile = useIsMobile();
+
+  const userId = userData?.result?.id;
 
   return (
     <div className="relative my-4">
@@ -81,7 +87,9 @@ const Marketplace: FC<Props> = ({
               </div>
             ) : (
               <Link href={PATHS.CATEGORY}>
-                <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer underline">View all</p>
+                <p className="text-[#007AFF] font-medium text-[15px] cursor-pointer underline">
+                  View all
+                </p>
               </Link>
             )}
           </div>
@@ -133,9 +141,16 @@ const Marketplace: FC<Props> = ({
         />
       ) : isMobile ? (
         <div className="grid grid-cols-2 gap-4">
-          {products.map((product) => (
-            <Product key={product.listingId || product.id} {...product} isAuthenticated={isAuthenticated} />
-          ))}
+          <p>{userId}</p>
+          {products
+            .filter((product: any) => product.userId !== userId)
+            .map((product: any) => (
+              <Product
+                key={product.listingId || product.id}
+                {...product}
+                isAuthenticated={isAuthenticated}
+              />
+            ))}
         </div>
       ) : (
         <Carousel
@@ -156,11 +171,13 @@ const Marketplace: FC<Props> = ({
           removeArrowOnDeviceType={["tablet", "mobile"]}
           dotListClass="custom-dot-list-style"
         >
-          {products.map((product) => (
-            <div key={product.listingId || product.id} className="p-2">
-              <Product {...product} isAuthenticated={isAuthenticated} />
-            </div>
-          ))}
+          {products
+            .filter((product) => product.userId !== userId)
+            .map((product) => (
+              <div key={product.listingId || product.id} className="p-2">
+                <Product {...product} isAuthenticated={isAuthenticated} />
+              </div>
+            ))}
         </Carousel>
       )}
     </div>
