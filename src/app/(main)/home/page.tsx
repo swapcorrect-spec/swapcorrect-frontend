@@ -85,7 +85,6 @@ const HomePage: FC = () => {
       )}
       <div className="w-[90%] mx-auto">
         <div className="my-8 flex flex-col gap-12">
-          <p>some</p>
           <Marketplace
             title="FEATURED"
             subtitle="Hot Picks, Fast Swaps."
