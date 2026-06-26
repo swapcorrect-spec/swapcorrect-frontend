@@ -232,9 +232,10 @@ const ProductDetails: React.FC<iProps> = ({
                   <button
                     type="button"
                     aria-label="Wants information"
-                    className="mt-[1px] text-[#737373] hover:text-[#222222]"
+                    className="mt-[1px] text-[#737373] hover:text-[#222222] flex items-center gap-1"
                   >
-                    <Info size={14} />
+                    <Info size={14} color="blue" />
+                    <span className="text-[#222222] font-bold text-xs">Wants:</span>
                   </button>
                 </Popover.Trigger>
 
@@ -253,24 +254,24 @@ const ProductDetails: React.FC<iProps> = ({
                 </Popover.Portal>
               </Popover.Root>
             )}
+            {displayWants.length === 1 && (
+              <span className="text-[#222222] font-bold text-xs">Wants:</span>
+            )}
 
-            <span className="text-[#222222] font-medium text-xs">Wants:</span>
-
-            <span className="text-[#737373]">
-              {/* {displayWants} */}
-              {displayWants && displayWants?.length > 0 && (
-                <ul className="flex justify-center items-center flex-wrap gap-1 text-[#737373] text-sm">
-                  {displayWants?.map((item, index: number) => (
+            <div className="text-[#737373]">
+              {displayWants && displayWants.length > 0 && (
+                <ul className="flex flex-wrap items-center gap-2 text-sm text-[#737373] leading-none">
+                  {displayWants.map((item, index) => (
                     <li key={index} className="flex items-center">
-                      {item}
+                      <span className="capitalize">{item}</span>
                       {index !== displayWants.length - 1 && (
-                        <span className="mx-2 w-1 h-1 rounded-full bg-[#000000]"></span>
+                        <span className="mx-2 h-1 w-1 rounded-full bg-black" />
                       )}
                     </li>
                   ))}
                 </ul>
               )}
-            </span>
+            </div>
           </div>
 
           <div className="rounded-xl mb-6 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">

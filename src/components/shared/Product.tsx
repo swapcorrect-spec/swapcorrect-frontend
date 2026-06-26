@@ -15,6 +15,7 @@ import {
   useAddToFavourite,
   useRemoveFromFavourite,
 } from "@/app/_hooks/queries/favourite/favourite";
+import { Avatar, AvatarImage } from "../ui/avatar";
 
 type Props = Prettify<Omit<IProduct, "id">> & {
   isAuthenticated?: boolean;
@@ -213,9 +214,10 @@ const Product: FC<Props> = (props) => {
                 <button
                   type="button"
                   aria-label="Wants information"
-                  className="mt-[1px] text-[#737373] hover:text-[#222222]"
+                  className="mt-[1px] text-[#737373] hover:text-[#222222] flex items-center gap-1"
                 >
-                  <Info size={14} />
+                  <Info size={14} color="blue" />
+                  <span className="text-[#222222] font-bold text-xs">Wants:</span>
                 </button>
               </Popover.Trigger>
 
@@ -234,22 +236,19 @@ const Product: FC<Props> = (props) => {
               </Popover.Portal>
             </Popover.Root>
           )}
+          {swapListRequest.length === 1 && (
+            <span className="text-[#222222] font-bold text-xs">Wants:</span>
+          )}
 
-          <span className="text-[#222222] font-medium">Wants:</span>
           <span className="text-[#737373]">{displayWants}</span>
         </div>
       </div>
 
       <div className="flex items-center justify-between border border-[#e3e0e0] px-2 py-2 rounded-xl">
         <div className="flex items-center gap-1">
-          <Image
-            src={getImageSrcWithFallback(displayPhoto, profileImageError)}
-            alt="user photo"
-            width={40}
-            height={40}
-            className="rounded-full"
-            onError={handleProfileImageError}
-          />
+          <Avatar>
+            <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
+          </Avatar>
           <p className="text-[#222222] font-medium text-[14px]">{displayAuthor}</p>
         </div>
         <div className="flex items-center gap-1">
