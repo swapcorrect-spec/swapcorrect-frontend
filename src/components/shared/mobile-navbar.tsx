@@ -27,12 +27,15 @@ import {
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
 import { useQueryClient } from "@tanstack/react-query";
+import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
 
 interface Props {
   data?: IGetUserInfoResponseData;
+  role?: "Visitor" | "Swapper";
+  handleToggleSwapperUpgrade?: () => void;
 }
 
-const MobileNavbar: FC<Props> = ({ data }) => {
+const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
   const [isOpen, setIsOpen] = useState(false);
@@ -306,10 +309,28 @@ const MobileNavbar: FC<Props> = ({ data }) => {
                   </a>
                 </>
               )}
+              {role === "Visitor" ? (
+                <Button
+                  variant={"default"}
+                  className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full"
+                  size={"sm"}
+                  onClick={() => {
+                    setIsOpen(false);
+                    handleToggleSwapperUpgrade?.();
+                  }}
+                >
+                  Upgrade to Swapper <SwapperUpgradeLogo />
+                </Button>
+              ) : (
+                <div className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                  Swapper
+                </div>
+              )}
               {isLoggedIn ? (
                 <Button
                   variant="outline"
-                  className="mt-6 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
+                  className="mt-2 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
                   onClick={handleLogout}
                 >
                   Logout

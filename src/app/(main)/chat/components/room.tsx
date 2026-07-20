@@ -950,7 +950,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                   className="!h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
-                  Update Swap
+                  Upgrade Swap
                 </Button>
               )}
             {/* {swappingProceeding !== null &&
@@ -973,7 +973,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                   className="!h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
-                  Update Swap
+                  Upgrade Swap
                 </Button>
               )}
             {swappingProceeding !== null &&
@@ -1083,7 +1083,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                       <>
                         <DropdownMenuItem>
                           <div onClick={() => setModalType("swap")} className="cursor-pointer">
-                            Update Swap
+                            Upgrade Swap
                           </div>
                         </DropdownMenuItem>
                         <DropdownMenuItem asChild>
@@ -1112,7 +1112,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                     ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
                       <DropdownMenuItem>
                         <div onClick={() => setModalType("swap")} className="cursor-pointer">
-                          Update Swap
+                          Upgrade Swap
                         </div>
                       </DropdownMenuItem>
                     )}
