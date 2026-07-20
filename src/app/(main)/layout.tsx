@@ -114,7 +114,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
         )}
         <section className="flex-1 h-screen overflow-y-auto">
           {isMobile ? (
-            <MobileNavbar data={data} />
+            <MobileNavbar
+              data={data}
+              role={data?.result.userRole[0] as "Visitor" | "Swapper"}
+              handleToggleSwapperUpgrade={handleToggleSwapperUpgrade}
+            />
           ) : (
             <Navbar
               data={data}
