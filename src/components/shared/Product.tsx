@@ -16,6 +16,7 @@ import {
   useRemoveFromFavourite,
 } from "@/app/_hooks/queries/favourite/favourite";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { toast } from "sonner";
 
 type Props = Prettify<Omit<IProduct, "id">> & {
   isAuthenticated?: boolean;
@@ -72,6 +73,12 @@ const Product: FC<Props> = (props) => {
     onSuccess: () => {
       router.push("/chat");
     },
+    onError(_val) {
+      toast.error(_val[0]);
+      if (_val[1]) {
+        router.push(`/chat?roomName=${_val[1]}`);
+      }
+    },
   });
 
   // Favourite toggle (optimistic UI)
@@ -122,6 +129,7 @@ const Product: FC<Props> = (props) => {
   };
 
   return (
+    // <Link href={`/listing/${listingId}`} className="w-full rounded-lg mb-2 inline-block">
     <div className="flex flex-col rounded-xl shadow-none md:shadow-sm bg-white h-full">
       <div className="relative">
         {isVideo ? (
@@ -280,6 +288,7 @@ const Product: FC<Props> = (props) => {
         actionText="Go to Login"
       />
     </div>
+    // </Link>
   );
 };
 

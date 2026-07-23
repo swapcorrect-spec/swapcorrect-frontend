@@ -17,6 +17,7 @@ import {
 } from "@/app/_hooks/queries/favourite/favourite";
 import * as Popover from "@radix-ui/react-popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import { toast } from "sonner";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -89,6 +90,12 @@ const ProductDetails: React.FC<iProps> = ({
     onSuccess: () => {
       router.push("/chat");
     },
+    onError(_val) {
+      toast.error(_val[0]);
+      if (_val[1]) {
+        router.push(`/chat?roomName=${_val[1]}`);
+      }
+    },
   });
 
   // Favourite toggle (optimistic UI)
@@ -139,6 +146,7 @@ const ProductDetails: React.FC<iProps> = ({
   };
 
   return (
+    // <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block">
     <Card className="bg-white w-full flex p-2 cursor-pointer">
       <CardContent className="h-full flex flex-col flex-grow p-0">
         <div className="mb-4 w-full h-[150px] md:h-[250px] relative transition-all duration-200 rounded-xl">
@@ -297,19 +305,20 @@ const ProductDetails: React.FC<iProps> = ({
             {isStartingSwap ? "Starting..." : "Swap Now"}
           </Button>
 
-          <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block">
-            <Button
-              disabled={!listingId}
-              variant={"outline"}
-              className="rounded-lg font-medium text-sm py-3 w-full"
-              size={"lg"}
-            >
-              View Details
-            </Button>
-          </Link>
+          {/* <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block"> */}
+          <Button
+            disabled={!listingId}
+            variant={"outline"}
+            className="rounded-lg font-medium text-sm py-3 w-full"
+            size={"lg"}
+          >
+            View Details
+          </Button>
+          {/* </Link> */}
         </div>
       </CardContent>
     </Card>
+    // </Link>
   );
 };
 
