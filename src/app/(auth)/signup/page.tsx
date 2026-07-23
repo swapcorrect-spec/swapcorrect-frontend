@@ -87,7 +87,7 @@ const Signup: FC = () => {
   return (
     <>
       {!isSuccess ? (
-        <AuthForm title="Welcome to SwapShop!" subtitle="Create your free account and start swapping instantly.">
+        <AuthForm title="Welcome to SwapCorrect!" subtitle="Create your free account and start swapping instantly.">
           <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input

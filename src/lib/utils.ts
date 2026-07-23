@@ -15,6 +15,11 @@ export function formatCurrency(amount: number, currency: string) {
   }).format(amount);
 }
 
+/** Show real rating when > 0; treat 0 / missing as 1. Never falls back to hardcoded 3.5. */
+export function displayRating(rating?: number | null) {
+  return rating && rating > 0 ? rating : 1;
+}
+
 export function createImageErrorHandler(
   setErrorState: (error: boolean) => void,
   fallbackUrl: string = "https://plus.unsplash.com/premium_photo-1664537979073-a467fa628555?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=2371"
@@ -48,17 +53,49 @@ export function formatDateTime(date: string | Date, options?: Intl.DateTimeForma
 }
 
 export function getStatusColor(status: string): string {
-  switch (status.toLowerCase()) {
+  switch (status.toLowerCase().replace(/\s+/g, "")) {
+    case "negotiation":
     case "negotiating":
-      return "bg-[#FFF9ED] border-[#FFF1D5] text-[#F6A301]";
+    case "advnegotiation":
+    case "requestadvnegotiation":
+      return "bg-[#EEF5FF] border-[#9EC5FF] text-[#007AFF]";
+    case "awaitingconfirmation":
+    case "awaitingvendorholdingfee":
+    case "advancechargepaymentcompleted":
+    case "resolution":
+    case "published":
+      return "bg-[#FFF9ED] border-[#F6C96B] text-[#C67C00]";
     case "confirmed":
     case "completed":
     case "swapped":
-      return "bg-[#F0FFEE] border-[#C0FFB6] text-[#3DAB2B]";
+    case "advnegotiationswapped":
+      return "bg-[#F0FFEE] border-[#8FD97F] text-[#2F8F22]";
     case "cancelled":
     case "failed":
+    case "closed":
       return "bg-[#FFEEEE] border-[#FFADAD] text-[#E42222]";
     default:
-      return "bg-[#E4FFE8] border-[#E4FFE8] text-[#68CC58]";
+      return "bg-[#F5F5F5] border-[#D9D9D9] text-[#737373]";
+  }
+}
+
+export function formatSwapStatus(status: string): string {
+  switch (status.toLowerCase().replace(/\s+/g, "")) {
+    case "negotiation":
+      return "Negotiating";
+    case "awaitingconfirmation":
+      return "Awaiting Confirmation";
+    case "requestadvnegotiation":
+      return "Advance Negotiation Request";
+    case "advancechargepaymentcompleted":
+      return "Advance Payment Done";
+    case "awaitingvendorholdingfee":
+      return "Awaiting Holding Fee";
+    case "advnegotiation":
+      return "Advance Negotiation";
+    case "advnegotiationswapped":
+      return "Advance Swap Completed";
+    default:
+      return status;
   }
 }

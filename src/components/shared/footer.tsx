@@ -7,7 +7,7 @@ const Footer = () => {
     <div className="bg-black p-5 md:p-10 mt-20">
       <div className="w-[90%] mx-auto flex flex-col md:flex-row justify-between gap-10">
         <div>
-          <h6 className="text-white font-medium text-base">ABOUT SWAP SHOP</h6>
+          <h6 className="text-white font-medium text-base">ABOUT SWAP CORRECT</h6>
           <div className="flex flex-col gap-2 my-4">
             <Link
               href="/about"
@@ -31,7 +31,7 @@ const Footer = () => {
         </div>
 
         <div>
-          <h6 className="text-white font-medium text-base">BUYING ON SWAP SHOP</h6>
+          <h6 className="text-white font-medium text-base">BUYING ON SWAP CORRECT</h6>
           <div className="flex flex-col gap-2 my-4">
             <p className="text-white text-sm font-extralight">Buyer Safety Centre</p>
             <p className="text-white text-sm font-extralight">FAQs</p>

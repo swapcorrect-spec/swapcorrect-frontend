@@ -73,7 +73,7 @@ export default function MySwaps() {
   // >("All");
   // const [listingDate, setListingDate] = useState<"All" | "LastWeek" | "LastMonth">("All");
   // const [pageNumber, setPageNumber] = useState<number>(1);
-  const perpageSize = 10;
+  const perpageSize = 15;
   // const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   // const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
 
@@ -110,17 +110,17 @@ export default function MySwaps() {
       const otherUserName = isSwapper ? swap.visitorName : swap.swapperName;
       const otherUserImage = isSwapper ? swap.visitorImage : swap.swapperImage;
 
-      const displayStatus = swap.status === "Negotiation" ? "Negotiating" : swap.status;
-
       return {
         name: otherUserName,
         item: swap.listedItem,
         time: swap.lastActivity,
         roomName: swap.roomName,
-        status: displayStatus,
+        status: swap.status,
         type: "Basic",
         image: otherUserImage,
         key: swap.swapProceedId,
+        requestItem: swap.swapperRequestItem,
+        roleLabel: isSwapper ? "Visitor" : "Swapper",
       };
     });
   }, [swapsData, currentUserId]);
@@ -183,7 +183,7 @@ export default function MySwaps() {
         </div>
       ) : swapList.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-5 border border-[#E9E9E9] rounded-lg p-6">
+          <div className="grid grid-cols-1 gap-3 border border-[#E9E9E9] rounded-lg p-3">
             {swapList.map((item) => (
               <SwapCardItem key={item.key} item={item} getStatusColor={getStatusColor} />
             ))}

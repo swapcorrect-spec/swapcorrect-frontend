@@ -270,9 +270,9 @@ export const useChangePassword = (props: MutationProps) => {
   const { onSuccess, onError } = props;
   const { mutate, isError, isSuccess, isPending } = useMutation({
     mutationFn: ({ payload }: { payload: ChangePassword }) =>
-      putRequest<{}, IChangePasswordResponse>({
-        url: `/auth/user/reset_password_signedIn_user?oldPassword=${payload.oldPassword}&newPassword=${payload.newPassword}`,
-        payload: {},
+      putRequest<ChangePassword, IChangePasswordResponse>({
+        url: "/auth/user/reset_password_signedIn_user",
+        payload,
       }),
     onSuccess(values) {
       onSuccess(values);

@@ -28,6 +28,7 @@ import {
 } from "@/app/_hooks/queries/notification/notification";
 import { useQueryClient } from "@tanstack/react-query";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
 
 interface Props {
   data?: IGetUserInfoResponseData;
@@ -45,8 +46,9 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
-  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: true });
+  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
     data: notificationsResponse,
     fetchNextPage,
@@ -55,7 +57,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
     isFetching: isNotificationFetching,
   } = useGetNotifications({
     unreadOnly,
-    enabler: isOpenNotifications,
+    enabler: isOpenNotifications && isLoggedIn,
   });
   const { mutate, isPending: isReadNotificationPending } = useReadNotification({
     onSuccess() {
@@ -78,6 +80,8 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
   const handleLogout = () => {
     queryClient.clear();
     localStorage.clear();
+    setIsLogoutModalOpen(false);
+    setIsOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };
 
@@ -244,7 +248,9 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                     <DropdownMenuItem asChild>
                       <Link href="/settings">Settings</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+                      Logout
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -331,7 +337,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 <Button
                   variant="outline"
                   className="mt-2 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
-                  onClick={handleLogout}
+                  onClick={() => setIsLogoutModalOpen(true)}
                 >
                   Logout
                 </Button>
@@ -348,6 +354,12 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
           </div>
         </div>
       )}
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
     </header>
   );
 };

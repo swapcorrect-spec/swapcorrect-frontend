@@ -6,14 +6,17 @@ import { Button } from "../ui/button";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
-import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
+import { getImageSrcWithFallback, createImageErrorHandler, displayRating } from "@/lib/utils";
 import Link from "next/link";
 import { PATHS } from "@/app/_constants/paths";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import useIsMobile from "@/app/_hooks/useIsMobile";
+import RateUserModal from "@/components/shared/rate-user-modal";
+import ReportUserModal from "@/components/shared/report-user-modal";
 
 interface ProfileDetailsHeaderProps {
   userData?: {
+    id?: string;
     firstName: string;
     lastName: string;
     profilePicture: null | string;
@@ -24,12 +27,21 @@ interface ProfileDetailsHeaderProps {
     rating: number;
   };
   handleToggleReview: () => void;
+  raterId?: string;
+  isOwnProfile?: boolean;
 }
 
-const ProfileDetailsHeader: React.FC<ProfileDetailsHeaderProps> = ({ userData, handleToggleReview }) => {
+const ProfileDetailsHeader: React.FC<ProfileDetailsHeaderProps> = ({
+  userData,
+  handleToggleReview,
+  raterId = "",
+  isOwnProfile = false,
+}) => {
   const isMobile = useIsMobile();
 
   const [imageError, setImageError] = useState(false);
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
+  const [isReportModalOpen, setIsReportModalOpen] = useState(false);
 
   const profileImageSrc = userData?.profilePicture
     ? getImageSrcWithFallback(userData.profilePicture, imageError)
@@ -39,79 +51,118 @@ const ProfileDetailsHeader: React.FC<ProfileDetailsHeaderProps> = ({ userData, h
   const userRole = userData?.userRole?.[0] || "Swapper";
   const listingCount = userData?.listingCount ?? 12;
   const swapCount = userData?.swapCount ?? 12;
-  const rating = userData?.rating ?? 12;
+  const rating = displayRating(userData?.rating);
+  const profileUserId = userData?.id || "";
 
   return (
-    <Card>
-      <CardContent className="p-3">
-        <div className="flex items-start justify-between gap-3 w-full mb-6">
-          <div className="flex items-start md:items-center gap-2">
-            <div className="w-20 h-20 rounded-full flex items-center justify-center bg-[#F4CE9B]">
-              <Image
-                src={profileImageSrc}
-                height={56}
-                width={56}
-                alt="User profile"
-                className="w-14 h-14 rounded-full"
-                onError={createImageErrorHandler(setImageError)}
-              />
-            </div>
-            <div className="me-auto">
-              <h5 className={`text-[#222222] text-lg font-medium`}>{displayName}</h5>
-            </div>
-          </div>
-          {isMobile && (
-            <Button className="rounded-3xl px-4" size={"sm"}>
-              {userRole}
-            </Button>
-          )}
-        </div>
-        <div className="flex gap-3 mb-6">
-          {!isMobile && <Button>{userRole}</Button>}
-          <Link href={PATHS.CHAT} passHref>
-            <Button className="items-center flex border-[#E9E9E9] text-[#222222] rounded-3xl" variant="outline">
-              Open Chat
-              <div className="bg-[#303030] rounded-full w-[14px] h-[14px]">
-                <ArrowRight size={12} color="#fff" />
+    <>
+      <Card>
+        <CardContent className="p-3">
+          <div className="flex items-start justify-between gap-3 w-full mb-6">
+            <div className="flex items-start md:items-center gap-2">
+              <div className="w-20 h-20 rounded-full flex items-center justify-center bg-[#F4CE9B]">
+                <Image
+                  src={profileImageSrc}
+                  height={56}
+                  width={56}
+                  alt="User profile"
+                  className="w-14 h-14 rounded-full"
+                  onError={createImageErrorHandler(setImageError)}
+                />
               </div>
-            </Button>
-          </Link>
-          {isMobile && (
-            <Button
-              onClick={handleToggleReview}
-              className="items-center flex border-[#E9E9E9] text-[#222222] rounded-3xl"
-              variant="outline"
-            >
-              Reviews
-              <Rating />
-            </Button>
+              <div className="me-auto">
+                <h5 className={`text-[#222222] text-lg font-medium`}>{displayName}</h5>
+              </div>
+            </div>
+            {isMobile && (
+              <Button className="rounded-3xl px-4" size={"sm"}>
+                {userRole}
+              </Button>
+            )}
+          </div>
+          <div className="flex flex-wrap gap-3 mb-3">
+            {!isMobile && <Button>{userRole}</Button>}
+            <Link href={PATHS.CHAT} passHref>
+              <Button
+                className="items-center flex border-[#E9E9E9] text-[#222222] rounded-3xl"
+                variant="outline"
+              >
+                Open Chat
+                <div className="bg-[#303030] rounded-full w-[14px] h-[14px]">
+                  <ArrowRight size={12} color="#fff" />
+                </div>
+              </Button>
+            </Link>
+            {isMobile && (
+              <Button
+                onClick={handleToggleReview}
+                className="items-center flex border-[#E9E9E9] text-[#222222] rounded-3xl"
+                variant="outline"
+              >
+                Reviews
+                <Rating />
+              </Button>
+            )}
+          </div>
+          {!isOwnProfile && profileUserId && raterId && (
+            <div className="flex flex-col gap-2 mb-6">
+              <Button
+                variant="outline"
+                className="rounded-3xl border-[#E9E9E9] text-[#E42222] hover:text-[#E42222] w-full justify-center"
+                onClick={() => setIsReportModalOpen(true)}
+              >
+                Report User
+              </Button>
+              <Button
+                variant="outline"
+                className="rounded-3xl border-[#E9E9E9] text-[#222222] w-full justify-center"
+                onClick={() => setIsRateModalOpen(true)}
+              >
+                Rate User
+              </Button>
+            </div>
           )}
-        </div>
-        <div className="flex gap-2">
-          <div className="border-[#E9E9E9] border p-2 rounded-md w-full">
-            <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
-              <Listed />
-              <p>Listed</p>
+          <div className="flex gap-2">
+            <div className="border-[#E9E9E9] border p-2 rounded-md w-full">
+              <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
+                <Listed />
+                <p>Listed</p>
+              </div>
+              <h6 className="font-medium text-lg">{listingCount}</h6>
             </div>
-            <h6 className="font-medium text-lg">{listingCount}</h6>
-          </div>
-          <div className="border-[#E9E9E9] border p-2 rounded-md w-full">
-            <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
-              <Swaps />
-              <p>Swaps</p>
+            <div className="border-[#E9E9E9] border p-2 rounded-md w-full">
+              <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
+                <Swaps />
+                <p>Swaps</p>
+              </div>
+              <h6 className="font-medium text-lg">{swapCount}</h6>
             </div>
-            <h6 className="font-medium text-lg">{swapCount}</h6>
-          </div>
-          <div className="border-[#E9E9E9] p-2 border rounded-md w-full">
-            <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
-              <Ratings />
-              <p>Ratings</p>
+            <div className="border-[#E9E9E9] p-2 border rounded-md w-full">
+              <div className="flex gap-1 items-center mb-2 text-sm text-[#737373]">
+                <Ratings />
+                <p>Ratings</p>
+              </div>
+              <h6 className="font-medium text-lg">{rating}</h6>
             </div>
-            <h6 className="font-medium text-lg">{rating}</h6>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+
+      <RateUserModal
+        isOpen={isRateModalOpen}
+        onClose={() => setIsRateModalOpen(false)}
+        raterId={raterId}
+        userId={profileUserId}
+        userName={displayName}
+      />
+
+      <ReportUserModal
+        isOpen={isReportModalOpen}
+        onClose={() => setIsReportModalOpen(false)}
+        reportedUserId={profileUserId}
+        userName={displayName}
+      />
+    </>
   );
 };
 

@@ -1,3 +1,5 @@
+"use client";
+
 import { FC } from "react";
 import Image from "next/image";
 
@@ -50,7 +52,7 @@ const Onboarding: FC = () => {
         </div>
         <div className="mt-20 mb-8">
           <h2 className="text-center text-[#000000] font-bold text-4xl">
-            How do you want to use SwapShop?
+            How do you want to use SwapCorrect?
           </h2>
           <p className="text-center text-[#737373] text-base w-[55%] mx-auto ">
             Pick a role that fits how you want to use the platform. You can

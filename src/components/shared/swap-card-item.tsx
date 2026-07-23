@@ -2,10 +2,15 @@
 
 import { FC, useState } from "react";
 import Image from "next/image";
-import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { ArrowRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
-import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
+import {
+  createImageErrorHandler,
+  formatSwapStatus,
+  getImageSrcWithFallback,
+  getStatusColor,
+} from "@/lib/utils";
 import MomentAgo from "@/components/moment-ago";
 
 export interface SwapCardItemData {
@@ -17,95 +22,144 @@ export interface SwapCardItemData {
   type: string;
   image: string | null;
   key: string;
+  requestItem?: string;
+  roleLabel?: string;
 }
 
 interface SwapCardItemProps {
   item: SwapCardItemData;
-  getStatusColor: (status: string) => string;
+  getStatusColor?: (status: string) => string;
 }
 
-const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor }) => {
+const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor: getColor = getStatusColor }) => {
+  const router = useRouter();
   const [itemImageError, setItemImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
 
+  const displayStatus = formatSwapStatus(item.status);
+  const profileSrc = getImageSrcWithFallback(item.image || "", profileImageError);
+  const thumbSrc = getImageSrcWithFallback(item.image || "", itemImageError);
+  const hasRoom = Boolean(item.roomName);
+
+  const handleCardClick = () => {
+    if (!item.roomName) return;
+    router.push(`/chat?roomName=${encodeURIComponent(item.roomName)}`);
+  };
+
   return (
-    <Card className="shadow-none border border-[#E9E9E9]">
-      <CardContent className="p-2.5 flex gap-3 items-center">
-        <div className="w-[66px] h-[66px] rounded-lg overflow-hidden bg-gray-200">
+    <Card
+      className={`shadow-none border border-[#E9E9E9] transition-colors ${
+        hasRoom ? "cursor-pointer hover:border-[#007AFF]/50 hover:bg-[#F8FBFF]" : ""
+      }`}
+      onClick={handleCardClick}
+      role={hasRoom ? "link" : undefined}
+      tabIndex={hasRoom ? 0 : undefined}
+      onKeyDown={(e) => {
+        if (!hasRoom) return;
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleCardClick();
+        }
+      }}
+    >
+      <CardContent className="p-3 flex gap-3 items-center">
+        <div className="w-[66px] h-[66px] rounded-lg overflow-hidden bg-[#F5F5F5] shrink-0">
           <Image
             className="w-full h-full object-cover"
-            src={getImageSrcWithFallback(
-              "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80",
-              itemImageError
-            )}
+            src={thumbSrc}
             height={66}
             width={66}
-            alt="Item image"
+            alt={item.name || "Swap counterpart"}
             onError={createImageErrorHandler(setItemImageError)}
           />
         </div>
-        <div className="mr-auto">
-          <div className="mb-2 flex items-center gap-2">
-            <p className="text-black font-medium text-base">{item.item}</p>
+
+        <div className="mr-auto min-w-0 flex-1">
+          <div className="mb-2 flex flex-wrap items-center gap-2">
+            <p className="text-black font-medium text-base truncate">{item.item}</p>
             <span
-              className={`border-1 rounded-lg py-1 px-3 text-[10px] ${getStatusColor(item.status)}`}
+              className={`border rounded-full py-0.5 px-2.5 text-[10px] font-medium whitespace-nowrap ${getColor(
+                item.status
+              )}`}
             >
-              {item.status}
+              {displayStatus}
             </span>
           </div>
 
-          <div className="me-auto text-sm items-center gap-3 hidden md:flex">
-            <div className="w-[24px] h-[24px] rounded-full overflow-hidden">
+          {item.requestItem && (
+            <p className="text-xs text-[#737373] mb-2 truncate">
+              Requested: <span className="text-[#222222]">{item.requestItem}</span>
+            </p>
+          )}
+
+          <div className="text-sm items-center gap-2 hidden md:flex min-w-0">
+            <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#E9E9E9]">
               <Image
                 className="w-full h-full rounded-full object-cover"
-                src={getImageSrcWithFallback(item.image || "", profileImageError)}
+                src={profileSrc}
                 height={24}
                 width={24}
-                alt="Profile picture"
+                alt={item.name}
                 onError={createImageErrorHandler(setProfileImageError)}
               />
             </div>
-            <p className="text-[#222222]">{item.name}</p>
-            <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div>
-            <p className="text-[#737373]">{item.type}</p>
-            <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div>
-            <p className="text-[#737373]">
+            <p className="text-[#222222] truncate">{item.name}</p>
+            {item.roleLabel && (
+              <>
+                <div className="w-1.5 h-1.5 rounded-full bg-[#D9D9D9] shrink-0" />
+                <p className="text-[#737373] shrink-0">{item.roleLabel}</p>
+              </>
+            )}
+            <div className="w-1.5 h-1.5 rounded-full bg-[#D9D9D9] shrink-0" />
+            <p className="text-[#737373] shrink-0">
               <MomentAgo createdAt={item.time} />
             </p>
           </div>
-          <div className="me-auto text-sm items-center gap-3 block md:hidden">
-            <div className="flex items-center gap-2 mb-1">
-              <div className="w-[24px] h-[24px] rounded-full overflow-hidden">
+
+          <div className="text-sm block md:hidden min-w-0">
+            <div className="flex items-center gap-2 mb-1 min-w-0">
+              <div className="w-6 h-6 rounded-full overflow-hidden shrink-0 bg-[#E9E9E9]">
                 <Image
                   className="w-full h-full rounded-full object-cover"
-                  src={getImageSrcWithFallback(item.image || "", profileImageError)}
+                  src={profileSrc}
                   height={24}
                   width={24}
-                  alt="Profile picture"
+                  alt={item.name}
                   onError={createImageErrorHandler(setProfileImageError)}
                 />
               </div>
-              <p className="text-[#222222]">{item.name}</p>
+              <p className="text-[#222222] truncate">{item.name}</p>
             </div>
-            {/* <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div> */}
             <div className="flex items-center gap-2">
-              <p className="text-[#737373]">{item.type}</p>
-              <div className="w-[6px] h-[6px] rounded-full bg-[#222222]"></div>
+              {item.roleLabel && (
+                <>
+                  <p className="text-[#737373]">{item.roleLabel}</p>
+                  <div className="w-1.5 h-1.5 rounded-full bg-[#D9D9D9]" />
+                </>
+              )}
               <p className="text-[#737373]">
                 <MomentAgo createdAt={item.time} />
               </p>
             </div>
           </div>
         </div>
-        {item.roomName && (
-          <Link href={`/chat?roomName=${item.roomName}`}>
-            <div className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center">
+
+        {hasRoom && (
+          <div
+            className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center shrink-0 bg-white"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              type="button"
+              className="flex items-center gap-1"
+              onClick={handleCardClick}
+            >
               <p className="font-medium text-xs text-[#222222]">Open Chat</p>
               <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
                 <ArrowRight size={12} color="#fff" />
               </span>
-            </div>
-          </Link>
+            </button>
+          </div>
         )}
       </CardContent>
     </Card>

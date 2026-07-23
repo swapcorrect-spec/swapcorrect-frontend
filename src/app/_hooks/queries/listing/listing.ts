@@ -29,8 +29,10 @@ import {
   ISwitchSwapStatusResponse,
 } from "./listing.type";
 import { toast } from "sonner";
+import { useRouter } from "next/navigation";
 import { MutationProps } from "@/app/_types/mutation-prop-types";
 import handleApiError from "@/app/_utils/handle-api-error";
+import { PATHS } from "@/app/_constants/paths";
 
 export const useGetListingDetails = (props: { enabler: boolean; listingId: string }) => {
   const { enabler, listingId } = props;
@@ -226,12 +228,9 @@ export const useGetAllCategories = (props: { enabler: boolean }) => {
   };
 };
 
-export const useStartSwap = (props: {
-  listingId: string;
-  onSuccess?: () => void;
-  onError?: (_val: any, _err?: any) => void;
-}) => {
-  const { listingId, onSuccess, onError } = props;
+export const useStartSwap = (props: { listingId: string; onSuccess?: () => void }) => {
+  const { listingId, onSuccess } = props;
+  const router = useRouter();
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationKey: [START_SWAP, listingId],
@@ -248,8 +247,15 @@ export const useStartSwap = (props: {
       });
     },
     onError: (err: any) => {
-      if (onError) {
-        onError(err?.response?.data?.errorMessages);
+      const errorMessages = err?.response?.data?.errorMessages;
+      const errorMessage =
+        errorMessages?.[0] || err?.message || "Failed to start swap. Please try again.";
+      const roomName = errorMessages?.[1];
+
+      toast.error(errorMessage);
+
+      if (roomName) {
+        router.push(`${PATHS.CHAT}?roomName=${roomName}`);
       }
     },
   });

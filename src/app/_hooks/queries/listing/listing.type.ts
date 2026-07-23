@@ -23,6 +23,7 @@ export interface ListingDetailsResponseInterface {
     userId: string;
     rating: number;
     swapCount: number;
+    isFlagged?: boolean;
   };
   statusCode: 200;
   displayMessage: string;

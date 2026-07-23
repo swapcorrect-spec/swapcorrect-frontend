@@ -33,6 +33,7 @@ import {
   useGetUnreadNotificationCount,
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
+import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
 // import { Auth } from "@/app/_config/auth";
 
 interface Props {
@@ -57,7 +58,8 @@ const Navbar: React.FC<Props> = ({
   const [isOpenNotifications, setIsOpenNotifications] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
-  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: true });
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
     data: notificationsResponse,
     fetchNextPage,
@@ -66,7 +68,7 @@ const Navbar: React.FC<Props> = ({
     isFetching: isNotificationFetching,
   } = useGetNotifications({
     unreadOnly,
-    enabler: isOpenNotifications,
+    enabler: isOpenNotifications && isLoggedIn,
   });
   const { mutate, isPending: isReadNotificationPending } = useReadNotification({
     onSuccess() {
@@ -97,6 +99,7 @@ const Navbar: React.FC<Props> = ({
   const handleLogout = () => {
     queryClient.clear();
     localStorage.clear();
+    setIsLogoutModalOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };
 
@@ -306,7 +309,9 @@ const Navbar: React.FC<Props> = ({
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -321,6 +326,12 @@ const Navbar: React.FC<Props> = ({
           </Button>
         </div>
       )}
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
     </section>
   );
 };

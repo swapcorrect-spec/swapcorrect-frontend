@@ -1222,7 +1222,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowRight, MoveLeft, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { ArrowRight, MoveLeft, X, ChevronLeft, ChevronRight, Flag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import ReactPlayer from "react-player";
@@ -1234,6 +1234,7 @@ import {
   createImageErrorHandler,
   getImageSrcWithFallback,
   formatDateTime,
+  displayRating,
 } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import useIsMobile from "@/app/_hooks/useIsMobile";
@@ -1279,6 +1280,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
     "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80";
 
   const handleNegotiate = () => {
+    if (listingData?.isFlagged) return;
     startSwap();
   };
 
@@ -1410,9 +1412,37 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               onClick={() => setIsZoomed(true)}
               className="w-full h-[418px] relative bg-black rounded-t-xl overflow-hidden cursor-zoom-in group"
             >
-              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center text-white font-medium text-sm">
+              <div className="absolute inset-0 bg-black/10 opacity-0 group-hover:opacity-100 transition-opacity z-10 flex items-center justify-center text-white font-medium text-sm pointer-events-none">
                 Click to expand view
               </div>
+
+              {listingData?.isFlagged && (
+                <div className="absolute top-4 left-4 z-20 bg-[#FFF6F6] gap-1.5 flex items-center rounded-xl px-2.5 py-1.5">
+                  <Flag size={14} className="text-[#FF3B30]" />
+                  <p className="text-[#FF3B30] text-xs font-medium">Flagged</p>
+                </div>
+              )}
+
+              {mediaList.length > 1 && (
+                <>
+                  <button
+                    type="button"
+                    aria-label="Previous image"
+                    onClick={handlePrevMedia}
+                    className="absolute left-3 top-1/2 -translate-y-1/2 z-20 text-white bg-black/40 hover:bg-black/60 p-2 rounded-full transition-colors"
+                  >
+                    <ChevronLeft size={22} />
+                  </button>
+                  <button
+                    type="button"
+                    aria-label="Next image"
+                    onClick={handleNextMedia}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 z-20 text-white bg-black/40 hover:bg-black/60 p-2 rounded-full transition-colors"
+                  >
+                    <ChevronRight size={22} />
+                  </button>
+                </>
+              )}
 
               {isVideo ? (
                 <ReactPlayer
@@ -1591,7 +1621,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                     </p>
                     <div className="flex gap-2 text-[#737373] text-sm items-center">
                       <p className="flex items-center gap-1">
-                        {listingData?.rating || 0} <Rating />
+                        {displayRating(listingData?.rating)} <Rating />
                       </p>
                       <span className="w-1 h-1 rounded-full bg-[#737373]"></span>
                       <p>{listingData?.swapCount || 0} swaps</p>
@@ -1617,7 +1647,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                   </p>
                   <Button
                     onClick={handleNegotiate}
-                    disabled={isStartingSwap}
+                    disabled={isStartingSwap || !!listingData?.isFlagged}
                     variant={"default"}
                     className="rounded-full font-medium text-sm py-3 w-full"
                     size={"lg"}

@@ -5,6 +5,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Button } from "../ui/button";
 import { Eye, SquarePen, Trash2 } from "lucide-react";
+import { displayRating } from "@/lib/utils";
 interface iWantList {
   name: string;
 }
@@ -85,7 +86,7 @@ const CartDetails: React.FC<iProps> = ({
           </div>
 
           <p className="flex items-center gap-1">
-            {rating || 3.5} <Rating />
+            {displayRating(rating)} <Rating />
           </p>
           <div className="mt-4 flex gap-3 items-center text-[#737373] text-sm">
             <Button variant="outline" className="flex items-center gap-2">

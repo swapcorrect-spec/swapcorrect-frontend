@@ -59,7 +59,7 @@ const AuthLayout = ({
             <SwiperSlide>
               <div className="relative bg-[url(../app/assets/images/pngs/banner_three.png)] rounded-[30px]  bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
-                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">Swap. Shop. Shine!</h2>
+                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">Swap. Correct. Shine!</h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
                     No be only buy and sell — swap your way to something better. List now, trade smart.
                   </p>
@@ -83,7 +83,7 @@ const AuthLayout = ({
         </div>
 
         <div className="w-full md:w-1/2">
-          <Link href={`${"/"}`} className="flex justify-center my-4">
+          <Link href="/" className="flex justify-center my-4">
             <Logo />
           </Link>
           {children}

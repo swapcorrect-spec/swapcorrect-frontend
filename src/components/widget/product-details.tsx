@@ -5,11 +5,11 @@ import HotPick from "@/app/assets/images/svgs/hot_pick.svg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Info } from "lucide-react";
+import { Heart, Info, Flag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useState } from "react";
-import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
+import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, displayRating } from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import {
   useAddToFavourite,
@@ -17,7 +17,6 @@ import {
 } from "@/app/_hooks/queries/favourite/favourite";
 import * as Popover from "@radix-ui/react-popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { toast } from "sonner";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -51,6 +50,7 @@ interface iProps {
   vendorName?: string;
   price?: string | number;
   showHotpick?: boolean;
+  isFlagged?: boolean;
 }
 
 const ProductDetails: React.FC<iProps> = ({
@@ -80,6 +80,7 @@ const ProductDetails: React.FC<iProps> = ({
   productName,
   price,
   showHotpick = true,
+  isFlagged = false,
 }) => {
   const router = useRouter();
   const [imageError, setImageError] = useState(false);
@@ -89,12 +90,6 @@ const ProductDetails: React.FC<iProps> = ({
     listingId: listingId?.toString() || "",
     onSuccess: () => {
       router.push("/chat");
-    },
-    onError(_val) {
-      toast.error(_val[0]);
-      if (_val[1]) {
-        router.push(`/chat?roomName=${_val[1]}`);
-      }
     },
   });
 
@@ -140,16 +135,34 @@ const ProductDetails: React.FC<iProps> = ({
   const handleProfileImageError = createImageErrorHandler(setProfileImageError);
 
   const handleSwapNow = () => {
+    if (isFlagged) return;
     if (listingId) {
       startSwap();
     }
   };
 
+  const handleViewDetails = () => {
+    if (listingId) {
+      router.push(`/listing/${listingId}`);
+    }
+  };
+
   return (
-    // <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block">
-    <Card className="bg-white w-full flex p-2 cursor-pointer">
+    <Card className="bg-white w-full h-full flex flex-col p-2.5 cursor-pointer border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] rounded-xl">
       <CardContent className="h-full flex flex-col flex-grow p-0">
-        <div className="mb-4 w-full h-[150px] md:h-[250px] relative transition-all duration-200 rounded-xl">
+        <div
+          className="mb-2 w-full h-[150px] md:h-[220px] relative transition-all duration-200 rounded-xl shrink-0"
+          onClick={handleViewDetails}
+          role="button"
+          tabIndex={listingId ? 0 : -1}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" || e.key === " ") {
+              e.preventDefault();
+              handleViewDetails();
+            }
+          }}
+          aria-label="View listing details"
+        >
           {isVideo ? (
             <ReactPlayer
               src={typeof mediaUrl === "string" ? mediaUrl : ""}
@@ -171,18 +184,25 @@ const ProductDetails: React.FC<iProps> = ({
               onError={handleImageError}
             />
           )}
-          <div className=" px-4 w-full absolute top-[16px] flex">
+          <div className=" px-4 w-full absolute top-[16px] flex items-center gap-2">
             {showHotpick && (
               <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
                 <HotPick />
                 <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
               </div>
             )}
+            {isFlagged && (
+              <div className="bg-[#FFF6F6] gap-1.5 flex items-center rounded-xl px-2 py-1">
+                <Flag size={12} className="text-[#FF3B30]" />
+                <p className="text-[#FF3B30] text-xs font-medium">Flagged</p>
+              </div>
+            )}
             <button
               type="button"
               aria-label="toggle favourite"
               disabled={isAddingFav || isRemovingFav || !listingId}
-              onClick={() => {
+              onClick={(e) => {
+                e.stopPropagation();
                 if (!listingId) return;
                 // Optimistic update - change UI immediately
                 setIsFav(!isFav);
@@ -203,13 +223,16 @@ const ProductDetails: React.FC<iProps> = ({
             </button>
           </div>
         </div>
-        <div>
-          <div className="flex justify-between items-center w-full">
-            <h6 className="text-xl font-medium">{displayName}</h6>
+        <div className="flex flex-col flex-1 min-h-0">
+          <div className="flex justify-between items-start gap-2 w-full min-h-[28px]">
+            <h6 className="text-xl font-medium leading-7 truncate min-w-0 flex-1">{displayName}</h6>
 
             <Popover.Root>
               <Popover.Trigger asChild>
-                <button type="button" className="text-[#007AFF] font-medium text-sm underline">
+                <button
+                  type="button"
+                  className="text-[#007AFF] font-medium text-sm underline shrink-0 whitespace-nowrap pt-0.5"
+                >
                   View Est. Value
                 </button>
               </Popover.Trigger>
@@ -229,96 +252,96 @@ const ProductDetails: React.FC<iProps> = ({
             </Popover.Root>
           </div>
           {categoryName && (
-            <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-3">
+            <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-1.5">
               {categoryName}
             </p>
           )}
-          <div className="flex items-center gap-2 mb-3">
-            {displayWants.length > 1 && (
-              <Popover.Root>
-                <Popover.Trigger asChild>
-                  <button
-                    type="button"
-                    aria-label="Wants information"
-                    className="mt-[1px] text-[#737373] hover:text-[#222222] flex items-center gap-1"
-                  >
-                    <Info size={14} color="blue" />
-                    <span className="text-[#222222] font-bold text-xs">Wants:</span>
-                  </button>
-                </Popover.Trigger>
+          <div className="flex items-start gap-1 mb-2 min-h-[40px]">
+            <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
+              {displayWants.length > 1 && (
+                <Popover.Root>
+                  <Popover.Trigger asChild>
+                    <button
+                      type="button"
+                      aria-label="Wants information"
+                      className="text-[#007AFF] hover:text-[#0056b3]"
+                    >
+                      <Info size={14} />
+                    </button>
+                  </Popover.Trigger>
 
-                <Popover.Portal>
-                  <Popover.Content
-                    side="top"
-                    align="start"
-                    sideOffset={6}
-                    collisionPadding={12}
-                    className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
-                  >
-                    <span className="font-semibold">Wants:</span> The user would like to exchange
-                    any of the listed items.
-                    <Popover.Arrow className="fill-black" width={10} height={6} />
-                  </Popover.Content>
-                </Popover.Portal>
-              </Popover.Root>
-            )}
-            {displayWants.length === 1 && (
-              <span className="text-[#222222] font-bold text-xs">Wants:</span>
-            )}
+                  <Popover.Portal>
+                    <Popover.Content
+                      side="top"
+                      align="start"
+                      sideOffset={6}
+                      collisionPadding={12}
+                      className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
+                    >
+                      <span className="font-semibold">Wants:</span> The user would like to exchange
+                      any of the listed items.
+                      <Popover.Arrow className="fill-black" width={10} height={6} />
+                    </Popover.Content>
+                  </Popover.Portal>
+                </Popover.Root>
+              )}
+              Wants:
+            </span>
 
-            <div className="text-[#737373]">
-              {displayWants && displayWants.length > 0 && (
-                <ul className="flex flex-wrap items-center gap-2 text-sm text-[#737373] leading-none">
-                  {displayWants.map((item, index) => (
-                    <li key={index} className="flex items-center">
-                      <span className="capitalize">{item}</span>
-                      {index !== displayWants.length - 1 && (
-                        <span className="mx-2 h-1 w-1 rounded-full bg-black" />
-                      )}
-                    </li>
-                  ))}
-                </ul>
+            <div className="text-[#737373] min-w-0 flex-1">
+              {displayWants && displayWants.length > 0 ? (
+                <p className="text-sm text-[#737373] leading-5 line-clamp-2 capitalize">
+                  {displayWants.join(", ")}
+                </p>
+              ) : (
+                <p className="text-sm text-[#737373] leading-5">Open to offers</p>
               )}
             </div>
           </div>
 
-          <div className="rounded-xl mb-6 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-            <div className="flex items-center gap-2">
-              <Avatar>
-                <AvatarImage
-                  src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
-                />
-              </Avatar>
-              <p className="font-medium">{displayAuthor}</p>
+          <div className="mt-auto shrink-0">
+            <div className="rounded-xl mb-3 text-[#222222] gap-2 px-2 py-1.5 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
+              <div className="flex items-center gap-2 min-w-0">
+                <Avatar>
+                  <AvatarImage
+                    src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
+                  />
+                </Avatar>
+                <p className="font-medium truncate">{displayAuthor}</p>
+              </div>
+              <p className="flex items-center gap-1 shrink-0">
+                {displayRating(rating)} <Rating />
+              </p>
             </div>
-            <p className="flex items-center gap-1">
-              {rating || 3.5} <Rating />
-            </p>
-          </div>
-          <Button
-            onClick={handleSwapNow}
-            disabled={isStartingSwap || !listingId}
-            variant={"default"}
-            className="rounded-lg font-medium text-sm py-3 w-full"
-            size={"lg"}
-          >
-            {isStartingSwap ? "Starting..." : "Swap Now"}
-          </Button>
+            {!isFlagged && (
+              <Button
+                onClick={handleSwapNow}
+                disabled={isStartingSwap || !listingId}
+                variant={"default"}
+                className="rounded-lg font-medium text-sm py-2.5 w-full"
+                size={"lg"}
+              >
+                {isStartingSwap ? "Starting..." : "Swap Now"}
+              </Button>
+            )}
 
-          {/* <Link href={`/listing/${listingId}`} className="w-full mt-2 inline-block"> */}
-          <Button
-            disabled={!listingId}
-            variant={"outline"}
-            className="rounded-lg font-medium text-sm py-3 w-full"
-            size={"lg"}
-          >
-            View Details
-          </Button>
-          {/* </Link> */}
+            <Link
+              href={`/listing/${listingId}`}
+              className={`w-full inline-block ${isFlagged ? "mt-0" : "mt-1.5"}`}
+            >
+              <Button
+                disabled={!listingId}
+                variant={"outline"}
+                className="rounded-lg font-medium text-sm py-2.5 w-full"
+                size={"lg"}
+              >
+                View Details
+              </Button>
+            </Link>
+          </div>
         </div>
       </CardContent>
     </Card>
-    // </Link>
   );
 };
 
