@@ -226,8 +226,12 @@ export const useGetAllCategories = (props: { enabler: boolean }) => {
   };
 };
 
-export const useStartSwap = (props: { listingId: string; onSuccess?: () => void }) => {
-  const { listingId, onSuccess } = props;
+export const useStartSwap = (props: {
+  listingId: string;
+  onSuccess?: () => void;
+  onError?: (_val: any, _err?: any) => void;
+}) => {
+  const { listingId, onSuccess, onError } = props;
 
   const { mutate, isPending, isError, error } = useMutation({
     mutationKey: [START_SWAP, listingId],
@@ -244,11 +248,9 @@ export const useStartSwap = (props: { listingId: string; onSuccess?: () => void 
       });
     },
     onError: (err: any) => {
-      const errorMessage =
-        err?.response?.data?.errorMessages?.[0] ||
-        err?.message ||
-        "Failed to start swap. Please try again.";
-      toast.error(errorMessage);
+      if (onError) {
+        onError(err?.response?.data?.errorMessages);
+      }
     },
   });
 
