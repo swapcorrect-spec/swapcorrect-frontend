@@ -124,9 +124,12 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
           >
             <Menu className="h-6 w-6 text-gray-700" />
           </button>
-          <div className="flex items-center gap-2">
+          <Link
+            href={isLoggedIn ? PATHS.DASHBOARD : "/"}
+            className="flex items-center gap-2"
+          >
             <Logo />
-          </div>
+          </Link>
         </div>
 
         {isLoggedIn ? (
@@ -305,6 +308,9 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                   )}
                   <a href={PATHS.CHAT} className="hover:text-[#007AFF] transition">
                     Chat
+                  </a>
+                  <a href={PATHS.REPORTS} className="hover:text-[#007AFF] transition">
+                    Reports
                   </a>
                   <a href="/settings" className="hover:text-[#007AFF] transition">
                     Settings

@@ -132,7 +132,7 @@ const Navbar: React.FC<Props> = ({
     <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex justify-between gap-[110px] z-10 w-full">
       <div className="flex gap-4 items-center justify-center">
         {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
-        <Link href={`${isLoggedIn ? "/home" : "/"}`} className="flex justify-center">
+        <Link href={isLoggedIn ? PATHS.DASHBOARD : "/"} className="flex justify-center">
           <Logo />
         </Link>
       </div>

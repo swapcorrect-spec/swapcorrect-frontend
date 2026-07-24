@@ -11,7 +11,7 @@ import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
 import { usePathname, useRouter } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import Link from "next/link";
-import { ArrowLeftRight, LayoutDashboard, ListCheck, LogOut, X } from "lucide-react";
+import { ArrowLeftRight, Flag, LayoutDashboard, ListCheck, LogOut, X } from "lucide-react";
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
@@ -79,6 +79,13 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
       iconOutline: <ChatOutline />,
       link: PATHS.CHAT,
       showCount: true,
+    },
+    {
+      title: "Reports",
+      iconFilled: <Flag size={22} color="#007AFF" fill="#007AFF" />,
+      iconOutline: <Flag size={22} color="#222222" />,
+      link: PATHS.REPORTS,
+      showCount: false,
     },
   ];
 
