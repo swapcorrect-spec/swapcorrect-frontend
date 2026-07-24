@@ -32,10 +32,11 @@ import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import * as signalR from "@microsoft/signalr";
-import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
+import { IGetActiveChatUsersResponseData, IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
 import EmojiPicker from "emoji-picker-react";
 import ReactPlayer from "react-player";
 import useIsMobile from "@/app/_hooks/useIsMobile";
+import { sanitizeText } from "@/lib/sanitize";
 import { useQueryClient } from "@tanstack/react-query";
 import { useInitializePayment } from "@/app/_hooks/queries/payment/payment";
 import { toast } from "sonner";
@@ -273,6 +274,38 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
   const queryClient = useQueryClient();
 
+  const syncChatSidebar = (previewMessage?: string, previewTime?: string) => {
+    if (roomName && previewMessage) {
+      queryClient.setQueryData<IGetActiveChatUsersResponseData>(
+        ["useGetActiveChatUsers"],
+        (old) => {
+          if (!old?.result) return old;
+
+          const updated = old.result.map((chat) =>
+            chat.chatRooomName === roomName
+              ? {
+                  ...chat,
+                  message: previewMessage,
+                  time: previewTime || new Date().toISOString(),
+                }
+              : chat
+          );
+
+          // Bump active room to top of the list
+          updated.sort((a, b) => {
+            if (a.chatRooomName === roomName) return -1;
+            if (b.chatRooomName === roomName) return 1;
+            return 0;
+          });
+
+          return { ...old, result: updated };
+        }
+      );
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+  };
+
   const {
     data,
     isLoading,
@@ -350,8 +383,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       });
     }
   }, [data]);
-
-  // console.log(messages, "121");
 
   const profileImageSrc = getImageSrcWithFallback(userProfileUrl, imageError);
 
@@ -475,15 +506,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         //   queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         // });
         connection.on("ReceiveMessage", (id, message) => {
-          console.log("ARG1", id);
-          console.log("ARG2", message);
-
-          console.log("ReceiveMessage fired", {
-            id,
-            message,
-            time: new Date().toISOString(),
-          });
-
           if (typeof message === "string") return;
 
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
@@ -497,10 +519,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             return typeMap[lowerType] || "Text";
           };
 
-          // 🛠️ FIX THE DATE FORMATTING BUG HERE
+          // Normalize short time strings like "14:02" into a full ISO datetime
           let safeDateTime = message.dateTime || new Date().toISOString();
 
-          // If the backend only sent a time string like "14:02", construct a valid ISO string
           if (
             safeDateTime.includes(":") &&
             !safeDateTime.includes("-") &&
@@ -511,7 +532,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             today.setHours(parseInt(hours, 10));
             today.setMinutes(parseInt(minutes, 10));
             today.setSeconds(0);
-            safeDateTime = today.toISOString(); // Converts "14:02" -> "2026-06-13T14:02:00.000Z"
+            safeDateTime = today.toISOString();
           }
 
           const incomingSenderId = String(message.senderId || id || "unknown").toLowerCase();
@@ -520,51 +541,23 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
           const transformedMessage: ChatListProps = {
             id: message.id || crypto.randomUUID(),
             message: message.message || message.content || "",
-            dateTime: safeDateTime, // <--- Now fully parseable and matchable!
+            dateTime: safeDateTime,
             status: message.status || "Sent",
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
             senderId: message.senderId || id || "unknown",
-            // isMe:
-            //   message.isMe !== undefined
-            //     ? message.isMe
-            //     : incomingSenderId === localizedCurrentUserId,
             isMe: incomingSenderId === localizedCurrentUserId,
           };
 
-          // setMessages((prev) => {
-          //   // Check duplicates safely using sanitized properties
-          //   const messageExists = prev.some(
-          //     (msg) =>
-          //       msg.message === transformedMessage.message &&
-          //       msg.senderId === transformedMessage.senderId
-          //     // Compare structural hour/minute components so slight latency shifts don't cause duplicates
-          //     // new Date(msg.dateTime).getHours() ===
-          //     //   new Date(transformedMessage.dateTime).getHours() &&
-          //     // new Date(msg.dateTime).getMinutes() ===
-          //     //   new Date(transformedMessage.dateTime).getMinutes()
-          //   );
-
-          //   if (messageExists) return prev;
-
-          //   const newMessages = [...prev, transformedMessage];
-          //   return newMessages.sort(
-          //     (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-          //   );
-          // });
           setMessages((prev) => {
-            // const messageExists = prev.some((m) => m.id === transformedMessage.id);
-
-            // if (messageExists) return prev;
-
-            // return [...prev, transformedMessage];
             const exists = prev.some((msg) => msg.id === transformedMessage.id);
             if (exists) return prev;
 
             return [...prev, transformedMessage];
           });
 
-          // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+          // Keep sidebar chat list in sync (preview + ordering)
+          syncChatSidebar(transformedMessage.message, transformedMessage.dateTime);
         });
       } catch (error) {
         console.error("Error setting up SignalR:", error);
@@ -627,10 +620,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const sendMessage = async (message: string, messageType: string = "Text") => {
     if (connection && roomName && currentUserId) {
       try {
-        await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
+        const safeMessage = messageType === "Text" ? sanitizeText(message) : message;
+        if (messageType === "Text" && !safeMessage) return;
+        await connection.invoke(
+          "SendMessageToRoom",
+          roomName,
+          currentUserId,
+          safeMessage,
+          messageType
+        );
 
-        // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-        // refetchRoomMessages();
+        syncChatSidebar(safeMessage);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -704,7 +704,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
       const payload = {
         reportType: watch("reportType"),
-        description: watch("description"),
+        description: sanitizeText(watch("description")),
         evidenceMediaFiles: uploaded,
         reportedUserId: userId,
       };
@@ -829,9 +829,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
           idx === prev.length - 1 && msg.status === "Sending" ? { ...msg, status: "Sent" } : msg
         )
       );
-
-      // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-      // refetchRoomMessages();
 
       setSelectedFiles([]);
       setUploadingFiles(new Set());

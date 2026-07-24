@@ -9,6 +9,7 @@ import { useReportUser } from "@/app/_hooks/queries/report/report";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
+import { sanitizeText } from "@/lib/sanitize";
 
 const REPORT_TYPES = ["Conflict", "Fraud", "Foul Language"] as const;
 
@@ -163,7 +164,7 @@ const ReportUserModal: FC<ReportUserModalProps> = ({
       reportUser({
         payload: {
           reportType,
-          description,
+          description: sanitizeText(description),
           evidenceMediaFiles: uploaded,
           reportedUserId,
         },

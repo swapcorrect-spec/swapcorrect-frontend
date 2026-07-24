@@ -7,6 +7,7 @@ import { Star } from "lucide-react";
 import { toast } from "sonner";
 import { useAddReview } from "@/app/_hooks/queries/review/review";
 import { useQueryClient } from "@tanstack/react-query";
+import { sanitizeText } from "@/lib/sanitize";
 
 type RateUserModalProps = {
   isOpen: boolean;
@@ -56,7 +57,8 @@ const RateUserModal: FC<RateUserModalProps> = ({
       toast.error("Please select a rating");
       return;
     }
-    if (!description.trim() || description.trim().length < 5) {
+    const cleanDescription = sanitizeText(description);
+    if (!cleanDescription || cleanDescription.length < 5) {
       toast.error("Please write a short review (at least 5 characters)");
       return;
     }
@@ -66,7 +68,7 @@ const RateUserModal: FC<RateUserModalProps> = ({
         dto: {
           raterId,
           userId,
-          description: description.trim(),
+          description: cleanDescription,
           rateScore,
         },
       },
