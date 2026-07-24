@@ -1,6 +1,6 @@
 "use client";
 
-import { FC } from "react";
+import { FC, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -11,6 +11,9 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { LogOut } from "lucide-react";
+import { toast } from "sonner";
+import { useLogout } from "@/app/_hooks/queries/auth/auth";
+import { ILogoutResponse } from "@/app/_hooks/queries/auth/auth.type";
 
 type LogoutConfirmModalProps = {
   isOpen: boolean;
@@ -19,8 +22,34 @@ type LogoutConfirmModalProps = {
 };
 
 const LogoutConfirmModal: FC<LogoutConfirmModalProps> = ({ isOpen, onClose, onConfirm }) => {
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
+  const { mutateAsync: logout } = useLogout({
+    onSuccess() {},
+    onError() {},
+  });
+
+  const handleLogout = async () => {
+    if (isLoggingOut) return;
+    setIsLoggingOut(true);
+    try {
+      const response = (await logout()) as ILogoutResponse;
+      toast.success(response?.result || response?.displayMessage || "Logged out successfully");
+      onConfirm();
+    } catch {
+      toast.error("Failed to log out. Clearing your session anyway.");
+      onConfirm();
+    } finally {
+      setIsLoggingOut(false);
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+    <Dialog
+      open={isOpen}
+      onOpenChange={(open) => {
+        if (!open && !isLoggingOut) onClose();
+      }}
+    >
       <DialogContent className="w-[95vw] max-w-md mx-auto rounded-xl">
         <div className="p-6">
           <DialogHeader>
@@ -33,12 +62,20 @@ const LogoutConfirmModal: FC<LogoutConfirmModalProps> = ({ isOpen, onClose, onCo
             </DialogDescription>
           </DialogHeader>
           <DialogFooter className="mt-6 gap-2 sm:gap-2">
-            <Button variant="outline" className="rounded-xl" onClick={onClose}>
+            <Button
+              type="button"
+              variant="outline"
+              className="rounded-xl"
+              onClick={onClose}
+              disabled={isLoggingOut}
+            >
               Cancel
             </Button>
             <Button
+              type="button"
               className="rounded-xl bg-[#E42222] hover:bg-[#CC1E1E] text-white gap-2"
-              onClick={onConfirm}
+              onClick={handleLogout}
+              loading={isLoggingOut}
             >
               <LogOut size={16} />
               Logout

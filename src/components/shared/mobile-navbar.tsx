@@ -15,7 +15,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import { notifyType } from "@/app/_constants/notifications";
@@ -29,6 +29,7 @@ import {
 import { useQueryClient } from "@tanstack/react-query";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
+import { useAuth } from "@/app/_context/auth-context";
 
 interface Props {
   data?: IGetUserInfoResponseData;
@@ -39,14 +40,15 @@ interface Props {
 const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const notificationContainerRef = useRef<HTMLDivElement>(null);
   const [isOpenNotifications, setIsOpenNotifications] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
   const [activeTab, setActiveTab] = useState("all");
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const isLoggedIn = isHydrated && isAuthenticated;
 
   const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
@@ -71,15 +73,9 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
-  useEffect(() => {
-    if (localStorage.getItem("comms-access-token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.clear();
+    clearAuth();
     setIsLogoutModalOpen(false);
     setIsOpen(false);
     router.push(`/${PATHS.LOGIN}`);

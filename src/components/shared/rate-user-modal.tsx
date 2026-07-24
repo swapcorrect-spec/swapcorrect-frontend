@@ -31,7 +31,7 @@ const RateUserModal: FC<RateUserModalProps> = ({
   const { mutate: addReview, isPending } = useAddReview({
     onSuccess(val: { displayMessage?: string; result?: string | null }) {
       toast.success(val?.displayMessage || val?.result || "Review submitted successfully!");
-      queryClient.invalidateQueries({ queryKey: ["useGetReviewsByRater", raterId, userId] });
+      queryClient.invalidateQueries({ queryKey: ["useGetUserReviews", userId] });
       onClose();
     },
     onError(err) {

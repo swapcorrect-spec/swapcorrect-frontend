@@ -21,19 +21,22 @@ import { PATHS } from "@/app/_constants/paths";
 import { loginPayload, validationSchema } from "@/app/(auth)/login/_validation";
 
 import { useLogin } from "@/app/_hooks/queries/auth/auth";
+import { useAuth } from "@/app/_context/auth-context";
+import { ILoginResponse } from "@/app/_hooks/queries/auth/auth.type";
 
 const Login: FC = () => {
   const router = useRouter();
+  const { setAuthTokens } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
 
   const toggleVisibility = () => setShowPassword((prev) => !prev);
 
   const { mutate, isPending } = useLogin({
-    onSuccess(_val: { displayMessage: string; result: { jwt: string } }) {
+    onSuccess(_val: ILoginResponse) {
+      setAuthTokens(_val.result.jwt, _val.result.refreshToken);
       toast.success(_val.displayMessage, {
         onAutoClose: () => {
-          localStorage.setItem("comms-access-token", _val.result.jwt);
           router.push(`${PATHS.DASHBOARD}`);
         },
       });

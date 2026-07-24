@@ -6,6 +6,7 @@ import {
   postRequest,
   putRequest,
 } from "@/app/_config/request-methods";
+import { Auth } from "@/app/_config/auth";
 
 import { MutationProps } from "@/app/_types/mutation-prop-types";
 
@@ -31,6 +32,7 @@ import {
   ChangePassword,
   DeleteUserPayload,
   IDeleteUserResponse,
+  ILogoutResponse,
 } from "@/app/_hooks/queries/auth/auth.type";
 import handleApiError from "@/app/_utils/handle-api-error";
 
@@ -314,6 +316,39 @@ export const useDeleteUser = (props: MutationProps) => {
 
   return {
     mutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useLogout = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, mutateAsync, isError, isSuccess, isPending } = useMutation({
+    mutationFn: async () => {
+      const token = Auth.getToken();
+      return postRequest<Record<string, never>, ILogoutResponse>({
+        url: "/auth/user/logout",
+        payload: {},
+        config: {
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+        },
+      });
+    },
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    mutateAsync,
     isError,
     isSuccess,
     isPending,

@@ -39,7 +39,7 @@ export type UserReviewItem = {
   raterProfilePicture?: string | null;
 };
 
-export interface IGetReviewsByRaterResponse {
+export interface IGetUserReviewsResponse {
   statusCode: number;
   displayMessage: string;
   result: UserReviewItem[] | UserReviewItem | null;

@@ -1,11 +1,11 @@
-import { getRequestParams, postRequest } from "@/app/_config/request-methods";
+import { getRequest, postRequest } from "@/app/_config/request-methods";
 import { MutationProps } from "@/app/_types/mutation-prop-types";
 import handleApiError from "@/app/_utils/handle-api-error";
 import { useMutation, useQuery } from "@tanstack/react-query";
 import {
   AddReviewPayload,
   IAddReviewResponse,
-  IGetReviewsByRaterResponse,
+  IGetUserReviewsResponse,
   UserReviewItem,
 } from "./review.type";
 
@@ -37,24 +37,17 @@ export const useAddReview = (props: MutationProps) => {
   };
 };
 
-export const useGetReviewsByRater = (props: {
-  userId: string;
-  raterId: string;
-  enabler: boolean;
-}) => {
-  const { userId, raterId, enabler } = props;
+/** Fetches reviews for a rated user (profile being viewed). */
+export const useGetUserReviews = (props: { ratedUserId: string; enabler: boolean }) => {
+  const { ratedUserId, enabler } = props;
 
   const { data, isError, isSuccess, isLoading, isFetching, error } = useQuery({
-    queryKey: ["useGetReviewsByRater", userId, raterId],
+    queryKey: ["useGetUserReviews", ratedUserId],
     queryFn: () =>
-      getRequestParams<{ userId: string; raterId: string }, IGetReviewsByRaterResponse>({
-        url: "/UserReview/Review/review_by_rater",
-        params: {
-          userId,
-          raterId,
-        },
+      getRequest<IGetUserReviewsResponse>({
+        url: `/UserReview/Review/${ratedUserId}`,
       }),
-    enabled: !!enabler && !!userId && !!raterId,
+    enabled: !!enabler && !!ratedUserId,
   });
 
   const raw = data?.result;

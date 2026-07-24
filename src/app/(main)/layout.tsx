@@ -7,7 +7,6 @@ import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
 import { PATHS } from "../_constants/paths";
 import { useGetUserInfo, useUpdateRole } from "../_hooks/queries/auth/auth";
-import { Auth } from "../_config/auth";
 import { CircularProgress } from "@/components/shared/circular-progress";
 import useIsMobile from "../_hooks/useIsMobile";
 import MobileNavbar from "@/components/shared/mobile-navbar";
@@ -15,6 +14,7 @@ import { Dialog, DialogContent, DialogOverlay } from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/app/_context/auth-context";
 
 const ConfirmModal = ({
   handleToggleSwapperUpgrade,
@@ -72,13 +72,12 @@ const ConfirmModal = ({
 };
 
 export default function MainLayout({ children }: { children: ReactNode }) {
-  const { isFetching, data } = useGetUserInfo({ enabler: true });
+  const { isAuthenticated, isHydrated } = useAuth();
+  const { isFetching, data } = useGetUserInfo({ enabler: isHydrated && isAuthenticated });
   const isMobile = useIsMobile();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isToggleUpgrade, setIsToggleUpgrade] = useState(false);
-
-  const isAuthenticated = Auth.isAuthenticated();
 
   // const user_role =
   //   Auth.getDecodedJwt()["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
@@ -91,7 +90,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     setIsToggleUpgrade(!isToggleUpgrade);
   };
 
-  if (isFetching) {
+  if (!isHydrated || (isAuthenticated && isFetching)) {
     return (
       <div className="text-center mt-4 flex flex-col items-center justify-center">
         <CircularProgress color="#007AFF" size={40} />

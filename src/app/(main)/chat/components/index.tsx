@@ -31,8 +31,13 @@ const ChatRoom: React.FC = () => {
   const transactionRef = searchParams.get("trxref") || "";
   const paymentRef = searchParams.get("reference") || "";
 
-  const [isShowChat, setIsShowChat] = useState(false);
+  const [isShowChat, setIsShowChat] = useState(() => !!roomName);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+
+  // Keep mobile pane in sync with URL (deep link, refresh, back, My Swaps → chat)
+  useEffect(() => {
+    setIsShowChat(!!roomName);
+  }, [roomName]);
 
   const cleanPaymentParams = () => {
     const params = new URLSearchParams(searchParams.toString());
@@ -100,7 +105,7 @@ const ChatRoom: React.FC = () => {
   if (isLoading) {
     return (
       <section className="flex h-[calc(100vh-72px)]">
-        <div className="max-w-[426px] w-full h-full flex flex-col border-r border-[#EEEEEE]">
+        <div className="w-full h-full flex flex-col border-r border-[#EEEEEE] md:max-w-[426px]">
           <div className={`sticky top-0 z-10 p-4 bg-white border-b border-[#EEEEEE]`}>
             <div className={`flex justify-between items-center mb-4`}>
               <h2 className={`text-base text-[#007AFF] capitalize`}>CHAT</h2>
@@ -154,8 +159,8 @@ const ChatRoom: React.FC = () => {
       <section className="flex h-[calc(100vh-72px)]">
         <div
           className={`
-    max-w-[426px] w-full h-full flex flex-col border-r border-[#EEEEEE]
-    ${isShowChat ? "hidden md:flex" : "flex"} 
+    w-full h-full flex-col border-r border-[#EEEEEE] md:max-w-[426px]
+    ${isShowChat ? "hidden md:flex" : "flex"}
   `}
         >
           <div className={`sticky top-0 z-1 p-4 bg-white border-b border-[#EEEEEE]`}>
@@ -186,8 +191,8 @@ const ChatRoom: React.FC = () => {
         </div>
         <div
           className={`
-    flex-1 h-full
-    ${isShowChat ? "flex md:flex" : "hidden md:flex"}
+    flex-1 h-full min-w-0 w-full
+    ${isShowChat ? "flex" : "hidden md:flex"}
   `}
         >
           {roomName ? (

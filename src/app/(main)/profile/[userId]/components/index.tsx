@@ -1,6 +1,6 @@
 "use client";
 
-import { useGetReviewsByRater } from "@/app/_hooks/queries/review/review";
+import { useGetUserReviews } from "@/app/_hooks/queries/review/review";
 import Reviews from "@/components/widget/review";
 import { useGetGeneralUserInfo, useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
@@ -34,10 +34,9 @@ const UserProfile: React.FC = () => {
   const { data: userData } = useGetUserInfo({ enabler: true });
   const loggedInUserserId = userData?.result?.id;
 
-  const { data: reviews, isLoading: isReviewsLoading } = useGetReviewsByRater({
-    userId: loggedInUserserId || "",
-    raterId: userId,
-    enabler: !!userId && !!loggedInUserserId,
+  const { data: reviews, isLoading: isReviewsLoading } = useGetUserReviews({
+    ratedUserId: userId,
+    enabler: !!userId,
   });
 
   const { data: itemsData, isLoading: itemsLoading } = useSearchItems({

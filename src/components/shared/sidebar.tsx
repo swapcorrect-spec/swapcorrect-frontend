@@ -15,6 +15,7 @@ import { ArrowLeftRight, LayoutDashboard, ListCheck, LogOut, X } from "lucide-re
 import { useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
+import { useAuth } from "@/app/_context/auth-context";
 
 type Props = {
   handleToggleMenu?: () => void;
@@ -25,6 +26,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
   const path = usePathname();
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { clearAuth } = useAuth();
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
 
   const SIDEBAR_LIST = [
@@ -82,7 +84,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
 
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.clear();
+    clearAuth();
     setIsLogoutModalOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };

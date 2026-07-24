@@ -13,20 +13,20 @@ import {
 import Marketplace from "@/components/shared/marketplace";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import Banner from "@/app/assets/images/pngs/mobile_ad.png";
-import { Auth } from "@/app/_config/auth";
+import { useAuth } from "@/app/_context/auth-context";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { IProduct } from "@/interface/IProduct";
 
 const HomePage: FC = () => {
   const isMobile = useIsMobile();
-  const isAuthenticated = Auth.isAuthenticated();
+  const { isAuthenticated, isHydrated } = useAuth();
   const {
     data: userData,
     isLoading,
     isError,
     error,
   } = useGetUserInfo({
-    enabler: isAuthenticated,
+    enabler: isHydrated && isAuthenticated,
   });
   const userId = userData?.result?.id;
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({

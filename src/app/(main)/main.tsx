@@ -5,16 +5,16 @@ import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
 import { PATHS } from "../_constants/paths";
-import { Auth } from "../_config/auth";
+import { useAuth } from "@/app/_context/auth-context";
 
 export default function Main({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const isAuthenticated = Auth.isAuthenticated();
+  const { isAuthenticated, isHydrated } = useAuth();
 
-  if (!isAuthenticated) {
+  if (isHydrated && !isAuthenticated) {
     redirect(`/${PATHS.LOGIN}`);
   }
 

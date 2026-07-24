@@ -17,28 +17,57 @@ const AuthLocalStorageObject = {
   session_id: "comms-session_id",
 };
 
+type AuthListener = () => void;
+
+const listeners = new Set<AuthListener>();
+
+const notifyAuthListeners = () => {
+  listeners.forEach((listener) => listener());
+};
+
 export class Auth {
+  static subscribe(listener: AuthListener) {
+    listeners.add(listener);
+    return () => {
+      listeners.delete(listener);
+    };
+  }
+
   static setToken(token: string) {
     localStorage.setItem(AuthLocalStorageObject.access, token);
+    notifyAuthListeners();
   }
 
   static setRefreshToken(token: string) {
     localStorage.setItem(AuthLocalStorageObject.refresh, token);
+    notifyAuthListeners();
+  }
+
+  static setAuthTokens(accessToken: string, refreshToken?: string | null) {
+    localStorage.setItem(AuthLocalStorageObject.access, accessToken);
+    if (refreshToken) {
+      localStorage.setItem(AuthLocalStorageObject.refresh, refreshToken);
+    }
+    notifyAuthListeners();
   }
 
   static setSessionToken(session_id: string) {
     localStorage.setItem(AuthLocalStorageObject.session_id, session_id);
+    notifyAuthListeners();
   }
 
   static getToken() {
+    if (typeof window === "undefined") return null;
     return localStorage.getItem(AuthLocalStorageObject.access);
   }
 
   static getRefreshToken() {
+    if (typeof window === "undefined") return null;
     return localStorage.getItem(AuthLocalStorageObject.refresh);
   }
 
   static getSessionToken() {
+    if (typeof window === "undefined") return null;
     return localStorage.getItem(AuthLocalStorageObject.session_id);
   }
 
@@ -69,13 +98,20 @@ export class Auth {
 
   static isAuthenticated() {
     try {
-      const decodedToken = this.getDecodedJwt();
+      const token = this.getToken();
+      if (!token) return false;
+
+      const decodedToken = this.getDecodedJwt(token);
       const hasProperties = decodedToken && Object.keys(decodedToken).length > 0;
       if (hasProperties) {
         const { exp } = decodedToken;
         const currentTime = Date.now() / 1000;
         if (exp) {
-          return exp > currentTime;
+          // Still treat as authenticated if we have a refresh token to renew with
+          if (exp <= currentTime) {
+            return !!this.getRefreshToken();
+          }
+          return true;
         }
         return true;
       }
@@ -86,8 +122,15 @@ export class Auth {
     }
   }
 
+  static hasSession() {
+    return !!this.getToken() || !!this.getRefreshToken();
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   static removeToken() {
-    localStorage.clear();
+    localStorage.removeItem(AuthLocalStorageObject.access);
+    localStorage.removeItem(AuthLocalStorageObject.refresh);
+    localStorage.removeItem(AuthLocalStorageObject.session_id);
+    notifyAuthListeners();
   }
 }

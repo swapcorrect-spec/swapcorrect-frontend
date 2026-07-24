@@ -25,7 +25,7 @@ import {
   // mockNotifications,
   notifyType,
 } from "@/app/_constants/notifications";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
 import {
@@ -34,6 +34,7 @@ import {
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
+import { useAuth } from "@/app/_context/auth-context";
 // import { Auth } from "@/app/_config/auth";
 
 interface Props {
@@ -53,12 +54,13 @@ const Navbar: React.FC<Props> = ({
 }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const notificationContainerRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOpenNotifications, setIsOpenNotifications] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
   const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const isLoggedIn = isHydrated && isAuthenticated;
   const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
     data: notificationsResponse,
@@ -82,12 +84,6 @@ const Navbar: React.FC<Props> = ({
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
-  useEffect(() => {
-    if (localStorage.getItem("comms-access-token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
   const handleLogin = () => {
     router.push(`/${PATHS.LOGIN}`);
   };
@@ -98,7 +94,7 @@ const Navbar: React.FC<Props> = ({
 
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.clear();
+    clearAuth();
     setIsLogoutModalOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };

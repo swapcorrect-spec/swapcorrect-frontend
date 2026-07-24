@@ -29,7 +29,7 @@ import { useCloseSwap } from "@/app/_hooks/queries/swap/swap";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
 import { useGetChatRoomMessages } from "@/app/_hooks/queries/chat/chat";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import * as signalR from "@microsoft/signalr";
 import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
@@ -228,6 +228,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const REPORT_TYPES = ["Conflict", "Fraud", "Foul Language"] as const;
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const roomName = searchParams.get("roomName") || "";
 
   const { data: currentUserData } = useGetUserInfo({
@@ -874,14 +876,25 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   //   .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
   return (
-    <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
+    <section className="border border-[#EEEEEE] border-t-0 h-full w-full min-w-0 flex flex-col flex-1">
       <div
         className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
       >
         <div className="flex flex-row justify-between items-center md:flex-row md:items-center gap-3 w-full">
           <div>
             <div className="flex items-center gap-2">
-              {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
+              {isMobile && (
+                <ArrowLeft
+                  className="cursor-pointer shrink-0"
+                  onClick={() => {
+                    setIsShowChat(false);
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete("roomName");
+                    const query = params.toString();
+                    router.replace(query ? `${pathname}?${query}` : pathname);
+                  }}
+                />
+              )}
               <Link
                 href={`/profile/${userId}`}
                 className="flex items-center gap-2 hover:opacity-80 transition-opacity"
