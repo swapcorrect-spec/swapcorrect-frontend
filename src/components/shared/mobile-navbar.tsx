@@ -1,9 +1,17 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard, ArrowLeftRight, ListCheck, Flag, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/app/assets/images/svgs/logo_mobile.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
+import HomeOutline from "@/app/assets/images/svgs/home_outline.svg";
+import HomeFilled from "@/app/assets/images/svgs/home_filled.svg";
+import ChatOutline from "@/app/assets/images/svgs/chat_outline.svg";
+import ChatFilled from "@/app/assets/images/svgs/chat_filled.svg";
+import SaveOutline from "@/app/assets/images/svgs/save_outline.svg";
+import SaveFilled from "@/app/assets/images/svgs/save_filled.svg";
+import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
+import CategoryFilled from "@/app/assets/images/svgs/category_filled.svg";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
-import { FC, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FC, ReactNode, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import { notifyType } from "@/app/_constants/notifications";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
@@ -39,6 +47,7 @@ interface Props {
 
 const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
@@ -84,6 +93,83 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
   const handleLogin = () => {
     router.push(`/${PATHS.LOGIN}`);
   };
+
+  const isRouteActive = (link: string) => {
+    if (link === PATHS.HOME) return pathname === link;
+    return pathname === link || pathname.startsWith(`${link}/`);
+  };
+
+  const mobileNavItems: {
+    title: string;
+    link: string;
+    iconFilled: ReactNode;
+    iconOutline: ReactNode;
+    requiresAuth?: boolean;
+    swapperOnly?: boolean;
+  }[] = [
+    {
+      title: "Home",
+      link: PATHS.HOME,
+      iconFilled: <HomeFilled />,
+      iconOutline: <HomeOutline />,
+    },
+    {
+      title: "Dashboard",
+      link: PATHS.DASHBOARD,
+      iconFilled: <LayoutDashboard size={22} color="#007AFF" strokeWidth={2.25} />,
+      iconOutline: <LayoutDashboard size={22} color="currentColor" strokeWidth={2} />,
+      requiresAuth: true,
+    },
+    {
+      title: "Category",
+      link: PATHS.CATEGORY,
+      iconFilled: <CategoryFilled />,
+      iconOutline: <CategoryOutline />,
+    },
+    {
+      title: "My Swaps",
+      link: PATHS.SWAPS,
+      iconFilled: <ArrowLeftRight size={22} color="#007AFF" />,
+      iconOutline: <ArrowLeftRight size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+    {
+      title: "Saves",
+      link: PATHS.SAVES,
+      iconFilled: <SaveFilled />,
+      iconOutline: <SaveOutline />,
+      requiresAuth: true,
+    },
+    {
+      title: "My Listing",
+      link: PATHS.MYLISTING,
+      iconFilled: <ListCheck size={22} color="#007AFF" />,
+      iconOutline: <ListCheck size={22} color="currentColor" />,
+      requiresAuth: true,
+      swapperOnly: true,
+    },
+    {
+      title: "Chat",
+      link: PATHS.CHAT,
+      iconFilled: <ChatFilled />,
+      iconOutline: <ChatOutline />,
+      requiresAuth: true,
+    },
+    {
+      title: "Reports",
+      link: PATHS.REPORTS,
+      iconFilled: <Flag size={22} color="#007AFF" fill="#007AFF" />,
+      iconOutline: <Flag size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+    {
+      title: "Settings",
+      link: "/settings",
+      iconFilled: <Settings size={22} color="#007AFF" />,
+      iconOutline: <Settings size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+  ];
 
   // const handleOpenNotifications = () => {
   //   setIsOpenNotifications(!isOpenNotifications);
@@ -286,37 +372,29 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 px-4 py-6 text-gray-700">
-              <a href={PATHS.HOME} className="hover:text-[#007AFF] transition">
-                Home
-              </a>
-              <a href={PATHS.CATEGORY} className="hover:text-[#007AFF] transition">
-                Category
-              </a>
-              {isLoggedIn && (
-                <>
-                  <a href={PATHS.DASHBOARD} className="hover:text-[#007AFF] transition">
-                    Dashboard
-                  </a>
-                  <a href={PATHS.SAVES} className="hover:text-[#007AFF] transition">
-                    Saves
-                  </a>
-                  {data && data?.result?.userRole[0] === "Swapper" && (
-                    <a href={PATHS.MYLISTING} className="hover:text-[#007AFF] transition">
-                      My Listing
+            <div className="flex flex-col gap-1 px-4 py-6 text-gray-700">
+              {mobileNavItems
+                .filter((item) => {
+                  if (item.requiresAuth && !isLoggedIn) return false;
+                  if (item.swapperOnly && data?.result?.userRole[0] !== "Swapper") return false;
+                  return true;
+                })
+                .map(({ title, link, iconFilled, iconOutline }) => {
+                  const isActive = isRouteActive(link);
+
+                  return (
+                    <a
+                      key={link}
+                      href={link}
+                      className={`flex items-center gap-3 py-2.5 font-medium transition ${
+                        isActive ? "text-[#007AFF] font-semibold" : "hover:text-[#007AFF]"
+                      }`}
+                    >
+                      {isActive ? iconFilled : iconOutline}
+                      {title}
                     </a>
-                  )}
-                  <a href={PATHS.CHAT} className="hover:text-[#007AFF] transition">
-                    Chat
-                  </a>
-                  <a href={PATHS.REPORTS} className="hover:text-[#007AFF] transition">
-                    Reports
-                  </a>
-                  <a href="/settings" className="hover:text-[#007AFF] transition">
-                    Settings
-                  </a>
-                </>
-              )}
+                  );
+                })}
               {role === "Visitor" ? (
                 <Button
                   variant={"default"}
