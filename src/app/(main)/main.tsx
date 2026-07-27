@@ -1,6 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
@@ -13,9 +14,16 @@ export default function Main({
   children: React.ReactNode;
 }>) {
   const { isAuthenticated, isHydrated } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
 
   if (isHydrated && !isAuthenticated) {
-    redirect(`/${PATHS.LOGIN}`);
+    return null;
   }
 
   return (

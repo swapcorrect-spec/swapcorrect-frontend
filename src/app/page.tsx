@@ -10,15 +10,17 @@ import {
   useGetElectronicsItems,
 } from "./_hooks/queries/listing/listing";
 import { PATHS } from "./_constants/paths";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Footer from "@/components/shared/footer";
 import useIsMobile from "./_hooks/useIsMobile";
 import MobileNavbar from "@/components/shared/mobile-navbar";
 import { IProduct } from "@/interface/IProduct";
 import { useAuth } from "@/app/_context/auth-context";
+import { useEffect } from "react";
 
 export default function Home() {
   const { isAuthenticated, isHydrated } = useAuth();
+  const router = useRouter();
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
     enabler: true,
   });
@@ -31,8 +33,14 @@ export default function Home() {
   const isMobile = useIsMobile();
   const loggedIn = isHydrated && isAuthenticated;
 
+  useEffect(() => {
+    if (loggedIn) {
+      router.replace(`${PATHS.DASHBOARD}`);
+    }
+  }, [loggedIn, router]);
+
   if (loggedIn) {
-    redirect(`${PATHS.DASHBOARD}`);
+    return null;
   }
   return (
     <>

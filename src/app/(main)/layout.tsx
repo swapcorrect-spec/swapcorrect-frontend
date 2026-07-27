@@ -1,7 +1,7 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
@@ -74,6 +74,7 @@ const ConfirmModal = ({
 export default function MainLayout({ children }: { children: ReactNode }) {
   const { isAuthenticated, isHydrated } = useAuth();
   const { isFetching, data } = useGetUserInfo({ enabler: isHydrated && isAuthenticated });
+  const router = useRouter();
   const isMobile = useIsMobile();
 
   const [isOpen, setIsOpen] = useState(false);
@@ -90,6 +91,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     setIsToggleUpgrade(!isToggleUpgrade);
   };
 
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
   if (!isHydrated || (isAuthenticated && isFetching)) {
     return (
       <div className="text-center mt-4 flex flex-col items-center justify-center">
@@ -99,7 +106,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    redirect(`/${PATHS.LOGIN}`);
+    return null;
   }
 
   return (

@@ -102,18 +102,18 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
   };
 
   return (
-    <section className="max-w-[99px] w-full border border-[#D9D9D9] bg-white z-50 h-screen py-7 relative top-0 flex flex-col">
-      <div className="mb-20 flex items-center justify-center shrink-0">
+    <section className="max-w-[99px] w-full border border-[#D9D9D9] bg-white z-50 h-screen py-7 relative top-0 flex flex-col overflow-hidden">
+      <div className="mb-8 flex items-center justify-center shrink-0">
         <X className="cursor-pointer" onClick={handleToggleMenu} />
       </div>
 
-      <ul className="flex flex-col gap-6 items-center justify-center flex-1 overflow-y-auto min-h-0">
+      <ul className="flex flex-col gap-4 items-center justify-start flex-1 overflow-y-auto min-h-0 pt-2">
         {SIDEBAR_LIST.filter((item) => !item.hideFor?.includes(role as string)).map(
           ({ title, iconFilled, iconOutline, link }, index) => {
             const isActive = isRouteActive(link);
 
             return (
-              <li key={index}>
+              <li key={index} className="shrink-0">
                 <Link href={link} className="flex flex-col items-center">
                   <span
                     className={`hover:bg-[#F1F8FF] px-1.5 py-[6px] rounded-lg flex items-center justify-center ${
