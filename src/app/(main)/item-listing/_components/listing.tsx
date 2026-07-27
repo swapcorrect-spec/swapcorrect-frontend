@@ -87,8 +87,8 @@ const Listing: FC<Props> = ({
   };
 
   return (
-    <div className="rounded-xl hover:border hover:border-[#e3e0e0] cursor-pointer p-2">
-      <div className="mb-4 w-full h-[350px] relative transition-all duration-200 rounded-xl">
+    <div className="rounded-xl hover:border hover:border-[#e3e0e0] cursor-pointer p-1.5">
+      <div className="mb-2 w-full h-[140px] md:h-[160px] relative transition-all duration-200 rounded-xl overflow-hidden">
         {isVideo ? (
           <ReactPlayer
             src={typeof mediaUrl === "string" ? mediaUrl : ""}
@@ -111,75 +111,77 @@ const Listing: FC<Props> = ({
           />
         )}
       </div>
-      <div className="flex flex-col gap-1 mt-2 mb-3">
-        <div className="flex justify-between items-center">
-          <h6 className="text-xl font-medium">{name}</h6>
-          <p className="text-[#222222] rounded-full font-medium text-xs px-2 py-1 border border-[#E9E9E9]">
+      <div className="flex flex-col gap-1 mt-1 mb-2">
+        <div className="flex justify-between items-center gap-2">
+          <h6 className="text-base font-medium truncate">{name}</h6>
+          <p className="text-[#222222] rounded-full font-medium text-[10px] px-2 py-0.5 border border-[#E9E9E9] shrink-0">
             {status}
           </p>
         </div>
         {categoryName && (
-          <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-1">
+          <p className="text-[#007AFF] font-medium text-[11px] bg-[#007AFF]/10 px-2 py-0.5 rounded-full w-fit">
             {categoryName}
           </p>
         )}
-        <p className="text-[#737373] text-sm font-normal">{description}</p>
-        <div className="flex justify-between items-center my-2">
-          <p className="font-medium text-[#007AFF]">{price}</p>
-          <span className="text-[#222222] bg-[#FAFAFA] rounded-full text-xs px-2 py-1 border border-[#E9E9E9]">
+        <p className="text-[#737373] text-xs font-normal line-clamp-2">{description}</p>
+        <div className="flex justify-between items-center my-1">
+          <p className="font-medium text-sm text-[#007AFF]">{price}</p>
+          <span className="text-[#222222] bg-[#FAFAFA] rounded-full text-[10px] px-2 py-0.5 border border-[#E9E9E9]">
             {type}
           </span>
         </div>
-        <div className="flex items-start gap-2 mb-2">
-          <h6 className="text-[#222222] text-sm font-medium">Wants:</h6>
+        <div className="flex items-start gap-1.5 mb-1 min-h-[20px]">
+          <h6 className="text-[#222222] text-xs font-medium shrink-0">Wants:</h6>
           {wants && wants.length > 0 ? (
-            <ul className="flex justify-center items-center flex-wrap gap-1 text-[#737373] text-sm">
+            <ul className="flex items-center flex-wrap gap-1 text-[#737373] text-xs">
               {wants.map((item, index: number) => (
                 <li key={index} className="flex items-center">
                   {item}
                   {index !== wants.length - 1 && (
-                    <span className="mx-2 w-1 h-1 rounded-full bg-[#000000]"></span>
+                    <span className="mx-1.5 w-1 h-1 rounded-full bg-[#000000]"></span>
                   )}
                 </li>
               ))}
             </ul>
           ) : (
-            <span className="text-[#737373] text-sm">None</span>
+            <span className="text-[#737373] text-xs">None</span>
           )}
         </div>
       </div>
-      <div className="rounded-xl mb-4 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-        <div className="flex items-center gap-2">
-          <Avatar>
+      <div className="rounded-lg mb-2 text-[#222222] gap-2 px-2 py-1.5 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
+        <div className="flex items-center gap-2 min-w-0">
+          <Avatar className="h-7 w-7">
             <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
           </Avatar>
-          <p className="font-medium">{displayAuthor}</p>
+          <p className="font-medium text-sm truncate">{displayAuthor}</p>
         </div>
-        <p className="flex items-center gap-1">
+        <p className="flex items-center gap-1 text-xs shrink-0">
           {displayRating.toFixed(1)} <Rating />
         </p>
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-1.5">
         {listingId ? (
           <Link href={`/item-listing/${listingId}`}>
-            <Button className="" variant={"outline"}>
+            <Button className="!h-8 text-xs px-3" variant={"outline"}>
               Edit
             </Button>
           </Link>
         ) : (
-          <Button className="" variant={"outline"} disabled>
+          <Button className="!h-8 text-xs px-3" variant={"outline"} disabled>
             Edit
           </Button>
         )}
-        <Button variant={"outline"} onClick={() => setShowDeleteModal(true)}>
+        <Button className="!h-8 text-xs px-3" variant={"outline"} onClick={() => setShowDeleteModal(true)}>
           Delete
         </Button>
         {listingId ? (
           <Link href={`/listing/${listingId}`}>
-            <Button variant={"outline"}>View</Button>
+            <Button className="!h-8 text-xs px-3" variant={"outline"}>
+              View
+            </Button>
           </Link>
         ) : (
-          <Button variant={"outline"} disabled>
+          <Button className="!h-8 text-xs px-3" variant={"outline"} disabled>
             View
           </Button>
         )}

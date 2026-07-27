@@ -152,11 +152,11 @@ export default function MySwaps() {
   };
 
   return (
-    <div className="w-[90%] mx-auto my-10">
+    <div className="w-full px-4 md:w-[90%] md:mx-auto md:px-0 my-6 md:my-10">
       <div className="flex items-end justify-between my-2">
         <Title title="MY SWAP" description="Track all your swap interactions." />
       </div>
-      <div className="my-8">
+      <div className="my-6 md:my-8">
         <FilterMenu
           categoryList={categoryList}
           locationList={locationList}
@@ -183,7 +183,7 @@ export default function MySwaps() {
         </div>
       ) : swapList.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-3 border border-[#E9E9E9] rounded-lg p-3">
+          <div className="grid grid-cols-1 gap-3 md:border md:border-[#E9E9E9] md:rounded-lg md:p-3">
             {swapList.map((item) => (
               <SwapCardItem key={item.key} item={item} getStatusColor={getStatusColor} />
             ))}

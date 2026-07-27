@@ -159,6 +159,7 @@ export const useSearchItems = (props: {
       listingDate,
       pageNumber,
       perpageSize,
+      listingUserId,
       userId,
     ],
     queryFn: async ({ signal }) =>
