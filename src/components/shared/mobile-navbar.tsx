@@ -1,9 +1,17 @@
 "use client";
 
-import { Menu, X } from "lucide-react";
+import { Menu, X, LayoutDashboard, ArrowLeftRight, ListCheck, Flag, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Logo from "@/app/assets/images/svgs/logo_mobile.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
+import HomeOutline from "@/app/assets/images/svgs/home_outline.svg";
+import HomeFilled from "@/app/assets/images/svgs/home_filled.svg";
+import ChatOutline from "@/app/assets/images/svgs/chat_outline.svg";
+import ChatFilled from "@/app/assets/images/svgs/chat_filled.svg";
+import SaveOutline from "@/app/assets/images/svgs/save_outline.svg";
+import SaveFilled from "@/app/assets/images/svgs/save_filled.svg";
+import CategoryOutline from "@/app/assets/images/svgs/category_outline.svg";
+import CategoryFilled from "@/app/assets/images/svgs/category_filled.svg";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -15,8 +23,8 @@ import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
 import Link from "next/link";
 import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
-import { FC, useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { FC, ReactNode, useRef, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
 import { PATHS } from "@/app/_constants/paths";
 import { notifyType } from "@/app/_constants/notifications";
 import { Tabs, TabsList, TabsTrigger } from "@radix-ui/react-tabs";
@@ -28,6 +36,8 @@ import {
 } from "@/app/_hooks/queries/notification/notification";
 import { useQueryClient } from "@tanstack/react-query";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
+import { useAuth } from "@/app/_context/auth-context";
 
 interface Props {
   data?: IGetUserInfoResponseData;
@@ -37,16 +47,19 @@ interface Props {
 
 const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const notificationContainerRef = useRef<HTMLDivElement>(null);
   const [isOpenNotifications, setIsOpenNotifications] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
   const [activeTab, setActiveTab] = useState("all");
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const isLoggedIn = isHydrated && isAuthenticated;
 
-  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: true });
+  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
     data: notificationsResponse,
     fetchNextPage,
@@ -55,7 +68,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
     isFetching: isNotificationFetching,
   } = useGetNotifications({
     unreadOnly,
-    enabler: isOpenNotifications,
+    enabler: isOpenNotifications && isLoggedIn,
   });
   const { mutate, isPending: isReadNotificationPending } = useReadNotification({
     onSuccess() {
@@ -69,21 +82,94 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
-  useEffect(() => {
-    if (localStorage.getItem("comms-access-token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.clear();
+    clearAuth();
+    setIsLogoutModalOpen(false);
+    setIsOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };
 
   const handleLogin = () => {
     router.push(`/${PATHS.LOGIN}`);
   };
+
+  const isRouteActive = (link: string) => {
+    if (link === PATHS.HOME) return pathname === link;
+    return pathname === link || pathname.startsWith(`${link}/`);
+  };
+
+  const mobileNavItems: {
+    title: string;
+    link: string;
+    iconFilled: ReactNode;
+    iconOutline: ReactNode;
+    requiresAuth?: boolean;
+    swapperOnly?: boolean;
+  }[] = [
+    {
+      title: "Home",
+      link: PATHS.HOME,
+      iconFilled: <HomeFilled />,
+      iconOutline: <HomeOutline />,
+    },
+    {
+      title: "Dashboard",
+      link: PATHS.DASHBOARD,
+      iconFilled: <LayoutDashboard size={22} color="#007AFF" strokeWidth={2.25} />,
+      iconOutline: <LayoutDashboard size={22} color="currentColor" strokeWidth={2} />,
+      requiresAuth: true,
+    },
+    {
+      title: "Category",
+      link: PATHS.CATEGORY,
+      iconFilled: <CategoryFilled />,
+      iconOutline: <CategoryOutline />,
+    },
+    {
+      title: "My Swaps",
+      link: PATHS.SWAPS,
+      iconFilled: <ArrowLeftRight size={22} color="#007AFF" />,
+      iconOutline: <ArrowLeftRight size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+    {
+      title: "Saves",
+      link: PATHS.SAVES,
+      iconFilled: <SaveFilled />,
+      iconOutline: <SaveOutline />,
+      requiresAuth: true,
+    },
+    {
+      title: "My Listing",
+      link: PATHS.MYLISTING,
+      iconFilled: <ListCheck size={22} color="#007AFF" />,
+      iconOutline: <ListCheck size={22} color="currentColor" />,
+      requiresAuth: true,
+      swapperOnly: true,
+    },
+    {
+      title: "Chat",
+      link: PATHS.CHAT,
+      iconFilled: <ChatFilled />,
+      iconOutline: <ChatOutline />,
+      requiresAuth: true,
+    },
+    {
+      title: "Reports",
+      link: PATHS.REPORTS,
+      iconFilled: <Flag size={22} color="#007AFF" fill="#007AFF" />,
+      iconOutline: <Flag size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+    {
+      title: "Settings",
+      link: "/settings",
+      iconFilled: <Settings size={22} color="#007AFF" />,
+      iconOutline: <Settings size={22} color="currentColor" />,
+      requiresAuth: true,
+    },
+  ];
 
   // const handleOpenNotifications = () => {
   //   setIsOpenNotifications(!isOpenNotifications);
@@ -124,9 +210,12 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
           >
             <Menu className="h-6 w-6 text-gray-700" />
           </button>
-          <div className="flex items-center gap-2">
+          <Link
+            href={isLoggedIn ? PATHS.DASHBOARD : "/"}
+            className="flex items-center gap-2"
+          >
             <Logo />
-          </div>
+          </Link>
         </div>
 
         {isLoggedIn ? (
@@ -244,7 +333,9 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                     <DropdownMenuItem asChild>
                       <Link href="/settings">Settings</Link>
                     </DropdownMenuItem>
-                    <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+                      Logout
+                    </DropdownMenuItem>
                   </DropdownMenuGroup>
                 </DropdownMenuContent>
               </DropdownMenu>
@@ -281,34 +372,29 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
               </button>
             </div>
 
-            <div className="flex flex-col gap-4 px-4 py-6 text-gray-700">
-              <a href={PATHS.HOME} className="hover:text-[#007AFF] transition">
-                Home
-              </a>
-              <a href={PATHS.CATEGORY} className="hover:text-[#007AFF] transition">
-                Category
-              </a>
-              {isLoggedIn && (
-                <>
-                  <a href={PATHS.DASHBOARD} className="hover:text-[#007AFF] transition">
-                    Dashboard
-                  </a>
-                  <a href={PATHS.SAVES} className="hover:text-[#007AFF] transition">
-                    Saves
-                  </a>
-                  {data && data?.result?.userRole[0] === "Swapper" && (
-                    <a href={PATHS.MYLISTING} className="hover:text-[#007AFF] transition">
-                      My Listing
+            <div className="flex flex-col gap-1 px-4 py-6 text-gray-700">
+              {mobileNavItems
+                .filter((item) => {
+                  if (item.requiresAuth && !isLoggedIn) return false;
+                  if (item.swapperOnly && data?.result?.userRole[0] !== "Swapper") return false;
+                  return true;
+                })
+                .map(({ title, link, iconFilled, iconOutline }) => {
+                  const isActive = isRouteActive(link);
+
+                  return (
+                    <a
+                      key={link}
+                      href={link}
+                      className={`flex items-center gap-3 py-2.5 font-medium transition ${
+                        isActive ? "text-[#007AFF] font-semibold" : "hover:text-[#007AFF]"
+                      }`}
+                    >
+                      {isActive ? iconFilled : iconOutline}
+                      {title}
                     </a>
-                  )}
-                  <a href={PATHS.CHAT} className="hover:text-[#007AFF] transition">
-                    Chat
-                  </a>
-                  <a href="/settings" className="hover:text-[#007AFF] transition">
-                    Settings
-                  </a>
-                </>
-              )}
+                  );
+                })}
               {role === "Visitor" ? (
                 <Button
                   variant={"default"}
@@ -331,7 +417,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 <Button
                   variant="outline"
                   className="mt-2 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
-                  onClick={handleLogout}
+                  onClick={() => setIsLogoutModalOpen(true)}
                 >
                   Logout
                 </Button>
@@ -348,6 +434,12 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
           </div>
         </div>
       )}
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
     </header>
   );
 };

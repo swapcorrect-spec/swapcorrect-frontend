@@ -82,17 +82,17 @@ const DashboardPage: FC = () => {
       const otherUserName = isSwapper ? swap.visitorName : swap.swapperName;
       const otherUserImage = isSwapper ? swap.visitorImage : swap.swapperImage;
 
-      const displayStatus = swap.status === "Negotiation" ? "Negotiating" : swap.status;
-
       return {
         name: otherUserName,
         item: swap.listedItem,
         time: swap.lastActivity,
         roomName: swap.roomName,
-        status: displayStatus,
+        status: swap.status,
         type: "Basic",
         image: otherUserImage,
         key: swap.swapProceedId,
+        requestItem: swap.swapperRequestItem,
+        roleLabel: isSwapper ? "Visitor" : "Swapper",
       };
     });
   }, [swapsData, currentUserId]);

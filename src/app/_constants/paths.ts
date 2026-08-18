@@ -11,4 +11,5 @@ export const PATHS = {
   CATEGORY: "/category",
   MYLISTING: "/item-listing",
   WALLETS: "/wallet",
+  REPORTS: "/reports",
 };

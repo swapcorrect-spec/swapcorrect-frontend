@@ -8,7 +8,7 @@ export interface SwapItem {
   visitorImage: string | null;
   listedItem: string;
   swapperRequestItem: string;
-  status: "Negotiation" | "Published" | "Swapped" | "Cancelled" | "Confirmed" | "Completed";
+  status: string;
   roomName: string | null;
   createdOn: string;
   lastActivity: string;

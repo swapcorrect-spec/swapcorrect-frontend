@@ -25,7 +25,7 @@ import {
   // mockNotifications,
   notifyType,
 } from "@/app/_constants/notifications";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
 import {
@@ -33,6 +33,8 @@ import {
   useGetUnreadNotificationCount,
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
+import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
+import { useAuth } from "@/app/_context/auth-context";
 // import { Auth } from "@/app/_config/auth";
 
 interface Props {
@@ -52,12 +54,14 @@ const Navbar: React.FC<Props> = ({
 }) => {
   const router = useRouter();
   const queryClient = useQueryClient();
+  const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const notificationContainerRef = useRef<HTMLDivElement>(null);
-  const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [isOpenNotifications, setIsOpenNotifications] = useState(false);
   const [unreadOnly, setUnreadOnly] = useState<boolean | undefined>(undefined);
   const [selectedNotification, setSelectedNotification] = useState("");
-  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: true });
+  const [isLogoutModalOpen, setIsLogoutModalOpen] = useState(false);
+  const isLoggedIn = isHydrated && isAuthenticated;
+  const { data: unreadCount, isFetching } = useGetUnreadNotificationCount({ enabler: isLoggedIn });
   const {
     data: notificationsResponse,
     fetchNextPage,
@@ -66,7 +70,7 @@ const Navbar: React.FC<Props> = ({
     isFetching: isNotificationFetching,
   } = useGetNotifications({
     unreadOnly,
-    enabler: isOpenNotifications,
+    enabler: isOpenNotifications && isLoggedIn,
   });
   const { mutate, isPending: isReadNotificationPending } = useReadNotification({
     onSuccess() {
@@ -80,12 +84,6 @@ const Navbar: React.FC<Props> = ({
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
-  useEffect(() => {
-    if (localStorage.getItem("comms-access-token")) {
-      setIsLoggedIn(true);
-    }
-  }, []);
-
   const handleLogin = () => {
     router.push(`/${PATHS.LOGIN}`);
   };
@@ -96,7 +94,8 @@ const Navbar: React.FC<Props> = ({
 
   const handleLogout = () => {
     queryClient.clear();
-    localStorage.clear();
+    clearAuth();
+    setIsLogoutModalOpen(false);
     router.push(`/${PATHS.LOGIN}`);
   };
 
@@ -133,7 +132,7 @@ const Navbar: React.FC<Props> = ({
     <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex justify-between gap-[110px] z-10 w-full">
       <div className="flex gap-4 items-center justify-center">
         {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
-        <Link href={`${isLoggedIn ? "/home" : "/"}`} className="flex justify-center">
+        <Link href={isLoggedIn ? PATHS.DASHBOARD : "/"} className="flex justify-center">
           <Logo />
         </Link>
       </div>
@@ -306,7 +305,9 @@ const Navbar: React.FC<Props> = ({
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={handleLogout}>Logout</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+                  Logout
+                </DropdownMenuItem>
               </DropdownMenuGroup>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -321,6 +322,12 @@ const Navbar: React.FC<Props> = ({
           </Button>
         </div>
       )}
+
+      <LogoutConfirmModal
+        isOpen={isLogoutModalOpen}
+        onClose={() => setIsLogoutModalOpen(false)}
+        onConfirm={handleLogout}
+      />
     </section>
   );
 };

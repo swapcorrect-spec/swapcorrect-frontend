@@ -33,6 +33,18 @@ export interface ILoginResponse {
   displayMessage: string;
   result: {
     jwt: string;
+    refreshToken?: string;
+    userRole: Array<"Visitor" | "Swapper">;
+  };
+  errorMessages: string | null;
+}
+
+export interface IRefreshTokenResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: {
+    jwt: string;
+    refreshToken?: string;
     userRole: Array<"Visitor" | "Swapper">;
   };
   errorMessages: string | null;
@@ -187,4 +199,11 @@ export interface IDeleteUserResponse {
   displayMessage: string;
   result: string;
   errorMessages: null | string;
+}
+
+export interface ILogoutResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string | null;
+  errorMessages: null | string | string[];
 }

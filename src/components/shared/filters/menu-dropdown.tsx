@@ -8,7 +8,7 @@ import { SelectFilter } from "./select";
 import { Button } from "@/components/ui/button";
 import Filter from "@/app/assets/images/svgs/Filter.svg";
 import { Input } from "@/components/ui/input";
-import { Search } from "lucide-react";
+import { MapPin, Search } from "lucide-react";
 import { useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
 import { useMemo, useState, useEffect } from "react";
 import { useDebounce } from "@/app/_hooks/useDebounce";
@@ -33,7 +33,7 @@ interface iProps {
     highestRange?: number;
   }) => void;
   categoryList?: selectType[];
-  locationList: selectType[];
+  locationList?: selectType[];
   listingDate?: selectType[];
 }
 const FilterMenu: React.FC<iProps> = ({
@@ -45,26 +45,28 @@ const FilterMenu: React.FC<iProps> = ({
   setSearchParam,
   onApplyFilters,
   categoryList,
-  locationList,
   listingDate,
 }) => {
-  const { data: categoriesData, isLoading, error } = useGetAllCategories({ enabler: true });
+  const { data: categoriesData } = useGetAllCategories({ enabler: true });
   const [rangeValue, setRangeValue] = useState(0);
   const [tempCategory, setTempCategory] = useState("");
   const [tempListingDate, setTempListingDate] = useState("");
-  const [tempLocation, setTempLocation] = useState("");
   const [searchValue, setSearchValue] = useState("");
+  const [locationValue, setLocationValue] = useState("");
   const [open, setOpen] = useState(false);
 
-  // Debounce search value with 500ms delay
   const debouncedSearchValue = useDebounce(searchValue, 500);
+  const debouncedLocationValue = useDebounce(locationValue, 500);
 
-  // Effect to update searchParam when debounced value changes
   useEffect(() => {
     if (setSearchParam) {
       setSearchParam(debouncedSearchValue);
     }
   }, [debouncedSearchValue, setSearchParam]);
+
+  useEffect(() => {
+    setLocation(debouncedLocationValue);
+  }, [debouncedLocationValue, setLocation]);
 
   // Transform API data to selectType format
   const apiCategoryList = useMemo(
@@ -88,14 +90,13 @@ const FilterMenu: React.FC<iProps> = ({
       onApplyFilters({
         category: tempCategory,
         listing: tempListingDate,
-        location: tempLocation,
+        location: locationValue,
         lowestRange: 0,
         highestRange: rangeValue,
       });
     }
     // Update the actual states
     setCategory(tempCategory);
-    setLocation(tempLocation);
     if (setLowestRange) setLowestRange(0);
     if (setHighestRange) setHighestRange(rangeValue);
     setOpen(false);
@@ -103,10 +104,13 @@ const FilterMenu: React.FC<iProps> = ({
 
   const handleResetFilters = () => {
     setTempCategory("");
-    setTempLocation("");
+    setTempListingDate("");
     setRangeValue(0);
+    setSearchValue("");
+    setLocationValue("");
     setCategory("");
     setLocation("");
+    if (setSearchParam) setSearchParam("");
     if (setListing) setListing("");
     if (setLowestRange) setLowestRange(undefined);
     if (setHighestRange) setHighestRange(undefined);
@@ -114,7 +118,7 @@ const FilterMenu: React.FC<iProps> = ({
   };
 
   return (
-    <div className="flex gap-4 items-cente mb-5">
+    <div className="flex flex-col sm:flex-row gap-4 items-stretch sm:items-center mb-5">
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild className="h-9">
           <Button
@@ -125,7 +129,10 @@ const FilterMenu: React.FC<iProps> = ({
             Filter
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-80 md:w-[900px] p-5 mt-3" align="start">
+        <DropdownMenuContent
+          className="min-w-0 w-[min(100vw-1.5rem,20rem)] md:w-[900px] p-5 mt-3"
+          align="start"
+        >
           <DropdownMenuGroup className="w-full">
             <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xs">FILTER</h6>
             <div className="flex flex-col md:flex-row gap-5">
@@ -181,13 +188,20 @@ const FilterMenu: React.FC<iProps> = ({
           </DropdownMenuGroup>
         </DropdownMenuContent>
       </DropdownMenu>
-      <div className="max-w-[749px] w-full">
+      <div className="flex flex-col sm:flex-row gap-3 w-full max-w-[749px]">
         <Input
           startIcon={<Search />}
           className="w-full !h-8 rounded-lg"
           placeholder="Search items..."
           value={searchValue}
           onChange={(e) => setSearchValue(e.target.value)}
+        />
+        <Input
+          startIcon={<MapPin />}
+          className="w-full !h-8 rounded-lg"
+          placeholder="Location..."
+          value={locationValue}
+          onChange={(e) => setLocationValue(e.target.value)}
         />
       </div>
     </div>

@@ -73,7 +73,7 @@ export default function MySwaps() {
   // >("All");
   // const [listingDate, setListingDate] = useState<"All" | "LastWeek" | "LastMonth">("All");
   // const [pageNumber, setPageNumber] = useState<number>(1);
-  const perpageSize = 10;
+  const perpageSize = 15;
   // const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   // const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
 
@@ -110,17 +110,17 @@ export default function MySwaps() {
       const otherUserName = isSwapper ? swap.visitorName : swap.swapperName;
       const otherUserImage = isSwapper ? swap.visitorImage : swap.swapperImage;
 
-      const displayStatus = swap.status === "Negotiation" ? "Negotiating" : swap.status;
-
       return {
         name: otherUserName,
         item: swap.listedItem,
         time: swap.lastActivity,
         roomName: swap.roomName,
-        status: displayStatus,
+        status: swap.status,
         type: "Basic",
         image: otherUserImage,
         key: swap.swapProceedId,
+        requestItem: swap.swapperRequestItem,
+        roleLabel: isSwapper ? "Visitor" : "Swapper",
       };
     });
   }, [swapsData, currentUserId]);
@@ -152,11 +152,11 @@ export default function MySwaps() {
   };
 
   return (
-    <div className="w-[90%] mx-auto my-10">
+    <div className="w-full min-w-0 max-w-full px-4 md:w-[90%] md:mx-auto md:px-0 my-6 md:my-10">
       <div className="flex items-end justify-between my-2">
         <Title title="MY SWAP" description="Track all your swap interactions." />
       </div>
-      <div className="my-8">
+      <div className="my-6 md:my-8">
         <FilterMenu
           categoryList={categoryList}
           locationList={locationList}
@@ -183,25 +183,26 @@ export default function MySwaps() {
         </div>
       ) : swapList.length > 0 ? (
         <>
-          <div className="grid grid-cols-1 gap-5 border border-[#E9E9E9] rounded-lg p-6">
+          <div className="grid grid-cols-1 md:border md:border-[#E9E9E9] md:rounded-lg md:p-3">
             {swapList.map((item) => (
               <SwapCardItem key={item.key} item={item} getStatusColor={getStatusColor} />
             ))}
           </div>
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 w-full min-w-0">
             <ReactPaginate
               breakLabel="..."
               nextLabel="Next ›"
               previousLabel="‹ Previous"
-              pageRangeDisplayed={5}
+              pageRangeDisplayed={2}
+              marginPagesDisplayed={1}
               pageCount={totalPages as number}
               renderOnZeroPageCount={null}
               onPageChange={handlePageClick}
               forcePage={pageNumber - 1}
-              pageClassName="w-10 h-10"
-              previousLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-              nextLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-              containerClassName="flex items-center gap-2"
+              pageClassName="w-8 h-8 sm:w-10 sm:h-10 shrink-0"
+              previousLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+              nextLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+              containerClassName="flex items-center justify-center flex-wrap gap-1 sm:gap-2 max-w-full"
               pageLinkClassName="w-full h-full flex items-center justify-center rounded-lg border hover:bg-gray-100"
               activeLinkClassName="bg-blue-500 text-white border-blue-500 hover:bg-blue-500"
               previousClassName={pageNumber === 1 ? "pointer-events-none opacity-40" : ""}

@@ -1,13 +1,12 @@
 "use client";
 
-import { redirect } from "next/navigation";
-import { ReactNode, useState } from "react";
+import { useRouter } from "next/navigation";
+import { ReactNode, useEffect, useState } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
 import { PATHS } from "../_constants/paths";
 import { useGetUserInfo, useUpdateRole } from "../_hooks/queries/auth/auth";
-import { Auth } from "../_config/auth";
 import { CircularProgress } from "@/components/shared/circular-progress";
 import useIsMobile from "../_hooks/useIsMobile";
 import MobileNavbar from "@/components/shared/mobile-navbar";
@@ -15,6 +14,7 @@ import { Dialog, DialogContent, DialogOverlay } from "@radix-ui/react-dialog";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/app/_context/auth-context";
 
 const ConfirmModal = ({
   handleToggleSwapperUpgrade,
@@ -72,13 +72,13 @@ const ConfirmModal = ({
 };
 
 export default function MainLayout({ children }: { children: ReactNode }) {
-  const { isFetching, data } = useGetUserInfo({ enabler: true });
+  const { isAuthenticated, isHydrated } = useAuth();
+  const { isFetching, data } = useGetUserInfo({ enabler: isHydrated && isAuthenticated });
+  const router = useRouter();
   const isMobile = useIsMobile();
 
   const [isOpen, setIsOpen] = useState(false);
   const [isToggleUpgrade, setIsToggleUpgrade] = useState(false);
-
-  const isAuthenticated = Auth.isAuthenticated();
 
   // const user_role =
   //   Auth.getDecodedJwt()["http://schemas.microsoft.com/ws/2008/06/identity/claims/role"];
@@ -91,7 +91,13 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     setIsToggleUpgrade(!isToggleUpgrade);
   };
 
-  if (isFetching) {
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
+  if (!isHydrated || (isAuthenticated && isFetching)) {
     return (
       <div className="text-center mt-4 flex flex-col items-center justify-center">
         <CircularProgress color="#007AFF" size={40} />
@@ -100,19 +106,19 @@ export default function MainLayout({ children }: { children: ReactNode }) {
   }
 
   if (!isAuthenticated) {
-    redirect(`/${PATHS.LOGIN}`);
+    return null;
   }
 
   return (
     <>
-      <section className={cn("flex w-full")}>
+      <section className={cn("flex w-full min-w-0 overflow-x-hidden")}>
         {isOpen && isAuthenticated && !isMobile && (
           <Sidebar
             handleToggleMenu={handleToggleMenu}
             role={data?.result.userRole[0] as "Visitor" | "Swapper"}
           />
         )}
-        <section className="flex-1 h-screen overflow-y-auto">
+        <section className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden">
           {isMobile ? (
             <MobileNavbar
               data={data}
@@ -136,7 +142,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
         <DialogContent
           className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
-               max-w-md w-full p-6 rounded-xl bg-white shadow-lg"
+               max-w-md w-[calc(100%-2rem)] p-6 rounded-xl bg-white shadow-lg"
         >
           <ConfirmModal handleToggleSwapperUpgrade={handleToggleSwapperUpgrade} />
         </DialogContent>

@@ -372,6 +372,7 @@ import { useCreateListing } from "@/app/_hooks/queries/listing/listing";
 import { useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { sanitizeText } from "@/lib/sanitize";
 
 const ITEM_CONDITIONS = ["New", "Fairly Used", "Used", "Needs Repair"];
 const CURRENCIES = [
@@ -570,10 +571,13 @@ const NewItemListing = () => {
 
     const payload = {
       ...formData,
+      itemName: sanitizeText(formData.itemName),
+      itemDescription: sanitizeText(formData.itemDescription),
+      location: sanitizeText(formData.location),
       listMediaFiles: uploadedMediaList, // Send the complete array
       listingSwapReq: requestedItems
         .filter((item) => item.trim())
-        .map((item) => ({ itemNeededName: item })),
+        .map((item) => ({ itemNeededName: sanitizeText(item) })),
     };
 
     createListing(payload);

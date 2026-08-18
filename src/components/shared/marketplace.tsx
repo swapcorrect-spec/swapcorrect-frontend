@@ -9,7 +9,6 @@ import EmptyState from "@/components/shared/empty-state";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import Link from "next/link";
 import { PATHS } from "@/app/_constants/paths";
-import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 
 type Props = {
   title: string;
@@ -59,23 +58,19 @@ const Marketplace: FC<Props> = ({
   onEmptyStateAction,
   isAuthenticated = true,
 }) => {
-  const { data: userData } = useGetUserInfo({ enabler: true });
-
   const carouselRef = useRef<Carousel | null>(null);
   const isMobile = useIsMobile();
 
-  const userId = userData?.result?.id;
-
   return (
-    <div className="relative my-4">
-      <div className="flex items-end justify-between mb-4 w-[100%]">
-        <div className="flex flex-col gap-1 w-[70%]">
+    <div className="relative my-4 min-w-0 w-full overflow-x-hidden">
+      <div className="flex items-end justify-between gap-3 mb-4 w-full min-w-0">
+        <div className="flex flex-col gap-1 min-w-0 flex-1">
           <p className="text-[#007AFF] text-[15px] font-medium">{title}</p>
-          <h3 className="text-[#222222] font-medium text-base md:text-5xl">{subtitle}</h3>
-          <p className="text-[#737373] font-medium text-[12px] md:text-2xl">{description}</p>
+          <h3 className="text-[#222222] font-medium text-base md:text-4xl">{subtitle}</h3>
+          <p className="text-[#737373] font-medium text-[12px] md:text-xl">{description}</p>
         </div>
         {!isLoading && products && products.length > 0 && (
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 shrink-0">
             {showSliderArrows ? (
               <div className="flex gap-5">
                 <button onClick={() => carouselRef.current?.previous(1)}>
@@ -140,17 +135,14 @@ const Marketplace: FC<Props> = ({
           onActionClick={onEmptyStateAction}
         />
       ) : isMobile ? (
-        <div className="grid grid-cols-2 gap-4">
-          <p>{userId}</p>
-          {products
-            .filter((product: any) => product.userId !== userId)
-            .map((product: any) => (
-              <Product
-                key={product.listingId || product.id}
-                {...product}
-                isAuthenticated={isAuthenticated}
-              />
-            ))}
+        <div className="grid grid-cols-2 gap-4 items-stretch">
+          {products.map((product: any) => (
+            <Product
+              key={product.listingId || product.id}
+              {...product}
+              isAuthenticated={isAuthenticated}
+            />
+          ))}
         </div>
       ) : (
         <Carousel
@@ -168,16 +160,15 @@ const Marketplace: FC<Props> = ({
           customTransition="all .5s"
           transitionDuration={500}
           containerClass="carousel-container"
+          itemClass="h-full"
           removeArrowOnDeviceType={["tablet", "mobile"]}
           dotListClass="custom-dot-list-style"
         >
-          {products
-            .filter((product) => product.userId !== userId)
-            .map((product) => (
-              <div key={product.listingId || product.id} className="p-2">
-                <Product {...product} isAuthenticated={isAuthenticated} />
-              </div>
-            ))}
+          {products.map((product) => (
+            <div key={product.listingId || product.id} className="p-2 h-full">
+              <Product {...product} isAuthenticated={isAuthenticated} />
+            </div>
+          ))}
         </Carousel>
       )}
     </div>

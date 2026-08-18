@@ -5,7 +5,6 @@ import { useQueryClient } from "@tanstack/react-query";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import { Dispatch, SetStateAction, useState } from "react";
 import { FileImage, FileVideo, File } from "lucide-react";
-import useIsMobile from "@/app/_hooks/useIsMobile";
 
 interface iChatRoom {
   count?: number;
@@ -50,7 +49,6 @@ const formatMessagePreview = (message: string): { text: string; icon?: JSX.Eleme
 const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
   const queryClient = useQueryClient();
   const router = useRouter();
-  const isMobile = useIsMobile();
   const searchParams = useSearchParams();
   const [imageError, setImageError] = useState(false);
 
@@ -58,9 +56,7 @@ const NotificationMessageCard: React.FC<iProps> = ({ chat, setIsShowChat }) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set("roomName", chat.chatRoomName || "");
     router.push(`?${params.toString()}`);
-    if (isMobile) {
-      setIsShowChat(true);
-    }
+    setIsShowChat(true);
 
     queryClient.invalidateQueries({ queryKey: ["useGetChatRoomMessages"] });
     queryClient.invalidateQueries({ queryKey: ["useGetUserInfo"] });

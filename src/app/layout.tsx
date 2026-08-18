@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { useState } from "react";
 import { Toaster } from "sonner";
+import { AuthProvider } from "@/app/_context/auth-context";
 
 import "./globals.css";
 
@@ -36,21 +37,27 @@ export default function RootLayout({
 
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>
+      <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
+      </head>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased overflow-x-hidden`}>
         <QueryClientProvider client={queryClient}>
-          <NextTopLoader height={4} showSpinner={false} />
-          {children}
-          <Toaster
-            position="top-right"
-            toastOptions={{
-              classNames: {
-                toast: "border p-4 rounded-md",
-                success: "!bg-green-100 !text-green-800",
-                error: "!bg-red-100 !text-red-800",
-              },
-            }}
-          />
-          <ReactQueryDevtools />
+          <AuthProvider>
+            <NextTopLoader height={4} showSpinner={false} />
+            {children}
+            <Toaster
+              position="top-right"
+              toastOptions={{
+                classNames: {
+                  toast: "border p-4 rounded-md",
+                  success: "!bg-green-100 !text-green-800",
+                  error: "!bg-red-100 !text-red-800",
+                },
+              }}
+            />
+            <ReactQueryDevtools />
+          </AuthProvider>
         </QueryClientProvider>
       </body>
     </html>

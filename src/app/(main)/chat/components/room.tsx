@@ -12,6 +12,7 @@ import {
   FileImage,
   ArrowLeft,
   EllipsisVertical,
+  Upload,
 } from "lucide-react";
 import { useState, useEffect, useRef, SetStateAction, Dispatch, useMemo } from "react";
 import SwapModalContent from "./swap-modal";
@@ -28,13 +29,14 @@ import { useCloseSwap } from "@/app/_hooks/queries/swap/swap";
 import Smiley from "@/app/assets/images/svgs/smiley.svg";
 import { useGetChatRoomMessages } from "@/app/_hooks/queries/chat/chat";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
-import { useSearchParams } from "next/navigation";
+import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import * as signalR from "@microsoft/signalr";
-import { IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
+import { IGetActiveChatUsersResponseData, IRoomMessage } from "@/app/_hooks/queries/chat/chat.type";
 import EmojiPicker from "emoji-picker-react";
 import ReactPlayer from "react-player";
 import useIsMobile from "@/app/_hooks/useIsMobile";
+import { sanitizeText } from "@/lib/sanitize";
 import { useQueryClient } from "@tanstack/react-query";
 import { useInitializePayment } from "@/app/_hooks/queries/payment/payment";
 import { toast } from "sonner";
@@ -49,6 +51,7 @@ import Link from "next/link";
 import { useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
 import { truncateName } from "@/app/_utils/truncate";
 import { useReportUser } from "@/app/_hooks/queries/report/report";
+import RateUserModal from "@/components/shared/rate-user-modal";
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -70,7 +73,7 @@ const reportUserSchema = z.object({
         url: z.string().url(),
       })
     )
-    .min(1, "At least one evidence file is required"),
+    .optional(),
 
   reportedUserId: z.string().min(1),
 });
@@ -214,9 +217,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const [selectedImageUrl, setSelectedImageUrl] = useState<string>("");
   const emojiPickerRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const reportFileInputRef = useRef<HTMLInputElement>(null);
   const [reportType, setReportType] = useState<ReportType | "">("");
   const [reportDescription, setReportDescription] = useState("");
   const [reportFiles, setReportFiles] = useState<File[]>([]);
+  const [isRateModalOpen, setIsRateModalOpen] = useState(false);
   const messagesContainerRef = useRef<HTMLDivElement>(null);
   const initialScrollDone = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -224,6 +229,8 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const REPORT_TYPES = ["Conflict", "Fraud", "Foul Language"] as const;
 
   const searchParams = useSearchParams();
+  const router = useRouter();
+  const pathname = usePathname();
   const roomName = searchParams.get("roomName") || "";
 
   const { data: currentUserData } = useGetUserInfo({
@@ -266,6 +273,38 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const currentUserId = currentUserData?.result?.id || "";
 
   const queryClient = useQueryClient();
+
+  const syncChatSidebar = (previewMessage?: string, previewTime?: string) => {
+    if (roomName && previewMessage) {
+      queryClient.setQueryData<IGetActiveChatUsersResponseData>(
+        ["useGetActiveChatUsers"],
+        (old) => {
+          if (!old?.result) return old;
+
+          const updated = old.result.map((chat) =>
+            chat.chatRooomName === roomName
+              ? {
+                  ...chat,
+                  message: previewMessage,
+                  time: previewTime || new Date().toISOString(),
+                }
+              : chat
+          );
+
+          // Bump active room to top of the list
+          updated.sort((a, b) => {
+            if (a.chatRooomName === roomName) return -1;
+            if (b.chatRooomName === roomName) return 1;
+            return 0;
+          });
+
+          return { ...old, result: updated };
+        }
+      );
+    }
+
+    queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+  };
 
   const {
     data,
@@ -344,8 +383,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       });
     }
   }, [data]);
-
-  // console.log(messages, "121");
 
   const profileImageSrc = getImageSrcWithFallback(userProfileUrl, imageError);
 
@@ -469,15 +506,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         //   queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
         // });
         connection.on("ReceiveMessage", (id, message) => {
-          console.log("ARG1", id);
-          console.log("ARG2", message);
-
-          console.log("ReceiveMessage fired", {
-            id,
-            message,
-            time: new Date().toISOString(),
-          });
-
           if (typeof message === "string") return;
 
           const normalizeMessageType = (type: string): "Text" | "Image" | "Video" | "File" => {
@@ -491,10 +519,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             return typeMap[lowerType] || "Text";
           };
 
-          // 🛠️ FIX THE DATE FORMATTING BUG HERE
+          // Normalize short time strings like "14:02" into a full ISO datetime
           let safeDateTime = message.dateTime || new Date().toISOString();
 
-          // If the backend only sent a time string like "14:02", construct a valid ISO string
           if (
             safeDateTime.includes(":") &&
             !safeDateTime.includes("-") &&
@@ -505,7 +532,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             today.setHours(parseInt(hours, 10));
             today.setMinutes(parseInt(minutes, 10));
             today.setSeconds(0);
-            safeDateTime = today.toISOString(); // Converts "14:02" -> "2026-06-13T14:02:00.000Z"
+            safeDateTime = today.toISOString();
           }
 
           const incomingSenderId = String(message.senderId || id || "unknown").toLowerCase();
@@ -514,51 +541,23 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
           const transformedMessage: ChatListProps = {
             id: message.id || crypto.randomUUID(),
             message: message.message || message.content || "",
-            dateTime: safeDateTime, // <--- Now fully parseable and matchable!
+            dateTime: safeDateTime,
             status: message.status || "Sent",
             messageType: normalizeMessageType(message.messageType),
             senderImgUrl: message.senderImgUrl || null,
             senderId: message.senderId || id || "unknown",
-            // isMe:
-            //   message.isMe !== undefined
-            //     ? message.isMe
-            //     : incomingSenderId === localizedCurrentUserId,
             isMe: incomingSenderId === localizedCurrentUserId,
           };
 
-          // setMessages((prev) => {
-          //   // Check duplicates safely using sanitized properties
-          //   const messageExists = prev.some(
-          //     (msg) =>
-          //       msg.message === transformedMessage.message &&
-          //       msg.senderId === transformedMessage.senderId
-          //     // Compare structural hour/minute components so slight latency shifts don't cause duplicates
-          //     // new Date(msg.dateTime).getHours() ===
-          //     //   new Date(transformedMessage.dateTime).getHours() &&
-          //     // new Date(msg.dateTime).getMinutes() ===
-          //     //   new Date(transformedMessage.dateTime).getMinutes()
-          //   );
-
-          //   if (messageExists) return prev;
-
-          //   const newMessages = [...prev, transformedMessage];
-          //   return newMessages.sort(
-          //     (a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime()
-          //   );
-          // });
           setMessages((prev) => {
-            // const messageExists = prev.some((m) => m.id === transformedMessage.id);
-
-            // if (messageExists) return prev;
-
-            // return [...prev, transformedMessage];
             const exists = prev.some((msg) => msg.id === transformedMessage.id);
             if (exists) return prev;
 
             return [...prev, transformedMessage];
           });
 
-          // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
+          // Keep sidebar chat list in sync (preview + ordering)
+          syncChatSidebar(transformedMessage.message, transformedMessage.dateTime);
         });
       } catch (error) {
         console.error("Error setting up SignalR:", error);
@@ -621,10 +620,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const sendMessage = async (message: string, messageType: string = "Text") => {
     if (connection && roomName && currentUserId) {
       try {
-        await connection.invoke("SendMessageToRoom", roomName, currentUserId, message, messageType);
+        const safeMessage = messageType === "Text" ? sanitizeText(message) : message;
+        if (messageType === "Text" && !safeMessage) return;
+        await connection.invoke(
+          "SendMessageToRoom",
+          roomName,
+          currentUserId,
+          safeMessage,
+          messageType
+        );
 
-        // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-        // refetchRoomMessages();
+        syncChatSidebar(safeMessage);
       } catch (error) {
         console.error("Error sending message:", error);
       }
@@ -657,14 +663,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const uploadEvidenceFiles = async (files: File[]) => {
     const uploaded = await Promise.all(
       files.map(async (file, index) => {
-        // <div> Pass the index here
-        const result = await uploadToCloudinary(file, index); // <div> Use it here
+        const result = await uploadToCloudinary(file, index, "swap_shop/reports");
 
-        if (!result) return null;
+        if (!result?.secure_url) return null;
 
         return {
-          mediaType: file.type.split("/")[1] || "file",
-          url: result.secure_url,
+          mediaType: file.type.startsWith("image/")
+            ? "Image"
+            : file.type.startsWith("video/")
+              ? "Video"
+              : "File",
+          url: result.secure_url as string,
         };
       })
     );
@@ -678,31 +687,43 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       return;
     }
 
+    if (reportFiles.length === 0) {
+      toast.error("Please add at least one evidence file");
+      return;
+    }
+
     try {
       setIsUploading(true);
 
-      // 1. Upload media files to Cloudinary
       const uploaded = await uploadEvidenceFiles(reportFiles);
 
-      // 2. Build the payload explicitly from state hooks
+      if (uploaded.length === 0) {
+        toast.error("Failed to upload evidence. Please try again.");
+        return;
+      }
+
       const payload = {
         reportType: watch("reportType"),
-        description: watch("description"),
+        description: sanitizeText(watch("description")),
         evidenceMediaFiles: uploaded,
         reportedUserId: userId,
       };
 
-      // 3. Dispatch straight to mutation hook
       reportUser({ payload });
     } catch (err) {
       console.error(err);
+      toast.error("Something went wrong while submitting the report.");
     } finally {
       setIsUploading(false);
     }
   };
 
   // Upload file to Cloudinary
-  const uploadToCloudinary = async (file: File, fileIndex: number) => {
+  const uploadToCloudinary = async (
+    file: File,
+    fileIndex: number,
+    folder: string = "swap_shop/chat"
+  ) => {
     const cloudName = process.env.NEXT_PUBLIC_CLOUDINARY_NAME;
     const uploadPreset = process.env.NEXT_PUBLIC_CLOUDINARY_PRESET;
 
@@ -711,7 +732,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       return null;
     }
 
-    // Determine resource type
     let resourceType = "auto";
     if (file.type.startsWith("image/")) {
       resourceType = "image";
@@ -724,7 +744,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
     const formData = new FormData();
     formData.append("file", file);
     formData.append("upload_preset", uploadPreset);
-    formData.append("folder", "swap_shop/chat");
+    formData.append("folder", folder);
 
     try {
       setUploadingFiles((prev) => new Set(prev).add(fileIndex));
@@ -744,6 +764,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         newSet.delete(fileIndex);
         return newSet;
       });
+
+      if (!response.ok || !data?.secure_url) {
+        console.error("Cloudinary upload failed:", data);
+        return null;
+      }
 
       return data;
     } catch (error) {
@@ -805,9 +830,6 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
         )
       );
 
-      // queryClient.invalidateQueries({ queryKey: ["useGetActiveChatUsers"] });
-      // refetchRoomMessages();
-
       setSelectedFiles([]);
       setUploadingFiles(new Set());
     } catch (error) {
@@ -851,54 +873,70 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   //   .sort((a, b) => new Date(a.dateTime).getTime() - new Date(b.dateTime).getTime());
 
   return (
-    <section className="border border-[#EEEEEE] border-t-0 h-full flex flex-col flex-1">
+    <section className="border border-[#EEEEEE] border-t-0 h-full w-full min-w-0 flex flex-col flex-1">
       <div
         className={`border-b py-4 px-5 flex justify-between bg-white items-center flex-shrink-0`}
       >
         <div className="flex flex-row justify-between items-center md:flex-row md:items-center gap-3 w-full">
           <div>
             <div className="flex items-center gap-2">
-              {isMobile && <ArrowLeft onClick={() => setIsShowChat(false)} />}
-              <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B] ">
-                <Image
-                  src={profileImageSrc}
-                  height={40}
-                  width={40}
-                  alt="User profile"
-                  className="w-10 h-10 rounded-full"
-                  onError={createImageErrorHandler(setImageError)}
+              {isMobile && (
+                <ArrowLeft
+                  className="cursor-pointer shrink-0"
+                  onClick={() => {
+                    setIsShowChat(false);
+                    const params = new URLSearchParams(searchParams.toString());
+                    params.delete("roomName");
+                    const query = params.toString();
+                    router.replace(query ? `${pathname}?${query}` : pathname);
+                  }}
                 />
-              </div>
-              <div>
-                <div className="flex items-center gap-2 justify-center">
-                  <h5 className={`text-[#222222] text-lg font-medium`}>
-                    {truncateName(userName, 8)}
-                  </h5>
-                  {connectionStatus && (
-                    <div className="flex items-center gap-2">
-                      <div
-                        className={`w-2 h-2 rounded-full ${
-                          connectionStatus === "Connected"
-                            ? "bg-green-500"
-                            : connectionStatus === "Connecting"
-                              ? "bg-yellow-500"
-                              : connectionStatus === "Reconnecting"
+              )}
+              <Link
+                href={`/profile/${userId}`}
+                className="flex items-center gap-2 hover:opacity-80 transition-opacity"
+              >
+                <div className="w-14 h-14 rounded-full flex items-center justify-center bg-[#F4CE9B]">
+                  <Image
+                    src={profileImageSrc}
+                    height={40}
+                    width={40}
+                    alt="User profile"
+                    className="w-10 h-10 rounded-full"
+                    onError={createImageErrorHandler(setImageError)}
+                  />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2 justify-center">
+                    <h5 className="text-[#222222] text-lg font-medium">
+                      {truncateName(userName, 8)}
+                    </h5>
+                    {connectionStatus && (
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`w-2 h-2 rounded-full ${
+                            connectionStatus === "Connected"
+                              ? "bg-green-500"
+                              : connectionStatus === "Connecting"
                                 ? "bg-yellow-500"
-                                : connectionStatus === "Error"
-                                  ? "bg-red-500"
-                                  : "bg-gray-400"
-                        }`}
-                      />
-                      <span className="text-xs text-gray-500">{connectionStatus}</span>
-                    </div>
+                                : connectionStatus === "Reconnecting"
+                                  ? "bg-yellow-500"
+                                  : connectionStatus === "Error"
+                                    ? "bg-red-500"
+                                    : "bg-gray-400"
+                          }`}
+                        />
+                        <span className="text-xs text-gray-500">{connectionStatus}</span>
+                      </div>
+                    )}
+                  </div>
+                  {swappingProceeding?.status && (
+                    <p className="text-xs bg-green-800 w-fit px-1 py-1 rounded-md text-white">
+                      {SwapStatus[swappingProceeding?.status as keyof typeof SwapStatus]}
+                    </p>
                   )}
                 </div>
-                {swappingProceeding?.status && (
-                  <p className="text-xs bg-green-800 w-fit px-1 py-1 rounded-md text-white">
-                    {SwapStatus[swappingProceeding?.status as keyof typeof SwapStatus]}
-                  </p>
-                )}
-              </div>
+              </Link>
             </div>
             <div className="me-auto">
               {/* <h5 className={`text-[#222222] text-lg font-medium`}>{userName}</h5> */}
@@ -1124,7 +1162,15 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                     >
                       Report User
                     </div>
-                    {/* <Link href="/settings">View</Link> */}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem asChild>
+                    <div
+                      className="cursor-pointer"
+                      onClick={() => setIsRateModalOpen(true)}
+                      title="Rate user"
+                    >
+                      Rate User
+                    </div>
                   </DropdownMenuItem>
                 </DropdownMenuGroup>
               </DropdownMenuContent>
@@ -1514,7 +1560,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               ? "max-w-[90vw] max-h-[90vh] p-0 bg-black border-none"
               : modalType === "infoDrawer"
                 ? "!fixed !right-0 !top-0 !bottom-0 !left-auto !w-[400px] h-screen max-w-[90vw] !translate-x-0 !translate-y-0 m-0 p-0 border-none shadow-2xl !grid-none"
-                : "w-[95vw] max-w-md mx-auto rounded-xl"
+                : modalType === "reportUser"
+                  ? "w-[95vw] max-w-xl mx-auto rounded-xl"
+                  : "w-[95vw] max-w-md mx-auto rounded-xl"
           }
         >
           {useMemo(() => {
@@ -1700,110 +1748,140 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                 );
               case "reportUser":
                 return (
-                  <div className="w-full max-w-md mx-auto max-h-[85vh] overflow-y-auto overflow-x-hidden p-4 sm:p-6 space-y-4">
-                    <h2 className="text-lg font-semibold">Report User</h2>
+                  <div className="w-full mx-auto max-h-[85vh] overflow-y-auto overflow-x-hidden p-4 space-y-3">
+                    <div>
+                      <h2 className="text-lg font-semibold text-[#222222]">Report User</h2>
+                      <p className="text-sm text-[#737373] mt-0.5">
+                        Tell us what happened and attach evidence so we can review this report.
+                      </p>
+                    </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Report Type</label>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-[#222222]">Report Type</label>
                       <select
-                        className="w-full border rounded-md p-2"
+                        className="w-full border border-[#E9E9E9] rounded-xl px-3 py-2.5 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:border-[#007AFF]"
                         value={watch("reportType")}
                         onChange={(e) =>
-                          setValue("reportType", e.target.value as ReportForm["reportType"])
+                          setValue("reportType", e.target.value as ReportForm["reportType"], {
+                            shouldValidate: true,
+                          })
                         }
                       >
                         <option value="">Select report type</option>
-
                         {REPORT_TYPES.map((type) => (
                           <option key={type} value={type}>
                             {type}
                           </option>
                         ))}
                       </select>
-
                       {errors.reportType && (
                         <p className="text-red-500 text-xs mt-1">{errors.reportType.message}</p>
                       )}
                     </div>
 
-                    <div className="space-y-2">
-                      <label className="text-sm font-medium">Description</label>
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-[#222222]">Description</label>
                       <textarea
-                        className="w-full border rounded-md p-2 min-h-[100px]"
+                        className="w-full border border-[#E9E9E9] rounded-xl p-3 min-h-[88px] text-sm resize-none focus:outline-none focus:ring-2 focus:ring-[#007AFF]/30 focus:border-[#007AFF]"
+                        placeholder="Describe what happened..."
                         {...register("description")}
                       />
-
                       {errors.description && (
                         <p className="text-red-500 text-xs mt-1">{errors.description.message}</p>
                       )}
                     </div>
 
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => {
-                        if (!e.target.files) return;
+                    <div className="space-y-1.5">
+                      <label className="text-sm font-medium text-[#222222]">Evidence</label>
+                      <input
+                        ref={reportFileInputRef}
+                        type="file"
+                        multiple
+                        accept="image/*,video/*"
+                        className="hidden"
+                        onChange={(e) => {
+                          if (!e.target.files) return;
+                          const newFiles = Array.from(e.target.files);
+                          setReportFiles((prev) => [...prev, ...newFiles]);
+                          e.target.value = "";
+                        }}
+                      />
+                      <button
+                        type="button"
+                        onClick={() => reportFileInputRef.current?.click()}
+                        className="w-full border border-dashed border-[#007AFF]/40 bg-[#007AFF]/5 hover:bg-[#007AFF]/10 rounded-xl px-4 py-3 transition-colors"
+                      >
+                        <div className="flex flex-col items-center gap-1.5 text-center">
+                          <div className="w-8 h-8 rounded-full bg-[#007AFF]/10 flex items-center justify-center">
+                            <Upload size={16} className="text-[#007AFF]" />
+                          </div>
+                          <p className="text-sm font-medium text-[#222222]">
+                            Click to upload evidence
+                          </p>
+                          <p className="text-xs text-[#737373]">Images or videos · multiple files ok</p>
+                        </div>
+                      </button>
 
-                        const newFiles = Array.from(e.target.files);
-
-                        setReportFiles((prev) => {
-                          const updated = [...prev, ...newFiles];
-
-                          setValue("evidenceMediaFiles", updated as any, {
-                            shouldValidate: true,
-                            shouldDirty: true,
-                          });
-
-                          return updated;
-                        });
-
-                        e.target.value = "";
-                      }}
-                    />
-                    {reportFiles.length > 0 && (
-                      <div className="grid grid-cols-3 gap-2 mt-3">
-                        {reportFiles.map((file, idx) => {
-                          const isImage = file.type.startsWith("image/");
-
-                          return (
-                            <div key={idx} className="relative border rounded-md p-1">
-                              {isImage ? (
-                                <img
-                                  src={URL.createObjectURL(file)}
-                                  className="w-full h-20 object-cover rounded"
-                                />
-                              ) : (
-                                <div className="h-20 flex items-center justify-center text-xs text-gray-500">
-                                  {file.name}
-                                </div>
-                              )}
-
-                              <button
-                                className="absolute top-1 right-1 bg-red-500 text-white text-xs px-1 rounded"
-                                onClick={() =>
-                                  setReportFiles((prev) => prev.filter((_, i) => i !== idx))
-                                }
+                      {reportFiles.length > 0 && (
+                        <div className="grid grid-cols-4 gap-2 mt-1.5">
+                          {reportFiles.map((file, idx) => {
+                            const isImage = file.type.startsWith("image/");
+                            return (
+                              <div
+                                key={`${file.name}-${idx}`}
+                                className="relative border border-[#E9E9E9] rounded-xl overflow-hidden bg-[#FAFAFA]"
                               >
-                                ✕
-                              </button>
-                            </div>
-                          );
-                        })}
-                      </div>
-                    )}
+                                {isImage ? (
+                                  <img
+                                    src={URL.createObjectURL(file)}
+                                    alt={file.name}
+                                    className="w-full h-16 object-cover"
+                                  />
+                                ) : (
+                                  <div className="h-16 flex flex-col items-center justify-center gap-1 px-1">
+                                    <FileVideo size={16} className="text-[#737373]" />
+                                    <span className="text-[10px] text-[#737373] truncate w-full text-center">
+                                      {file.name}
+                                    </span>
+                                  </div>
+                                )}
+                                <button
+                                  type="button"
+                                  aria-label="Remove file"
+                                  className="absolute top-1 right-1 bg-[#E42222] text-white rounded-full p-0.5"
+                                  onClick={() =>
+                                    setReportFiles((prev) => prev.filter((_, i) => i !== idx))
+                                  }
+                                >
+                                  <X size={12} />
+                                </button>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
 
-                    {/* Actions */}
-                    <div className="flex justify-end gap-2 mt-4">
-                      <Button variant="outline" onClick={() => setModalType(null)}>
+                    <div className="flex justify-end gap-2 pt-1">
+                      <Button
+                        variant="outline"
+                        className="rounded-xl"
+                        onClick={() => {
+                          setModalType(null);
+                          setReportFiles([]);
+                          reset();
+                        }}
+                        disabled={isReporting || isUploading}
+                      >
                         Cancel
                       </Button>
-
                       <Button
+                        className="rounded-xl bg-[#222222] hover:bg-black"
                         disabled={isReporting || isUploading}
                         onClick={handleManualSubmit}
                         loading={isReporting || isUploading}
                       >
-                        Submit Report
+                        {isUploading ? "Uploading..." : isReporting ? "Submitting..." : "Submit Report"}
                       </Button>
                     </div>
                   </div>
@@ -1826,9 +1904,24 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             mediaStats,
             allMedia,
             swappingProceeding,
+            reportFiles,
+            isReporting,
+            isUploading,
+            errors.reportType,
+            errors.description,
+            watch("reportType"),
+            watch("description"),
           ])}
         </DialogContent>
       </Dialog>
+
+      <RateUserModal
+        isOpen={isRateModalOpen}
+        onClose={() => setIsRateModalOpen(false)}
+        raterId={currentUserId}
+        userId={userId}
+        userName={userName}
+      />
     </section>
   );
 };

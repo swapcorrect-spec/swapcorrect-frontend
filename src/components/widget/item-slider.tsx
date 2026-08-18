@@ -7,6 +7,7 @@ import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { Button } from "@/components/ui/button";
 import { Heart } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { displayRating } from "@/lib/utils";
 
 interface iWantList {
   name: string;
@@ -82,7 +83,7 @@ const ItemSliderContent: React.FC<iProps> = ({
               {vendorName || "Jenny Franklin"}
             </p>
             <p className="flex items-center gap-1">
-              {rating || 3.5} <Rating />
+              {displayRating(rating)} <Rating />
             </p>
           </div>
           <Button

@@ -1,8 +1,6 @@
 "use client";
 
-import { Card, CardContent } from "@/components/ui/card";
-import ProductDetails from "@/components/widget/product-details";
-import ProfileDetailsHeader from "@/components/widget/profile-details";
+import { useGetUserReviews } from "@/app/_hooks/queries/review/review";
 import Reviews from "@/components/widget/review";
 import { useGetGeneralUserInfo, useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
@@ -13,6 +11,9 @@ import { useState } from "react";
 import EmptyItemsState from "@/components/shared/empty-items-state";
 import useIsMobile from "@/app/_hooks/useIsMobile";
 import { MoveLeft } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
+import ProductDetails from "@/components/widget/product-details";
+import ProfileDetailsHeader from "@/components/widget/profile-details";
 
 const UserProfile: React.FC = () => {
   const params = useParams();
@@ -32,6 +33,11 @@ const UserProfile: React.FC = () => {
   });
   const { data: userData } = useGetUserInfo({ enabler: true });
   const loggedInUserserId = userData?.result?.id;
+
+  const { data: reviews, isLoading: isReviewsLoading } = useGetUserReviews({
+    ratedUserId: userId,
+    enabler: !!userId,
+  });
 
   const { data: itemsData, isLoading: itemsLoading } = useSearchItems({
     enabler: !!userId,
@@ -154,9 +160,17 @@ const UserProfile: React.FC = () => {
             <Card>
               <CardContent className="p-3">
                 <div className="flex flex-col gap-2">
-                  {Array.from({ length: 5 }).map((_, index) => (
-                    <Reviews key={index} />
-                  ))}
+                  {isReviewsLoading ? (
+                    Array.from({ length: 3 }).map((_, index) => (
+                      <Skeleton key={index} className="h-24 w-full rounded-md" />
+                    ))
+                  ) : reviews.length > 0 ? (
+                    reviews.map((review, index) => (
+                      <Reviews key={review.id || `${review.raterId}-${index}`} review={review} />
+                    ))
+                  ) : (
+                    <p className="text-sm text-[#737373] py-4 text-center">No reviews yet</p>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -167,15 +181,28 @@ const UserProfile: React.FC = () => {
               <ProfileDetailsHeader
                 userData={data?.result}
                 handleToggleReview={handleToggleReview}
+                raterId={loggedInUserserId}
+                isOwnProfile={loggedInUserserId === userId}
               />
               {!isMobile && (
                 <Card>
                   <CardContent className="p-3">
                     <p className="mb-4 font-medium text-base">Reviews</p>
                     <div className="flex flex-col gap-2">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <Reviews key={index} />
-                      ))}
+                      {isReviewsLoading ? (
+                        Array.from({ length: 3 }).map((_, index) => (
+                          <Skeleton key={index} className="h-24 w-full rounded-md" />
+                        ))
+                      ) : reviews.length > 0 ? (
+                        reviews.map((review, index) => (
+                          <Reviews
+                            key={review.id || `${review.raterId}-${index}`}
+                            review={review}
+                          />
+                        ))
+                      ) : (
+                        <p className="text-sm text-[#737373] py-4 text-center">No reviews yet</p>
+                      )}
                     </div>
                   </CardContent>
                 </Card>

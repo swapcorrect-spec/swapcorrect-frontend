@@ -1,7 +1,6 @@
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Heart, Info } from "lucide-react";
+import { Heart, Info, Flag } from "lucide-react";
 import * as Popover from "@radix-ui/react-popover";
 import { Button } from "@/components/ui/button";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
@@ -9,14 +8,13 @@ import { FC, useState } from "react";
 import { IProduct } from "@/interface/IProduct";
 import LoginRequiredModal from "@/components/shared/login-required-modal";
 import ReactPlayer from "react-player";
-import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback } from "@/lib/utils";
+import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, displayRating } from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import {
   useAddToFavourite,
   useRemoveFromFavourite,
 } from "@/app/_hooks/queries/favourite/favourite";
 import { Avatar, AvatarImage } from "../ui/avatar";
-import { toast } from "sonner";
 
 type Props = Prettify<Omit<IProduct, "id">> & {
   isAuthenticated?: boolean;
@@ -41,6 +39,7 @@ const Product: FC<Props> = (props) => {
     name,
     isAuthenticated = true,
     fullName,
+    isFlagged = false,
   } = props;
   const router = useRouter();
   const [showLoginModal, setShowLoginModal] = useState(false);
@@ -73,12 +72,6 @@ const Product: FC<Props> = (props) => {
     onSuccess: () => {
       router.push("/chat");
     },
-    onError(_val) {
-      toast.error(_val[0]);
-      if (_val[1]) {
-        router.push(`/chat?roomName=${_val[1]}`);
-      }
-    },
   });
 
   // Favourite toggle (optimistic UI)
@@ -110,12 +103,23 @@ const Product: FC<Props> = (props) => {
   const handleProfileImageError = createImageErrorHandler(setProfileImageError);
 
   const handleSwap = () => {
+    if (isFlagged) return;
     if (!isAuthenticated) {
       setShowLoginModal(true);
       return;
     }
     if (listingId) {
       startSwap();
+    }
+  };
+
+  const handleViewDetails = () => {
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (listingId) {
+      router.push(`/listing/${listingId}`);
     }
   };
 
@@ -129,9 +133,8 @@ const Product: FC<Props> = (props) => {
   };
 
   return (
-    // <Link href={`/listing/${listingId}`} className="w-full rounded-lg mb-2 inline-block">
-    <div className="flex flex-col rounded-xl shadow-none md:shadow-sm bg-white h-full">
-      <div className="relative">
+    <div className="flex flex-col rounded-xl border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] bg-white h-full p-2.5">
+      <div className="relative shrink-0">
         {isVideo ? (
           <div className="relative w-full h-[150px] md:h-[250px] rounded-xl overflow-hidden">
             <ReactPlayer
@@ -143,7 +146,13 @@ const Product: FC<Props> = (props) => {
             />
           </div>
         ) : (
-          <div className="relative w-full h-[150px] md:h-[250px] rounded-xl overflow-hidden">
+          <button
+            type="button"
+            onClick={handleViewDetails}
+            disabled={!listingId}
+            aria-label="View listing details"
+            className="relative w-full h-[150px] md:h-[250px] rounded-xl overflow-hidden cursor-pointer disabled:cursor-default"
+          >
             <Image
               src={getImageSrcWithFallback(
                 typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
@@ -154,6 +163,13 @@ const Product: FC<Props> = (props) => {
               className="object-cover"
               onError={handleImageError}
             />
+          </button>
+        )}
+
+        {isFlagged && (
+          <div className="absolute top-3 left-3 z-10 bg-[#FFF6F6] gap-1.5 flex items-center rounded-xl px-2 py-1">
+            <Flag size={12} className="text-[#FF3B30]" />
+            <p className="text-[#FF3B30] text-xs font-medium">Flagged</p>
           </div>
         )}
 
@@ -176,7 +192,7 @@ const Product: FC<Props> = (props) => {
               addToFavourite();
             }
           }}
-          className="bg-white absolute top-3 right-3 rounded-full p-1 disabled:opacity-60"
+          className="bg-white absolute top-3 right-3 rounded-full p-1 disabled:opacity-60 z-10"
         >
           <Heart
             size={20}
@@ -185,98 +201,102 @@ const Product: FC<Props> = (props) => {
           />
         </button>
       </div>
-      <div className="flex flex-col gap-1 mt-2 mb-3">
-        <div className="flex justify-between items-center">
-          {/* <p className="font-medium text-lg">{displayName}</p> */}
-          {/* <p className="text-[#007AFF] font-medium text-sm">{displayPrice}</p> */}
-          <div className="flex justify-between items-center w-full">
-            <p className="font-medium text-lg">{displayName}</p>
+      <div className="flex flex-col gap-1 mt-2 mb-2 flex-1 min-h-0">
+        <div className="flex justify-between items-start gap-2 w-full min-h-[28px]">
+          <p className="font-medium text-lg leading-7 truncate min-w-0 flex-1">{displayName}</p>
 
-            <Popover.Root>
-              <Popover.Trigger asChild>
-                <button type="button" className="text-[#007AFF] font-medium text-sm underline">
-                  View Est. Value
-                </button>
-              </Popover.Trigger>
+          <Popover.Root>
+            <Popover.Trigger asChild>
+              <button
+                type="button"
+                className="text-[#007AFF] font-medium text-sm underline shrink-0 whitespace-nowrap pt-0.5"
+              >
+                View Est. Value
+              </button>
+            </Popover.Trigger>
 
-              <Popover.Portal>
-                <Popover.Content
-                  side="left"
-                  align="center"
-                  sideOffset={8}
-                  collisionPadding={12}
-                  className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
-                >
-                  {displayPrice}
-                  <Popover.Arrow className="fill-black" width={12} height={6} />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
+            <Popover.Portal>
+              <Popover.Content
+                side="left"
+                align="center"
+                sideOffset={8}
+                collisionPadding={12}
+                className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
+              >
+                {displayPrice}
+                <Popover.Arrow className="fill-black" width={12} height={6} />
+              </Popover.Content>
+            </Popover.Portal>
+          </Popover.Root>
+        </div>
+
+        <div className="flex items-start gap-1 text-[13px] min-h-[40px]">
+          <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
+            {(swapListRequest?.length ?? 0) > 1 && (
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <button
+                    type="button"
+                    aria-label="Wants information"
+                    className="text-[#007AFF] hover:text-[#0056b3]"
+                  >
+                    <Info size={14} />
+                  </button>
+                </Popover.Trigger>
+
+                <Popover.Portal>
+                  <Popover.Content
+                    side="top"
+                    align="start"
+                    sideOffset={6}
+                    collisionPadding={12}
+                    className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
+                  >
+                    <span className="font-semibold">Wants:</span> The user would like to exchange any
+                    of the listed items.
+                    <Popover.Arrow className="fill-black" width={10} height={6} />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            )}
+            Wants:
+          </span>
+          <span className="text-[#737373] line-clamp-2 leading-5">{displayWants}</span>
+        </div>
+      </div>
+
+      <div className="mt-auto shrink-0">
+        <div className="flex items-center justify-between border border-[#e3e0e0] px-2 py-1.5 rounded-xl mb-3">
+          <div className="flex items-center gap-1 min-w-0">
+            <Avatar>
+              <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
+            </Avatar>
+            <p className="text-[#222222] font-medium text-[14px] truncate">{displayAuthor}</p>
+          </div>
+          <div className="flex items-center gap-1 shrink-0">
+            <p className="text-[#222222] font-normal text-[15px]">{displayRating(rating)}</p>
+            <Rating />
           </div>
         </div>
+        {!isFlagged && (
+          <Button
+            className="w-full rounded-lg mb-1.5"
+            onClick={handleSwap}
+            disabled={isStartingSwap || !listingId}
+          >
+            {isStartingSwap ? "Starting..." : "Swap Now"}
+          </Button>
+        )}
 
-        <div className="flex items-center gap-1 text-[13px]">
-          {swapListRequest.length > 1 && (
-            <Popover.Root>
-              <Popover.Trigger asChild>
-                <button
-                  type="button"
-                  aria-label="Wants information"
-                  className="mt-[1px] text-[#737373] hover:text-[#222222] flex items-center gap-1"
-                >
-                  <Info size={14} color="blue" />
-                  <span className="text-[#222222] font-bold text-xs">Wants:</span>
-                </button>
-              </Popover.Trigger>
-
-              <Popover.Portal>
-                <Popover.Content
-                  side="top"
-                  align="start"
-                  sideOffset={6}
-                  collisionPadding={12}
-                  className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
-                >
-                  <span className="font-semibold">Wants:</span> The user would like to exchange any
-                  of the listed items.
-                  <Popover.Arrow className="fill-black" width={10} height={6} />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
-          )}
-          {swapListRequest.length === 1 && (
-            <span className="text-[#222222] font-bold text-xs">Wants:</span>
-          )}
-
-          <span className="text-[#737373]">{displayWants}</span>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between border border-[#e3e0e0] px-2 py-2 rounded-xl">
-        <div className="flex items-center gap-1">
-          <Avatar>
-            <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
-          </Avatar>
-          <p className="text-[#222222] font-medium text-[14px]">{displayAuthor}</p>
-        </div>
-        <div className="flex items-center gap-1">
-          <p className="text-[#222222] font-normal text-[15px]">{rating || "N/A"}</p>
-          <Rating />
-        </div>
-      </div>
-      <Button
-        className="w-full rounded-lg mt-4 mb-2"
-        onClick={handleSwap}
-        disabled={isStartingSwap || !listingId}
-      >
-        {isStartingSwap ? "Starting..." : "Swap Now"}
-      </Button>
-
-      <Link href={`/listing/${listingId}`} className="w-full rounded-lg mb-2 inline-block">
-        <Button variant="outline" className="w-full rounded-lg mb-2" disabled={!listingId}>
+        <Button
+          variant="outline"
+          className={`w-full rounded-lg mb-1 ${isFlagged ? "mt-0" : ""}`}
+          disabled={!listingId}
+          onClick={handleViewDetails}
+        >
           View Details
         </Button>
-      </Link>
+      </div>
 
       <LoginRequiredModal
         isOpen={showLoginModal}
@@ -288,7 +308,6 @@ const Product: FC<Props> = (props) => {
         actionText="Go to Login"
       />
     </div>
-    // </Link>
   );
 };
 

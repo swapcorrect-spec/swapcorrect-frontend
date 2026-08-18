@@ -11,6 +11,7 @@ import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { SEARCH_ITEMS, LISTING_DETAILS } from "@/app/_constants/api_contant";
+import { sanitizeText } from "@/lib/sanitize";
 
 const ITEM_CONDITIONS = ["New", "Fairly Used", "Used", "Needs Repair"];
 const CURRENCIES = [
@@ -193,9 +194,14 @@ const EditItemListing = () => {
 
     const payload = {
       ...formData,
+      itemName: sanitizeText(formData.itemName),
+      itemDescription: sanitizeText(formData.itemDescription),
+      location: sanitizeText(formData.location),
       listId: listingId,
       listMediaFiles: [uploadedMedia],
-      listingSwapReq: requestedItems.filter(item => item.trim()).map(item => ({ itemNeededName: item })),
+      listingSwapReq: requestedItems
+        .filter((item) => item.trim())
+        .map((item) => ({ itemNeededName: sanitizeText(item) })),
     };
 
     updateListing(payload);

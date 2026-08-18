@@ -9,15 +9,18 @@ import {
   useGetRecommendedItems,
   useGetElectronicsItems,
 } from "./_hooks/queries/listing/listing";
-import { Auth } from "./_config/auth";
 import { PATHS } from "./_constants/paths";
-import { redirect } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Footer from "@/components/shared/footer";
 import useIsMobile from "./_hooks/useIsMobile";
 import MobileNavbar from "@/components/shared/mobile-navbar";
 import { IProduct } from "@/interface/IProduct";
+import { useAuth } from "@/app/_context/auth-context";
+import { useEffect } from "react";
 
 export default function Home() {
+  const { isAuthenticated, isHydrated } = useAuth();
+  const router = useRouter();
   const { isLoading: isLoadingHotPicks, data } = useGetItemByRaterHotPick({
     enabler: true,
   });
@@ -27,19 +30,24 @@ export default function Home() {
   const { isLoading: isLoadingElectronicsItems, data: electronicsItems } = useGetElectronicsItems({
     enabler: true,
   });
-  const isAuthenticated = Auth.isAuthenticated();
   const isMobile = useIsMobile();
+  const loggedIn = isHydrated && isAuthenticated;
 
-  if (isAuthenticated) {
-    redirect(`${PATHS.DASHBOARD}`);
+  useEffect(() => {
+    if (loggedIn) {
+      router.replace(`${PATHS.DASHBOARD}`);
+    }
+  }, [loggedIn, router]);
+
+  if (loggedIn) {
+    return null;
   }
-  console.log(recommendedItems, "123");
   return (
     <>
       <div className="flex flex-col min-h-screen">
         {isMobile ? <MobileNavbar /> : <Navbar isOpen={true} />}
         {!isMobile && <Herosection />}
-        <div className="w-[90%] mx-auto">
+        <div className="w-[90%] max-w-full mx-auto min-w-0">
           <div className="my-8">
             <Marketplace
               title="FEATURED"
@@ -47,7 +55,7 @@ export default function Home() {
               description="Discover trending items that everyone wants — swap quick"
               products={data as IProduct[]}
               isLoading={isLoadingHotPicks}
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={loggedIn}
             />
             <Marketplace
               title="FEATURED"
@@ -55,7 +63,7 @@ export default function Home() {
               description="Our spotlight trades are secure, high-value, and worth every click."
               products={recommendedItems as IProduct[]}
               isLoading={isLoadingRecommendedItems}
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={loggedIn}
             />
             <Marketplace
               title="OUR RECOMMENDATIONs"
@@ -64,7 +72,7 @@ export default function Home() {
               products={electronicsItems as IProduct[]}
               showSliderArrows
               isLoading={isLoadingElectronicsItems}
-              isAuthenticated={isAuthenticated}
+              isAuthenticated={loggedIn}
             />
           </div>
         </div>
