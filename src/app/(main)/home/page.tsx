@@ -80,10 +80,10 @@ const HomePage: FC = () => {
           </div>
 
           {/* Hero Banner */}
-          <Image src={Banner} className="px-4 py-4" alt="banner" />
+          <Image src={Banner} className="w-full h-auto max-w-full px-4 py-4" alt="banner" />
         </>
       )}
-      <div className="w-[90%] mx-auto">
+      <div className="w-[90%] max-w-full mx-auto min-w-0">
         <div className="my-8 flex flex-col gap-12">
           <Marketplace
             title="FEATURED"

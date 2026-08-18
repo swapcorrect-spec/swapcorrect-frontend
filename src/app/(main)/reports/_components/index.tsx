@@ -47,7 +47,7 @@ const ReportsPage = () => {
   const showLoading = !userId || isLoading || (isFetching && reports.length === 0);
 
   return (
-    <div className="w-[92%] mx-auto my-8 md:my-10">
+    <div className="w-[92%] max-w-full min-w-0 mx-auto my-8 md:my-10">
       <Title title="REPORTS" description="View reports linked to your account." />
 
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-3 mb-6">
@@ -126,20 +126,21 @@ const ReportsPage = () => {
         <>
           <ReportsTable data={reports} />
           {totalPages > 1 && (
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-8 w-full min-w-0">
               <ReactPaginate
                 breakLabel="..."
                 nextLabel="Next ›"
                 previousLabel="‹ Previous"
-                pageRangeDisplayed={5}
+                pageRangeDisplayed={2}
+                marginPagesDisplayed={1}
                 pageCount={totalPages}
                 renderOnZeroPageCount={null}
                 onPageChange={({ selected }) => setPageNumber(selected + 1)}
                 forcePage={pageNumber - 1}
-                pageClassName="w-10 h-10"
-                previousLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-                nextLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-                containerClassName="flex items-center gap-2"
+                pageClassName="w-8 h-8 sm:w-10 sm:h-10 shrink-0"
+                previousLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+                nextLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+                containerClassName="flex items-center justify-center flex-wrap gap-1 sm:gap-2 max-w-full"
                 pageLinkClassName="w-full h-full flex items-center justify-center rounded-lg border hover:bg-gray-100"
                 activeLinkClassName="bg-blue-500 text-white border-blue-500 hover:bg-blue-500"
                 previousClassName={pageNumber === 1 ? "pointer-events-none opacity-40" : ""}

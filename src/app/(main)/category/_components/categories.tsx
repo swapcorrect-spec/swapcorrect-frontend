@@ -91,8 +91,8 @@ const Categories = () => {
     },
   ];
   return (
-    <div className="w-full md:w-[80%] h-full overflow-y-auto hide-scrollbar">
-      <div className="p-6">
+    <div className="w-full md:w-[80%] h-full min-w-0 overflow-y-auto overflow-x-hidden hide-scrollbar">
+      <div className="p-4 sm:p-6">
         <p className="text-[#007AFF] font-medium text-[15px] pb-1">Category</p>
         <p className="text-[#222222] font-medium text-xl capitalize mb-8">
           Browse {tab?.replace(/-/g, " ") || "categories"}
@@ -122,20 +122,21 @@ const Categories = () => {
                 <ProductDetails key={item.listingId} {...item} />
               ))}
             </div>
-            <div className="flex justify-center mt-8">
+            <div className="flex justify-center mt-8 w-full min-w-0">
               <ReactPaginate
                 breakLabel="..."
                 nextLabel="Next ›"
                 previousLabel="‹ Previous"
-                pageRangeDisplayed={5}
+                pageRangeDisplayed={2}
+                marginPagesDisplayed={1}
                 pageCount={totalPage as number}
                 renderOnZeroPageCount={null}
                 onPageChange={handlePageClick}
                 forcePage={pageNumber - 1}
-                pageClassName="w-10 h-10"
-                previousLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-                nextLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-                containerClassName="flex items-center gap-2"
+                pageClassName="w-8 h-8 sm:w-10 sm:h-10 shrink-0"
+                previousLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+                nextLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+                containerClassName="flex items-center justify-center flex-wrap gap-1 sm:gap-2 max-w-full"
                 pageLinkClassName="w-full h-full flex items-center justify-center rounded-lg border hover:bg-gray-100"
                 activeLinkClassName="bg-blue-500 text-white border-blue-500 hover:bg-blue-500"
                 previousClassName={pageNumber === 1 ? "pointer-events-none opacity-40" : ""}

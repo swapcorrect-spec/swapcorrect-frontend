@@ -105,13 +105,13 @@ export default function ItemListing() {
   };
 
   return (
-    <div className="w-full px-4 md:px-0 md:w-[90%] mx-auto my-6 md:my-10">
-      <div className="flex items-start md:items-end justify-between my-2">
+    <div className="w-full min-w-0 max-w-full px-4 md:px-0 md:w-[90%] mx-auto my-6 md:my-10">
+      <div className="flex items-start md:items-end justify-between gap-3 my-2 min-w-0">
         <Title
           title="MY LISTING"
           description="Track, edit, or swap your listed items in one place."
         />
-        <Button className="rounded-full" onClick={handleNewListing}>
+        <Button className="rounded-full shrink-0" onClick={handleNewListing}>
           Create New Listing
         </Button>
       </div>
@@ -167,20 +167,21 @@ export default function ItemListing() {
               );
             })}
           </div>
-          <div className="flex justify-center mt-8">
+          <div className="flex justify-center mt-8 w-full min-w-0">
             <ReactPaginate
               breakLabel="..."
               nextLabel="Next ›"
               previousLabel="‹ Previous"
-              pageRangeDisplayed={5}
+              pageRangeDisplayed={2}
+              marginPagesDisplayed={1}
               pageCount={totalPages}
               renderOnZeroPageCount={null}
               onPageChange={handlePageClick}
               forcePage={Math.max(pageNumber - 1, 0)}
-              pageClassName="w-10 h-10"
-              previousLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-              nextLinkClassName="px-4 py-2 rounded-lg border hover:bg-gray-100"
-              containerClassName="flex items-center gap-2"
+              pageClassName="w-8 h-8 sm:w-10 sm:h-10 shrink-0"
+              previousLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+              nextLinkClassName="px-2 sm:px-4 py-2 rounded-lg border hover:bg-gray-100 whitespace-nowrap"
+              containerClassName="flex items-center justify-center flex-wrap gap-1 sm:gap-2 max-w-full"
               pageLinkClassName="w-full h-full flex items-center justify-center rounded-lg border hover:bg-gray-100"
               activeLinkClassName="bg-blue-500 text-white border-blue-500 hover:bg-blue-500"
               previousClassName={pageNumber === 1 ? "pointer-events-none opacity-40" : ""}

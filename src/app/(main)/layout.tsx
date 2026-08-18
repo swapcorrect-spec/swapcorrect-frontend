@@ -111,14 +111,14 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <section className={cn("flex w-full")}>
+      <section className={cn("flex w-full min-w-0 overflow-x-hidden")}>
         {isOpen && isAuthenticated && !isMobile && (
           <Sidebar
             handleToggleMenu={handleToggleMenu}
             role={data?.result.userRole[0] as "Visitor" | "Swapper"}
           />
         )}
-        <section className="flex-1 h-screen overflow-y-auto">
+        <section className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden">
           {isMobile ? (
             <MobileNavbar
               data={data}
@@ -142,7 +142,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
         <DialogContent
           className="fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 
-               max-w-md w-full p-6 rounded-xl bg-white shadow-lg"
+               max-w-md w-[calc(100%-2rem)] p-6 rounded-xl bg-white shadow-lg"
         >
           <ConfirmModal handleToggleSwapperUpgrade={handleToggleSwapperUpgrade} />
         </DialogContent>

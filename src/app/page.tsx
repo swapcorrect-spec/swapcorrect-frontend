@@ -47,7 +47,7 @@ export default function Home() {
       <div className="flex flex-col min-h-screen">
         {isMobile ? <MobileNavbar /> : <Navbar isOpen={true} />}
         {!isMobile && <Herosection />}
-        <div className="w-[90%] mx-auto">
+        <div className="w-[90%] max-w-full mx-auto min-w-0">
           <div className="my-8">
             <Marketplace
               title="FEATURED"

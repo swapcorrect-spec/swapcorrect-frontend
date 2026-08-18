@@ -48,7 +48,7 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor: getColor = 
 
   return (
     <Card
-      className={`shadow-none border border-[#E9E9E9] transition-colors ${
+      className={`shadow-none border border-[#E9E9E9] transition-colors mb-2 ${
         hasRoom ? "cursor-pointer hover:border-[#007AFF]/50 hover:bg-[#F8FBFF]" : ""
       }`}
       onClick={handleCardClick}

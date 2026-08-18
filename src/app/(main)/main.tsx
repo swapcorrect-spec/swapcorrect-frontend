@@ -28,9 +28,9 @@ export default function Main({
 
   return (
     <>
-      <section className={cn("flex w-full")}>
+      <section className={cn("flex w-full min-w-0 overflow-x-hidden")}>
         {isAuthenticated && <Sidebar />}
-        <section className="flex-1 h-screen overflow-y-auto">
+        <section className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden">
           <Navbar />
           {children}
         </section>

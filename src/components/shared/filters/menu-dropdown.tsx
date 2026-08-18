@@ -129,7 +129,10 @@ const FilterMenu: React.FC<iProps> = ({
             Filter
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent className="min-w-80 md:w-[900px] p-5 mt-3" align="start">
+        <DropdownMenuContent
+          className="min-w-0 w-[min(100vw-1.5rem,20rem)] md:w-[900px] p-5 mt-3"
+          align="start"
+        >
           <DropdownMenuGroup className="w-full">
             <h6 className="text-[#007AFF] font-medium mb-3 2xl:mb-4 text-xs">FILTER</h6>
             <div className="flex flex-col md:flex-row gap-5">
