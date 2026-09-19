@@ -1,11 +1,11 @@
 "use client";
-
+import { useRouter } from "next/navigation";
 import Title from "@/components/shared/tltle";
 import SwapCardItem, { SwapCardItemData } from "@/components/shared/swap-card-item";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Box, CircleCheck, Clock4, Hourglass } from "lucide-react";
-import { FC, useMemo } from "react";
+import { FC, useEffect, useMemo } from "react";
 import { useGetDashboardCard } from "@/app/_hooks/queries/dashboard/dashboard";
 import { useSearchSwaps } from "@/app/_hooks/queries/swap/swap";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
@@ -13,8 +13,19 @@ import { getStatusColor } from "@/lib/utils";
 import Link from "next/link";
 import { PATHS } from "@/app/_constants/paths";
 import EmptyItemsState from "@/components/shared/empty-items-state";
+import { useAuth } from "@/app/_context/auth-context";
 
 const DashboardPage: FC = () => {
+  const router = useRouter();
+
+  const { isAuthenticated, isHydrated } = useAuth();
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,
   });

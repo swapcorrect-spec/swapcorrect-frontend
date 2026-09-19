@@ -9,7 +9,12 @@ import { Heart, Info, Flag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useState } from "react";
-import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, displayRating } from "@/lib/utils";
+import {
+  formatCurrency,
+  createImageErrorHandler,
+  getImageSrcWithFallback,
+  displayRating,
+} from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import {
   useAddToFavourite,
@@ -17,6 +22,8 @@ import {
 } from "@/app/_hooks/queries/favourite/favourite";
 import * as Popover from "@radix-ui/react-popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import LoginRequiredModal from "../shared/login-required-modal";
+import { useAuth } from "@/app/_context/auth-context";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -83,8 +90,13 @@ const ProductDetails: React.FC<iProps> = ({
   isFlagged = false,
 }) => {
   const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
+
   const [imageError, setImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
+  // const loggedIn = isHydrated && isAuthenticated;
 
   const { startSwap, isPending: isStartingSwap } = useStartSwap({
     listingId: listingId?.toString() || "",
@@ -136,6 +148,10 @@ const ProductDetails: React.FC<iProps> = ({
 
   const handleSwapNow = () => {
     if (isFlagged) return;
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
     if (listingId) {
       startSwap();
     }
@@ -147,201 +163,225 @@ const ProductDetails: React.FC<iProps> = ({
     }
   };
 
+  const handleLogin = () => {
+    setShowLoginModal(false);
+    router.push("/login");
+  };
+  const handleSignup = () => {
+    setShowLoginModal(false);
+    router.push("/signup");
+  };
+
   return (
-    <Card className="bg-white w-full h-full flex flex-col p-2.5 cursor-pointer border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] rounded-xl">
-      <CardContent className="h-full flex flex-col flex-grow p-0">
-        <div
-          className="mb-2 w-full h-[150px] md:h-[220px] relative transition-all duration-200 rounded-xl shrink-0"
-          onClick={handleViewDetails}
-          role="button"
-          tabIndex={listingId ? 0 : -1}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleViewDetails();
-            }
-          }}
-          aria-label="View listing details"
-        >
-          {isVideo ? (
-            <ReactPlayer
-              src={typeof mediaUrl === "string" ? mediaUrl : ""}
-              width="100%"
-              height="100%"
-              controls={true}
-              className="rounded-xl overflow-hidden"
-              style={{ borderRadius: "12px" }}
-            />
-          ) : (
-            <Image
-              alt="Product Preview"
-              fill
-              src={getImageSrcWithFallback(
-                typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
-                imageError
-              )}
-              className="rounded-xl object-cover"
-              onError={handleImageError}
-            />
-          )}
-          <div className=" px-4 w-full absolute top-[16px] flex items-center gap-2">
-            {showHotpick && (
-              <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
-                <HotPick />
-                <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
-              </div>
-            )}
-            {isFlagged && (
-              <div className="bg-[#FFF6F6] gap-1.5 flex items-center rounded-xl px-2 py-1">
-                <Flag size={12} className="text-[#FF3B30]" />
-                <p className="text-[#FF3B30] text-xs font-medium">Flagged</p>
-              </div>
-            )}
-            <button
-              type="button"
-              aria-label="toggle favourite"
-              disabled={isAddingFav || isRemovingFav || !listingId}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!listingId) return;
-                // Optimistic update - change UI immediately
-                setIsFav(!isFav);
-                // Then make API call
-                if (isFav) {
-                  removeFromFavourite();
-                } else {
-                  addToFavourite();
-                }
-              }}
-              className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60"
-            >
-              <Heart
-                fill={isFav ? "#ef4444" : "none"}
-                color={isFav ? "#ef4444" : "#6b7280"}
-                size={16}
+    <>
+      <Card className="bg-white w-full h-full flex flex-col p-2 sm:p-2.5 cursor-pointer border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] rounded-xl overflow-hidden">
+        <CardContent className="h-full flex flex-col flex-grow p-0">
+          <div
+            className="mb-2 w-full h-[130px] sm:h-[160px] md:h-[220px] relative transition-all duration-200 rounded-xl shrink-0"
+            onClick={handleViewDetails}
+            role="button"
+            tabIndex={listingId ? 0 : -1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleViewDetails();
+              }
+            }}
+            aria-label="View listing details"
+          >
+            {isVideo ? (
+              <ReactPlayer
+                src={typeof mediaUrl === "string" ? mediaUrl : ""}
+                width="100%"
+                height="100%"
+                controls={true}
+                className="rounded-xl overflow-hidden"
+                style={{ borderRadius: "12px" }}
               />
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex justify-between items-start gap-2 w-full min-h-[28px]">
-            <h6 className="text-xl font-medium leading-7 truncate min-w-0 flex-1">{displayName}</h6>
-
-            <Popover.Root>
-              <Popover.Trigger asChild>
-                <button
-                  type="button"
-                  className="text-[#007AFF] font-medium text-sm underline shrink-0 whitespace-nowrap pt-0.5"
-                >
-                  View Est. Value
-                </button>
-              </Popover.Trigger>
-
-              <Popover.Portal>
-                <Popover.Content
-                  side="left"
-                  align="center"
-                  sideOffset={8}
-                  collisionPadding={12}
-                  className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
-                >
-                  {displayPrice}
-                  <Popover.Arrow className="fill-black" width={12} height={6} />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
-          </div>
-          {categoryName && (
-            <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-1.5">
-              {categoryName}
-            </p>
-          )}
-          <div className="flex items-start gap-1 mb-2 min-h-[40px]">
-            <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
-              {displayWants.length > 1 && (
-                <Popover.Root>
-                  <Popover.Trigger asChild>
-                    <button
-                      type="button"
-                      aria-label="Wants information"
-                      className="text-[#007AFF] hover:text-[#0056b3]"
-                    >
-                      <Info size={14} />
-                    </button>
-                  </Popover.Trigger>
-
-                  <Popover.Portal>
-                    <Popover.Content
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      collisionPadding={12}
-                      className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
-                    >
-                      <span className="font-semibold">Wants:</span> The user would like to exchange
-                      any of the listed items.
-                      <Popover.Arrow className="fill-black" width={10} height={6} />
-                    </Popover.Content>
-                  </Popover.Portal>
-                </Popover.Root>
+            ) : (
+              <Image
+                alt="Product Preview"
+                fill
+                src={getImageSrcWithFallback(
+                  typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
+                  imageError
+                )}
+                className="rounded-xl object-cover"
+                onError={handleImageError}
+              />
+            )}
+            <div className="px-2 sm:px-4 w-full absolute top-[10px] sm:top-[16px] flex items-center gap-1.5 sm:gap-2">
+              {showHotpick && (
+                <div className="bg-[#FFF6F6] gap-1.5 sm:gap-2 flex items-center rounded-xl px-1.5 py-1 sm:p-[5px]">
+                  <HotPick />
+                  <p className="text-[#FF3B30] text-[10px] sm:text-xs"> Hot Picks</p>
+                </div>
               )}
-              Wants:
-            </span>
-
-            <div className="text-[#737373] min-w-0 flex-1">
-              {displayWants && displayWants.length > 0 ? (
-                <p className="text-sm text-[#737373] leading-5 line-clamp-2 capitalize">
-                  {displayWants.join(", ")}
-                </p>
-              ) : (
-                <p className="text-sm text-[#737373] leading-5">Open to offers</p>
+              {isFlagged && (
+                <div className="bg-[#FFF6F6] gap-1 flex items-center rounded-xl px-1.5 py-1">
+                  <Flag size={12} className="text-[#FF3B30]" />
+                  <p className="text-[#FF3B30] text-[10px] sm:text-xs font-medium">Flagged</p>
+                </div>
               )}
-            </div>
-          </div>
-
-          <div className="mt-auto shrink-0">
-            <div className="rounded-xl mb-3 text-[#222222] gap-2 px-2 py-1.5 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-              <div className="flex items-center gap-2 min-w-0">
-                <Avatar>
-                  <AvatarImage
-                    src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
-                  />
-                </Avatar>
-                <p className="font-medium truncate">{displayAuthor}</p>
-              </div>
-              <p className="flex items-center gap-1 shrink-0">
-                {displayRating(rating)} <Rating />
-              </p>
-            </div>
-            {!isFlagged && (
-              <Button
-                onClick={handleSwapNow}
-                disabled={isStartingSwap || !listingId}
-                variant={"default"}
-                className="rounded-lg font-medium text-sm py-2.5 w-full"
-                size={"lg"}
+              <button
+                type="button"
+                aria-label="toggle favourite"
+                disabled={isAddingFav || isRemovingFav || !listingId}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!listingId) return;
+                  setIsFav(!isFav);
+                  if (isFav) {
+                    removeFromFavourite();
+                  } else {
+                    addToFavourite();
+                  }
+                }}
+                className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60 shrink-0"
               >
-                {isStartingSwap ? "Starting..." : "Swap Now"}
-              </Button>
+                <Heart
+                  fill={isFav ? "#ef4444" : "none"}
+                  color={isFav ? "#ef4444" : "#6b7280"}
+                  size={16}
+                />
+              </button>
+            </div>
+          </div>
+
+          <div className="flex flex-col flex-1 min-h-0">
+            <div className="flex justify-between items-start gap-1.5 w-full">
+              <h6 className="text-base sm:text-lg md:text-xl font-medium leading-6 sm:leading-7 truncate min-w-0 flex-1">
+                {displayName}
+              </h6>
+
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <button
+                    type="button"
+                    className="text-[#007AFF] font-medium text-xs sm:text-sm underline shrink-0 whitespace-nowrap pt-0.5"
+                  >
+                    View Est. Value
+                  </button>
+                </Popover.Trigger>
+
+                <Popover.Portal>
+                  <Popover.Content
+                    side="left"
+                    align="center"
+                    sideOffset={8}
+                    collisionPadding={12}
+                    className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
+                  >
+                    {displayPrice}
+                    <Popover.Arrow className="fill-black" width={12} height={6} />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            </div>
+
+            {categoryName && (
+              <p className="text-[#007AFF] font-medium text-[10px] sm:text-[12px] bg-[#007AFF]/10 px-2 py-0.5 sm:py-1 rounded-full w-fit my-1">
+                {categoryName}
+              </p>
             )}
 
-            <Link
-              href={`/listing/${listingId}`}
-              className={`w-full inline-block ${isFlagged ? "mt-0" : "mt-1.5"}`}
-            >
-              <Button
-                disabled={!listingId}
-                variant={"outline"}
-                className="rounded-lg font-medium text-sm py-2.5 w-full"
-                size={"lg"}
+            <div className="flex items-start gap-1 mb-2">
+              <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
+                {displayWants.length > 1 && (
+                  <Popover.Root>
+                    <Popover.Trigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Wants information"
+                        className="text-[#007AFF] hover:text-[#0056b3]"
+                      >
+                        <Info size={14} />
+                      </button>
+                    </Popover.Trigger>
+
+                    <Popover.Portal>
+                      <Popover.Content
+                        side="top"
+                        align="start"
+                        sideOffset={6}
+                        collisionPadding={12}
+                        className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
+                      >
+                        <span className="font-semibold">Wants:</span> The user would like to
+                        exchange any of the listed items.
+                        <Popover.Arrow className="fill-black" width={10} height={6} />
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
+                )}
+                Wants:
+              </span>
+
+              <div className="text-[#737373] min-w-0 flex-1">
+                {displayWants && displayWants.length > 0 ? (
+                  <p className="text-xs sm:text-sm text-[#737373] leading-5 line-clamp-2 capitalize">
+                    {displayWants.join(", ")}
+                  </p>
+                ) : (
+                  <p className="text-xs sm:text-sm text-[#737373] leading-5">Open to offers</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-auto shrink-0">
+              <div className="rounded-xl mb-2 text-[#222222] gap-2 px-2 py-1 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Avatar className="w-6 h-6 sm:w-8 sm:h-8">
+                    <AvatarImage
+                      src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
+                    />
+                  </Avatar>
+                  <p className="font-medium text-xs sm:text-sm truncate">{displayAuthor}</p>
+                </div>
+                <p className="flex items-center gap-1 text-xs shrink-0">
+                  {displayRating(rating)} <Rating />
+                </p>
+              </div>
+
+              {!isFlagged && (
+                <Button
+                  onClick={handleSwapNow}
+                  disabled={isStartingSwap || !listingId}
+                  variant={"default"}
+                  className="bg-[#007AFF] hover:bg-[#0062cc] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  size={"lg"}
+                >
+                  {isStartingSwap ? "Starting..." : "Swap Now"}
+                </Button>
+              )}
+
+              <Link
+                href={`/listing/${listingId}`}
+                className={`w-full inline-block ${isFlagged ? "mt-0" : "mt-1.5"}`}
               >
-                View Details
-              </Button>
-            </Link>
+                <Button
+                  disabled={!listingId}
+                  variant={"outline"}
+                  className="rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  size={"lg"}
+                >
+                  View Details
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        title="Login Required to Swap"
+        description="You need to be logged in to swap items. Please sign in to continue with your swap and start trading!"
+        actionText="Go to Login"
+      />
+    </>
   );
 };
 
