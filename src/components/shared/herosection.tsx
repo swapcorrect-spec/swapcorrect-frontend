@@ -61,21 +61,21 @@ const Herosection = () => {
             <div className="flex items-center gap-1 text-[10px] font-medium text-[#007AFF] uppercase tracking-wider">
               <span>Trading Off</span>
             </div>
-            <p className="text-sm font-bold text-slate-100">Vintage Dunks</p>
-            <p className="text-xs text-slate-400">Est. Value: $120</p>
+            <p className="text-sm font-bold text-slate-100">Adidas</p>
+            <p className="text-xs text-slate-400">Est. Value: ₦20,000</p>
           </div>
         </div>
 
         {/* Right Item Card */}
         <div className="hidden lg:flex absolute right-8 xl:right-16 top-1/4 rotate-6 items-center gap-3 bg-slate-900/90 border border-slate-800 p-3.5 rounded-2xl shadow-2xl backdrop-blur-xl animate-pulse [animation-delay:1000ms]">
           <div className="w-12 h-12 rounded-xl bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center text-2xl">
-            🎸
+            💼
           </div>
           <div>
             <div className="flex items-center gap-1 text-[10px] font-medium text-emerald-400 uppercase tracking-wider">
               <span>Looking For</span>
             </div>
-            <p className="text-sm font-bold text-slate-100">Acoustic Guitar</p>
+            <p className="text-sm font-bold text-slate-100">Vantage Bag</p>
             <p className="text-xs text-slate-400">Mint Condition</p>
           </div>
         </div>
