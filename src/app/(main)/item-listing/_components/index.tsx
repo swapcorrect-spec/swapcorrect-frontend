@@ -4,12 +4,14 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import Listing from "@/app/(main)/item-listing/_components/listing";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useSearchItems } from "@/app/_hooks/queries/listing/listing";
 import EmptyItemsState from "@/components/shared/empty-items-state";
 import Title from "@/components/shared/tltle";
 import ReactPaginate from "react-paginate";
+import { useAuth } from "@/app/_context/auth-context";
+import { PATHS } from "@/app/_constants/paths";
 
 const categoryList = [
   {
@@ -34,6 +36,7 @@ const locationList = [
 
 export default function ItemListing() {
   const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
   const search = useSearchParams();
   const pageNumber = Number(search.get("page") || 1);
 
@@ -41,10 +44,20 @@ export default function ItemListing() {
   const [location, setLocation] = useState<string>("");
   const [searchParam, setSearchParam] = useState<string>("");
 
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
   const { data: userData } = useGetUserInfo({ enabler: true });
   const userId = userData?.result?.id;
 
-  const { data: itemsData, isLoading, totalPage } = useSearchItems({
+  const {
+    data: itemsData,
+    isLoading,
+    totalPage,
+  } = useSearchItems({
     enabler: !!userId,
     listingUserId: userId,
     searhParam: searchParam || undefined,
@@ -111,7 +124,10 @@ export default function ItemListing() {
           title="MY LISTING"
           description="Track, edit, or swap your listed items in one place."
         />
-        <Button className="rounded-full shrink-0" onClick={handleNewListing}>
+        <Button
+          className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full shrink-0"
+          onClick={handleNewListing}
+        >
           Create New Listing
         </Button>
       </div>

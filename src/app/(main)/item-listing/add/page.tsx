@@ -732,9 +732,26 @@ const NewItemListing = () => {
           <Input
             label="Estimated Monetary Value *"
             placeholder="0.00"
-            type="number"
-            value={formData.estimatedAmount || ""}
-            onChange={(e) => handleInputChange("estimatedAmount", Number(e.target.value))}
+            type="text"
+            inputMode="decimal"
+            value={
+              formData.estimatedAmount !== undefined && formData.estimatedAmount !== null
+                ? Number(formData.estimatedAmount).toLocaleString("en-US", {
+                    maximumFractionDigits: 2,
+                  })
+                : ""
+            }
+            onChange={(e) => {
+              // Strip out non-numeric characters except decimals
+              const rawValue = e.target.value.replace(/[^0-9.]/g, "");
+
+              // Prevent multiple decimal points
+              const parts = rawValue.split(".");
+              const cleanValue =
+                parts.length > 2 ? `${parts[0]}.${parts.slice(1).join("")}` : rawValue;
+
+              handleInputChange("estimatedAmount", cleanValue ? Number(cleanValue) : 0);
+            }}
           />
 
           <div>
@@ -827,7 +844,7 @@ const NewItemListing = () => {
             </div>
 
             <Button
-              className={"rounded-full w-full"}
+              className={"bg-[#007AFF] hover:bg-[#0062cc] rounded-full w-full"}
               size={"lg"}
               onClick={handleSubmit}
               disabled={isPending}

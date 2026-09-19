@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ReactPaginate from "react-paginate";
 import Title from "@/components/shared/tltle";
 import { Input } from "@/components/ui/input";
@@ -9,10 +9,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Search } from "lucide-react";
 import { useDebounce } from "@/app/_hooks/useDebounce";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
-import {
-  mapReportToTableRow,
-  useGetReports,
-} from "@/app/_hooks/queries/report/report";
+import { mapReportToTableRow, useGetReports } from "@/app/_hooks/queries/report/report";
 import {
   REPORT_DATE_FILTER_OPTIONS,
   REPORT_STATUS_OPTIONS,
@@ -20,12 +17,24 @@ import {
   ReportUserStatus,
 } from "@/app/_hooks/queries/report/report.type";
 import ReportsTable from "./reports-table";
+import { useAuth } from "@/app/_context/auth-context";
+import { useRouter } from "next/navigation";
+import { PATHS } from "@/app/_constants/paths";
 
 const ReportsPage = () => {
+  const router = useRouter();
+
+  const { isAuthenticated, isHydrated } = useAuth();
   const [pageNumber, setPageNumber] = useState(1);
   const [searchInput, setSearchInput] = useState("");
   const [status, setStatus] = useState<ReportUserStatus>("All");
   const [reportFilerDate, setReportFilerDate] = useState<ReportDateFilter>("All");
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
 
   const debouncedSearch = useDebounce(searchInput, 500);
 
@@ -94,7 +103,10 @@ const ReportsPage = () => {
       {showLoading ? (
         <div className="border border-[#EEEEEE] rounded-xl overflow-hidden bg-white">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="flex items-center gap-4 px-4 py-4 border-b border-[#F0F0F0]">
+            <div
+              key={index}
+              className="flex items-center gap-4 px-4 py-4 border-b border-[#F0F0F0]"
+            >
               <Skeleton className="w-8 h-8 rounded-full" />
               <Skeleton className="h-4 w-28" />
               <Skeleton className="h-4 w-20" />

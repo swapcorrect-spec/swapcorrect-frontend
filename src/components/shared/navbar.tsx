@@ -1,9 +1,9 @@
 "use client";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
-import Logo from "@/app/assets/images/svgs/logo_full.svg";
+import Logo from "@/app/assets/images/svgs/logo.svg";
 import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
 // import Search from "@/app/assets/images/svgs/Search.svg";
@@ -25,7 +25,7 @@ import {
   // mockNotifications,
   notifyType,
 } from "@/app/_constants/notifications";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { IGetUserInfoResponseData } from "@/app/_hooks/queries/auth/auth.type";
 import {
@@ -53,6 +53,7 @@ const Navbar: React.FC<Props> = ({
   handleToggleSwapperUpgrade,
 }) => {
   const router = useRouter();
+  const pathname = usePathname();
   const queryClient = useQueryClient();
   const { isAuthenticated, isHydrated, clearAuth } = useAuth();
   const notificationContainerRef = useRef<HTMLDivElement>(null);
@@ -81,6 +82,23 @@ const Navbar: React.FC<Props> = ({
       console.log("read notification error", _err);
     },
   });
+
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  const isHomePage = pathname === "/";
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 20) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
@@ -129,20 +147,228 @@ const Navbar: React.FC<Props> = ({
   };
 
   return (
-    <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex justify-between gap-[110px] z-10 w-full">
+    // <section className="border-[#E9E9E9] border bg-white py-[15px] px-[42px] top-0 sticky flex justify-between gap-[110px] z-10 w-full">
+    //   <div className="flex gap-4 items-center justify-center">
+    //     {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
+    //     <Link href={isLoggedIn ? PATHS.DASHBOARD : "/"} className="flex justify-center">
+    //       <Logo />
+    //     </Link>
+    //   </div>
+    //   {/* <div className="max-w-[749px] w-full me-auto">
+    //     <Input
+    //       startIcon={<Search />}
+    //       className="w-full !h-11 rounded-[2rem]"
+    //       placeholder="Search items..."
+    //     />
+    //   </div> */}
+    //   {isLoggedIn ? (
+    //     <div className="flex gap-5 items-center">
+    //       {role === "Visitor" ? (
+    //         <Button
+    //           variant={"default"}
+    //           className="rounded-full font-medium text-sm py-3 !px-[11px] flex items-center gap-1 !h-auto w-full"
+    //           size={"lg"}
+    //           onClick={handleToggleSwapperUpgrade}
+    //         >
+    //           Upgrade to Swapper <SwapperUpgradeLogo />
+    //         </Button>
+    //       ) : (
+    //         <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+    //           <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+    //           Swapper
+    //         </div>
+    //       )}
+    //       <DropdownMenu open={isOpenNotifications} onOpenChange={handleOpenNotifications}>
+    //         <DropdownMenuTrigger asChild>
+    //           <div className="relative cursor-pointer">
+    //             <Bell />
+    //             {!isFetching && unreadCount?.result !== 0 && (
+    //               <div className="absolute top-[-3px] right-[-2px] text-white bg-[#E42222] w-4 h-4 rounded-full items-center justify-center flex text-xs">
+    //                 {!isFetching && unreadCount?.result}
+    //               </div>
+    //             )}
+    //           </div>
+    //         </DropdownMenuTrigger>
+    //         {/* <DropdownMenuContent className="w-[500px] flex flex-col gap-1 h-[75vh] pb-2 mt-5 py-0">
+    //           <Tabs
+    //             defaultValue="all"
+    //             onValueChange={(value) => {
+    //               console.log("tab changed:", value, "unreadOnly:", unreadOnly);
+    //               setUnreadOnly(value === "unread" ? true : undefined);
+    //             }}
+    //             className="w-full mb-6 sticky top-0 bg-white py-3"
+    //           >
+    //             <TabsList className="flex w-full">
+    //               {notifyType.map((_, index: number) => (
+    //                 <TabsTrigger value={_.value} className={`rounded-[26px] w-full`} key={index}>
+    //                   {_.title}
+    //                 </TabsTrigger>
+    //               ))}
+    //             </TabsList>
+    //           </Tabs>
+    //           <div className="px-2">
+    //             {notifications?.result?.items.map((notify, idx) => (
+    //               <Notification key={idx} notify={notify} />
+    //             ))}
+    //           </div>
+    //           <div className="px-2">
+    //             {isNotificationsFetching ? (
+    //               <div className="py-8 text-center">Loading notifications...</div>
+    //             ) : notifications?.result?.items?.length ? (
+    //               notifications.result.items.map((notify, idx) => (
+    //                 <Notification key={idx} notify={notify} />
+    //               ))
+    //             ) : (
+    //               <div className="flex flex-col items-center justify-center py-12 text-center">
+    //                 <Bell className="h-10 w-10 text-gray-400 mb-3" />
+    //                 <p className="text-sm font-medium text-gray-600">No notifications</p>
+    //                 <p className="text-xs text-gray-400 mt-1">You&apos;re all caught up.</p>
+    //               </div>
+    //             )}
+    //           </div>
+    //         </DropdownMenuContent> */}
+    //         <DropdownMenuContent className="w-[500px] h-[75vh] mt-5 p-0">
+    //           <Tabs
+    //             defaultValue="all"
+    //             onValueChange={(value) => {
+    //               setUnreadOnly(value === "unread" ? true : undefined);
+    //             }}
+    //             className="h-full flex flex-col"
+    //           >
+    //             <div className="sticky top-0 bg-white z-10 p-3 border-b">
+    //               <TabsList className="flex w-full">
+    //                 {notifyType.map((item) => (
+    //                   <TabsTrigger
+    //                     key={item.value}
+    //                     value={item.value}
+    //                     className="rounded-[26px] w-full"
+    //                   >
+    //                     {item.title}
+    //                   </TabsTrigger>
+    //                 ))}
+    //               </TabsList>
+    //             </div>
+
+    //             {/* <div
+    //               ref={notificationContainerRef}
+    //               onScroll={handleNotificationScroll}
+    //               className="flex-1 overflow-y-auto px-2"
+    //             >
+    //               {notifications.length === 0 && !isFetching ? (
+    //                 <div className="flex flex-col items-center justify-center h-full">
+    //                   <Bell className="w-10 h-10 text-gray-400" />
+    //                   <p className="mt-3 text-sm font-medium">No notifications</p>
+    //                   <p className="text-xs text-gray-500">You&apos;re all caught up.</p>
+    //                 </div>
+    //               ) : (
+    //                 notifications.map((notify, idx) => (
+    //                   <Notification key={`${notify.id}-${idx}`} notify={notify} />
+    //                 ))
+    //               )}
+
+    //               {isFetchingNextPage && (
+    //                 <div className="py-4 text-center text-sm text-gray-500">Loading more...</div>
+    //               )}
+    //             </div> */}
+    //             <div
+    //               ref={notificationContainerRef}
+    //               onScroll={handleNotificationScroll}
+    //               className="flex-1 overflow-y-auto px-2"
+    //             >
+    //               {isNotificationFetching && notifications.length === 0 ? (
+    //                 <div className="flex items-center justify-center h-full">
+    //                   Loading notifications...
+    //                 </div>
+    //               ) : notifications.length === 0 ? (
+    //                 <div className="flex flex-col items-center justify-center h-full">
+    //                   <Bell className="w-10 h-10 text-gray-400" />
+    //                   <p className="mt-3 text-sm font-medium">No notifications</p>
+    //                   <p className="text-xs text-gray-500">You&apos;re all caught up.</p>
+    //                 </div>
+    //               ) : (
+    //                 notifications.map((notify, idx) => (
+    //                   <Notification
+    //                     key={`${notify.id}-${idx}`}
+    //                     notify={notify}
+    //                     onRead={handleReadNotification}
+    //                     isPending={isReadNotificationPending}
+    //                     selectedNotification={selectedNotification}
+    //                   />
+    //                 ))
+    //               )}
+
+    //               {isFetchingNextPage && (
+    //                 <div className="py-4 text-center text-sm text-gray-500">Loading more...</div>
+    //               )}
+    //             </div>
+    //           </Tabs>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu>
+    //       <DropdownMenu>
+    //         <DropdownMenuTrigger asChild>
+    //           <button className="flex items-center !border-0 gap-2">
+    //             <div className="w-[42px] h-[42px] rounded-full bg-[#007AFF] flex items-center justify-center">
+    //               <Avatar>
+    //                 <AvatarImage src={data?.result?.profilePicture as string} />
+    //                 <AvatarFallback>{`${data?.result?.firstName?.charAt(0)} ${data?.result?.lastName?.charAt(
+    //                   0
+    //                 )}`}</AvatarFallback>
+    //               </Avatar>
+    //             </div>
+    //             <ArrowDown />
+    //           </button>
+    //         </DropdownMenuTrigger>
+    //         <DropdownMenuContent className="w-40">
+    //           <DropdownMenuGroup>
+    //             <DropdownMenuItem asChild>
+    //               <Link href="/settings">Settings</Link>
+    //             </DropdownMenuItem>
+    //             <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+    //               Logout
+    //             </DropdownMenuItem>
+    //           </DropdownMenuGroup>
+    //         </DropdownMenuContent>
+    //       </DropdownMenu>
+    //     </div>
+    //   ) : (
+    //     <div className="flex items-center gap-2">
+    //       <Button className="bg-[#007AFF] rounded-full px-8" onClick={handleLogin}>
+    //         Login
+    //       </Button>
+    //       <Button className="!no-underline" variant={"link"} onClick={handleGetStarted}>
+    //         Get started
+    //       </Button>
+    //     </div>
+    //   )}
+
+    //   <LogoutConfirmModal
+    //     isOpen={isLogoutModalOpen}
+    //     onClose={() => setIsLogoutModalOpen(false)}
+    //     onConfirm={handleLogout}
+    //   />
+    // </section>
+    <section
+      className={`top-0 sticky flex justify-between gap-[110px] z-50 w-full py-[15px] px-[42px] transition-all duration-300 
+      bg-white border border-[#D9D9D9]
+    `}
+    >
       <div className="flex gap-4 items-center justify-center">
-        {!isOpen && <Menu className="cursor-pointer" onClick={handleToggleMenu} />}
-        <Link href={isLoggedIn ? PATHS.DASHBOARD : "/"} className="flex justify-center">
-          <Logo />
+        {!isOpen && isAuthenticated && (
+          <Menu className="cursor-pointer text-black" onClick={handleToggleMenu} />
+        )}
+        <Link
+          href={isLoggedIn ? PATHS.DASHBOARD : "/"}
+          className="flex justify-center items-center"
+        >
+          <Logo className="text-white mr-2" />
+          <p
+            className={`font-bold transition-colors ${isHomePage ? "text-black" : "text-slate-900"}`}
+          >
+            SwapCorrect
+          </p>
         </Link>
       </div>
-      {/* <div className="max-w-[749px] w-full me-auto">
-        <Input
-          startIcon={<Search />}
-          className="w-full !h-11 rounded-[2rem]"
-          placeholder="Search items..."
-        />
-      </div> */}
+
       {isLoggedIn ? (
         <div className="flex gap-5 items-center">
           {role === "Visitor" ? (
@@ -160,10 +386,17 @@ const Navbar: React.FC<Props> = ({
               Swapper
             </div>
           )}
+
           <DropdownMenu open={isOpenNotifications} onOpenChange={handleOpenNotifications}>
             <DropdownMenuTrigger asChild>
-              <div className="relative cursor-pointer">
-                <Bell />
+              <div
+                className={`relative cursor-pointer transition-colors ${
+                  isScrolled
+                    ? "text-slate-700 hover:text-slate-900"
+                    : "text-slate-300 hover:text-white"
+                }`}
+              >
+                <Bell className="text-black" />
                 {!isFetching && unreadCount?.result !== 0 && (
                   <div className="absolute top-[-3px] right-[-2px] text-white bg-[#E42222] w-4 h-4 rounded-full items-center justify-center flex text-xs">
                     {!isFetching && unreadCount?.result}
@@ -171,50 +404,11 @@ const Navbar: React.FC<Props> = ({
                 )}
               </div>
             </DropdownMenuTrigger>
-            {/* <DropdownMenuContent className="w-[500px] flex flex-col gap-1 h-[75vh] pb-2 mt-5 py-0">
+
+            <DropdownMenuContent className="w-[500px] h-[75vh] mt-5 p-0 bg-white border border-[#E9E9E9] text-slate-900 shadow-xl">
               <Tabs
                 defaultValue="all"
-                onValueChange={(value) => {
-                  console.log("tab changed:", value, "unreadOnly:", unreadOnly);
-                  setUnreadOnly(value === "unread" ? true : undefined);
-                }}
-                className="w-full mb-6 sticky top-0 bg-white py-3"
-              >
-                <TabsList className="flex w-full">
-                  {notifyType.map((_, index: number) => (
-                    <TabsTrigger value={_.value} className={`rounded-[26px] w-full`} key={index}>
-                      {_.title}
-                    </TabsTrigger>
-                  ))}
-                </TabsList>
-              </Tabs>
-              <div className="px-2">
-                {notifications?.result?.items.map((notify, idx) => (
-                  <Notification key={idx} notify={notify} />
-                ))}
-              </div>
-              <div className="px-2">
-                {isNotificationsFetching ? (
-                  <div className="py-8 text-center">Loading notifications...</div>
-                ) : notifications?.result?.items?.length ? (
-                  notifications.result.items.map((notify, idx) => (
-                    <Notification key={idx} notify={notify} />
-                  ))
-                ) : (
-                  <div className="flex flex-col items-center justify-center py-12 text-center">
-                    <Bell className="h-10 w-10 text-gray-400 mb-3" />
-                    <p className="text-sm font-medium text-gray-600">No notifications</p>
-                    <p className="text-xs text-gray-400 mt-1">You&apos;re all caught up.</p>
-                  </div>
-                )}
-              </div>
-            </DropdownMenuContent> */}
-            <DropdownMenuContent className="w-[500px] h-[75vh] mt-5 p-0">
-              <Tabs
-                defaultValue="all"
-                onValueChange={(value) => {
-                  setUnreadOnly(value === "unread" ? true : undefined);
-                }}
+                onValueChange={(value) => setUnreadOnly(value === "unread" ? true : undefined)}
                 className="h-full flex flex-col"
               >
                 <div className="sticky top-0 bg-white z-10 p-3 border-b">
@@ -231,41 +425,20 @@ const Navbar: React.FC<Props> = ({
                   </TabsList>
                 </div>
 
-                {/* <div
-                  ref={notificationContainerRef}
-                  onScroll={handleNotificationScroll}
-                  className="flex-1 overflow-y-auto px-2"
-                >
-                  {notifications.length === 0 && !isFetching ? (
-                    <div className="flex flex-col items-center justify-center h-full">
-                      <Bell className="w-10 h-10 text-gray-400" />
-                      <p className="mt-3 text-sm font-medium">No notifications</p>
-                      <p className="text-xs text-gray-500">You&apos;re all caught up.</p>
-                    </div>
-                  ) : (
-                    notifications.map((notify, idx) => (
-                      <Notification key={`${notify.id}-${idx}`} notify={notify} />
-                    ))
-                  )}
-
-                  {isFetchingNextPage && (
-                    <div className="py-4 text-center text-sm text-gray-500">Loading more...</div>
-                  )}
-                </div> */}
                 <div
                   ref={notificationContainerRef}
                   onScroll={handleNotificationScroll}
                   className="flex-1 overflow-y-auto px-2"
                 >
                   {isNotificationFetching && notifications.length === 0 ? (
-                    <div className="flex items-center justify-center h-full">
+                    <div className="flex items-center justify-center h-full text-slate-500">
                       Loading notifications...
                     </div>
                   ) : notifications.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full">
                       <Bell className="w-10 h-10 text-gray-400" />
-                      <p className="mt-3 text-sm font-medium">No notifications</p>
-                      <p className="text-xs text-gray-500">You&apos;re all caught up.</p>
+                      <p className="mt-3 text-sm font-medium text-gray-600">No notifications</p>
+                      <p className="text-xs text-gray-400 mt-1">You&apos;re all caught up.</p>
                     </div>
                   ) : (
                     notifications.map((notify, idx) => (
@@ -286,21 +459,26 @@ const Navbar: React.FC<Props> = ({
               </Tabs>
             </DropdownMenuContent>
           </DropdownMenu>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <button className="flex items-center !border-0 gap-2">
+              <button className="flex items-center !border-0 gap-2 focus:outline-none cursor-pointer">
                 <div className="w-[42px] h-[42px] rounded-full bg-[#007AFF] flex items-center justify-center">
                   <Avatar>
                     <AvatarImage src={data?.result?.profilePicture as string} />
-                    <AvatarFallback>{`${data?.result?.firstName?.charAt(0)} ${data?.result?.lastName?.charAt(
+                    <AvatarFallback className="text-black">{`${data?.result?.firstName?.charAt(0)} ${data?.result?.lastName?.charAt(
                       0
                     )}`}</AvatarFallback>
                   </Avatar>
                 </div>
-                <ArrowDown />
+                <ArrowDown
+                  className={`text-black transition-colors ${
+                    isScrolled ? "text-slate-600" : "text-slate-400"
+                  }`}
+                />
               </button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent className="w-40">
+            <DropdownMenuContent className="w-40 bg-white border border-[#E9E9E9]">
               <DropdownMenuGroup>
                 <DropdownMenuItem asChild>
                   <Link href="/settings">Settings</Link>
@@ -314,10 +492,21 @@ const Navbar: React.FC<Props> = ({
         </div>
       ) : (
         <div className="flex items-center gap-2">
-          <Button className="bg-[#007AFF] rounded-full px-8" onClick={handleLogin}>
+          <Button
+            className={`rounded-full px-8 bg-[#007AFF] hover:bg-[#0062cc] shadow-blue-500/25 hover:scale-[1.02] transition-all duration-200`}
+            onClick={handleLogin}
+          >
             Login
           </Button>
-          <Button className="!no-underline" variant={"link"} onClick={handleGetStarted}>
+          <Button
+            variant="link"
+            className={`!no-underline transition-all duration-200 border border-transparent rounded-full px-6 py-2 ${
+              isHomePage
+                ? "text-[#007AFF] hover:text-[#007AFF] hover:border-[#007AFF]"
+                : "text-[#007AFF] hover:border-[#007AFF]"
+            }`}
+            onClick={handleGetStarted}
+          >
             Get started
           </Button>
         </div>

@@ -45,8 +45,33 @@ export default function Home() {
   return (
     <>
       <div className="flex flex-col min-h-screen">
-        {isMobile ? <MobileNavbar /> : <Navbar isOpen={true} />}
-        {!isMobile && <Herosection />}
+        <>
+          {/* Mobile View: Navbar render */}
+          {isMobile && (
+            <div className="block md:hidden w-full sticky top-0 z-50">
+              <MobileNavbar />
+            </div>
+          )}
+
+          {/* Desktop View: Full Hero Section + Dark Navbar Wrapper */}
+          {!isMobile && (
+            <div className="hidden md:flex relative min-h-screen w-full bg-slate-950 text-white overflow-hidden flex-col justify-between items-center pt-0 pb-16">
+              {/* Dynamic Background Gradients & Mesh Grid */}
+              <div className="absolute inset-0 bg-[linear-gradient(to_right,#1f293712_1px,transparent_1px),linear-gradient(to_bottom,#1f293712_1px,transparent_1px)] bg-[size:24px_24px]" />
+              <div className="absolute top-1/4 -left-20 w-96 h-96 bg-amber-500/20 rounded-full blur-[128px] pointer-events-none" />
+              <div className="absolute bottom-10 -right-20 w-[30rem] h-[30rem] bg-emerald-500/15 rounded-full blur-[128px] pointer-events-none" />
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[40rem] h-[20rem] bg-indigo-500/10 rounded-full blur-[140px] pointer-events-none" />
+
+              {/* Desktop Navbar */}
+              <div className="w-full z-50 sticky top-0">
+                <Navbar isOpen={true} />
+              </div>
+
+              {/* Hero Content */}
+              <Herosection />
+            </div>
+          )}
+        </>
         <div className="w-[90%] max-w-full mx-auto min-w-0">
           <div className="my-8">
             <Marketplace
