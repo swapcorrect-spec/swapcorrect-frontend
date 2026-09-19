@@ -27,7 +27,10 @@ import { countries } from "@/app/_constants/countries";
 import { ROLES } from "@/app/_constants/roles";
 
 const Signup: FC = () => {
-  const [isTogglePassword, setIsTogglePassword] = useState({ password: false, confirm_password: false });
+  const [isTogglePassword, setIsTogglePassword] = useState({
+    password: false,
+    confirm_password: false,
+  });
 
   const toggleVisibility = (field: "password" | "confirm_password") => {
     setIsTogglePassword((prev) => ({
@@ -87,7 +90,10 @@ const Signup: FC = () => {
   return (
     <>
       {!isSuccess ? (
-        <AuthForm title="Welcome to SwapCorrect!" subtitle="Create your free account and start swapping instantly.">
+        <AuthForm
+          title="Welcome to SwapCorrect!"
+          subtitle="Create your free account and start swapping instantly."
+        >
           <form className="flex flex-col gap-5" onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <Input
@@ -143,7 +149,9 @@ const Signup: FC = () => {
                   enableAreaCodes={true}
                   enableSearch
                 />
-                {errors.phone && <p className="mt-1 text-sm text-red-500 min-h-[1rem]">{errors.phone}</p>}
+                {errors.phone && (
+                  <p className="mt-1 text-sm text-red-500 min-h-[1rem]">{errors.phone}</p>
+                )}
               </div>
               <SelectFilter
                 list={[
@@ -212,7 +220,11 @@ const Signup: FC = () => {
                 placeholder="Password"
                 startIcon={<PasswordIcon />}
                 endIcon={
-                  <button type="button" onClick={() => toggleVisibility("password")} className="focus:outline-none">
+                  <button
+                    type="button"
+                    onClick={() => toggleVisibility("password")}
+                    className="focus:outline-none"
+                  >
                     {isTogglePassword.password ? <EyeOpenIcon /> : <EyeClosedIcon />}
                   </button>
                 }
@@ -242,7 +254,12 @@ const Signup: FC = () => {
                 error={errors.confirm_password}
               />
             </div>
-            <Button variant={"default"} className="rounded-full py-6 mt-2 md:mt-4" type="submit" loading={isPending}>
+            <Button
+              variant={"default"}
+              className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full py-6 mt-2 md:mt-4"
+              type="submit"
+              loading={isPending}
+            >
               Create Account
             </Button>
             <p className="text-center pb-10 md:pb-0">

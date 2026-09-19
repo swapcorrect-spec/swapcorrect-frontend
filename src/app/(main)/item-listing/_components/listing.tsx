@@ -13,12 +13,19 @@ import Image from "next/image";
 import Link from "next/link";
 import { FC, useState } from "react";
 import ReactPlayer from "react-player";
+import { Check, Copy, Share2 } from "lucide-react";
 import Rating from "@/app/assets/images/svgs/star_rating.svg";
 import { getImageSrcWithFallback, createImageErrorHandler } from "@/lib/utils";
 import { useDeleteListing } from "@/app/_hooks/queries/listing/listing";
 import { useQueryClient } from "@tanstack/react-query";
 import { SEARCH_ITEMS } from "@/app/_constants/api_contant";
 import { Avatar, AvatarImage } from "@/components/ui/avatar";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@radix-ui/react-dropdown-menu";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
@@ -41,6 +48,14 @@ type Props = {
   username?: string;
   rating?: number;
 };
+
+// Simple WhatsApp Icon SVG component
+const WhatsAppIcon = () => (
+  <svg className="w-4 h-4 fill-[#25D366]" viewBox="0 0 24 24">
+    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.237a9.994 9.994 0 004.779 1.217h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.669-1.038-5.176-2.925-7.062A9.925 9.925 0 0012.012 2zm5.835 14.167c-.247.692-1.228 1.282-1.996 1.347-.525.044-1.212.08-3.504-.863-2.931-1.206-4.821-4.18-4.968-4.375-.146-.195-1.196-1.593-1.196-3.039 0-1.446.757-2.158 1.026-2.451.27-.293.585-.366.78-.366.195 0 .39.002.56.01.182.008.427-.069.668.51.248.595.845 2.062.918 2.21.073.148.122.321.024.516-.098.195-.147.317-.293.488-.146.171-.307.382-.439.513-.146.146-.298.305-.128.597.171.293.758 1.25 1.626 2.023 1.115.992 2.057 1.301 2.35 1.447.293.146.463.122.634-.073.171-.195.731-.853.926-1.146.195-.293.39-.244.658-.146.268.098 1.706.804 2.001.951.293.146.488.22.56.341.073.122.073.707-.174 1.399z" />
+  </svg>
+);
+
 const Listing: FC<Props> = ({
   listingId,
   name,
@@ -60,6 +75,7 @@ const Listing: FC<Props> = ({
   const [imageError, setImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [copied, setCopied] = useState(false);
 
   const { deleteListing, isPending: isDeleting } = useDeleteListing({
     onSuccess: () => {
@@ -83,6 +99,19 @@ const Listing: FC<Props> = ({
   const handleDelete = () => {
     if (listingId) {
       deleteListing(listingId);
+    }
+  };
+
+  const productUrl =
+    typeof window !== "undefined" ? `${window.location.origin}/listing/${listingId}` : "";
+  const shareText = `Check out "${name}" for swap on SwapCorrect! 👇\n${productUrl}`;
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(shareText)}`;
+
+  const handleCopyLink = () => {
+    if (productUrl) {
+      navigator.clipboard.writeText(productUrl);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
@@ -171,7 +200,11 @@ const Listing: FC<Props> = ({
             Edit
           </Button>
         )}
-        <Button className="!h-8 text-xs px-3" variant={"outline"} onClick={() => setShowDeleteModal(true)}>
+        <Button
+          className="!h-8 text-xs px-3"
+          variant={"outline"}
+          onClick={() => setShowDeleteModal(true)}
+        >
           Delete
         </Button>
         {listingId ? (
@@ -185,6 +218,47 @@ const Listing: FC<Props> = ({
             View
           </Button>
         )}
+        {status !== "Pending" && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button className="!h-8 text-xs px-3 flex items-center gap-1.5" variant={"outline"}>
+                <Share2 className="w-3.5 h-3.5 text-slate-600" />
+                <span>Share</span>
+              </Button>
+            </DropdownMenuTrigger>
+
+            <DropdownMenuContent
+              align="end"
+              className="w-48 bg-white border border-[#E9E9E9] p-1 shadow-lg rounded-xl"
+            >
+              <DropdownMenuItem asChild className="cursor-pointer">
+                <a
+                  href={whatsappUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-2 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
+                >
+                  <WhatsAppIcon />
+                  <span>WhatsApp (Status & Chat)</span>
+                </a>
+              </DropdownMenuItem>
+
+              {/* Copy Link Option */}
+              <DropdownMenuItem
+                onClick={handleCopyLink}
+                className="flex items-center gap-2 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+              >
+                {copied ? (
+                  <Check className="w-4 h-4 text-emerald-600" />
+                ) : (
+                  <Copy className="w-4 h-4 text-slate-500" />
+                )}
+                <span>{copied ? "Copied!" : "Copy Link"}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+
         {/* <Button variant={"outline"}>Feature</Button> */}
       </div>
 

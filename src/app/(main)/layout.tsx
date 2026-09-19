@@ -91,11 +91,11 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     setIsToggleUpgrade(!isToggleUpgrade);
   };
 
-  useEffect(() => {
-    if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
-    }
-  }, [isHydrated, isAuthenticated, router]);
+  // useEffect(() => {
+  //   if (isHydrated && !isAuthenticated) {
+  //     router.replace(`/${PATHS.LOGIN}`);
+  //   }
+  // }, [isHydrated, isAuthenticated, router]);
 
   if (!isHydrated || (isAuthenticated && isFetching)) {
     return (
@@ -105,9 +105,9 @@ export default function MainLayout({ children }: { children: ReactNode }) {
     );
   }
 
-  if (!isAuthenticated) {
-    return null;
-  }
+  // if (!isAuthenticated) {
+  //   return null;
+  // }
 
   return (
     <>

@@ -985,7 +985,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               !isSwapper &&
               ["Negotiation"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="!h-9 rounded-xl font-medium hidden md:block"
+                  className="bg-[#007AFF] hover:bg-[#0062cc] !h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Upgrade Swap
@@ -1008,7 +1008,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               isSwapper &&
               ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="!h-9 rounded-xl font-medium hidden md:block"
+                  className="bg-[#007AFF] hover:bg-[#0062cc] !h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Upgrade Swap
@@ -1019,7 +1019,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               !isSwapper &&
               ["AdvNegotiation"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="!h-9 rounded-xl font-medium"
+                  className="bg-[#007AFF] hover:bg-[#0062cc] !h-9 rounded-xl font-medium"
                   onClick={handleConfirmSwap}
                   loading={isPendingSwitchSwap}
                 >
@@ -1818,7 +1818,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                           <p className="text-sm font-medium text-[#222222]">
                             Click to upload evidence
                           </p>
-                          <p className="text-xs text-[#737373]">Images or videos · multiple files ok</p>
+                          <p className="text-xs text-[#737373]">
+                            Images or videos · multiple files ok
+                          </p>
                         </div>
                       </button>
 
@@ -1881,7 +1883,11 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                         onClick={handleManualSubmit}
                         loading={isReporting || isUploading}
                       >
-                        {isUploading ? "Uploading..." : isReporting ? "Submitting..." : "Submit Report"}
+                        {isUploading
+                          ? "Uploading..."
+                          : isReporting
+                            ? "Submitting..."
+                            : "Submit Report"}
                       </Button>
                     </div>
                   </div>

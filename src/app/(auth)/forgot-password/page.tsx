@@ -20,7 +20,10 @@ import { PATHS } from "@/app/_constants/paths";
 import { getValidationSchema } from "@/app/(auth)/forgot-password/_validation";
 
 import { useForgotPassword, useResetPassword } from "@/app/_hooks/queries/auth/auth";
-import { ForgotPassword as ForgotPasswordProp, ResetPassword } from "@/app/_hooks/queries/auth/auth.type";
+import {
+  ForgotPassword as ForgotPasswordProp,
+  ResetPassword,
+} from "@/app/_hooks/queries/auth/auth.type";
 
 type formStep = "email" | "code" | "password";
 
@@ -88,28 +91,43 @@ const ForgotPassword: FC = () => {
     validationSchema: validationSchemas,
   });
 
-  const { values, handleBlur, handleChange, handleSubmit, errors, touched, setFieldValue, resetForm } = formik;
+  const {
+    values,
+    handleBlur,
+    handleChange,
+    handleSubmit,
+    errors,
+    touched,
+    setFieldValue,
+    resetForm,
+  } = formik;
 
   return (
     <AuthForm title="" subtitle="">
       <div className="mb-10">
         {formStep === "email" ? (
           <>
-            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">Forgot Password</h1>
+            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">
+              Forgot Password
+            </h1>
             <p className="text-[#737373] text-base font-normal text-left mt-2 mb-8 leading-tight">
               Enter Your Registered Email
             </p>
           </>
         ) : formStep === "code" ? (
           <>
-            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">Input Email Verification Code</h1>
+            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">
+              Input Email Verification Code
+            </h1>
             <p className="text-[#737373] text-base font-normal text-left mt-2 mb-8 leading-tight">
               Enter the 6 digits code sent to {values.email}
             </p>
           </>
         ) : (
           <>
-            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">Create New Password</h1>
+            <h1 className="text-[#000000] text-2xl md:text-4xl text-left font-medium">
+              Create New Password
+            </h1>
             <p className="text-[#737373] text-base font-normal text-left mt-2 mb-8 leading-tight">
               Enter Your New Password
             </p>
@@ -182,7 +200,7 @@ const ForgotPassword: FC = () => {
         )}
         <Button
           variant={"default"}
-          className="rounded-full py-6 mt-2 md:mt-4"
+          className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full py-6 mt-2 md:mt-4"
           type="submit"
           loading={isPending || isPendingResetPassword}
         >

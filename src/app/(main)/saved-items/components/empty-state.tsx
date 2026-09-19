@@ -14,7 +14,7 @@ const SavedItemsEmptyState: React.FC = () => {
       </p>
       <Link
         href={`${PATHS.CATEGORY}`}
-        className="rounded-full font-medium text-sm py-3 px-10 w-fit bg-primary text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
+        className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full font-medium text-sm py-3 px-10 w-fit  text-primary-foreground hover:bg-primary/90 inline-flex items-center justify-center whitespace-nowrap transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50"
       >
         Go to Marketplace
       </Link>

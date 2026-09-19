@@ -24,6 +24,8 @@ export interface SwapCardItemData {
   key: string;
   requestItem?: string;
   roleLabel?: string;
+  swapProceedId?: string;
+  id?: string;
 }
 
 interface SwapCardItemProps {
@@ -31,7 +33,10 @@ interface SwapCardItemProps {
   getStatusColor?: (status: string) => string;
 }
 
-const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor: getColor = getStatusColor }) => {
+const SwapCardItem: FC<SwapCardItemProps> = ({
+  item,
+  getStatusColor: getColor = getStatusColor,
+}) => {
   const router = useRouter();
   const [itemImageError, setItemImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
@@ -42,13 +47,24 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor: getColor = 
   const hasRoom = Boolean(item.roomName);
 
   const handleCardClick = () => {
-    if (!item.roomName) return;
-    router.push(`/chat?roomName=${encodeURIComponent(item.roomName)}`);
+    // if (!item.roomName) return;
+    // router.push(`/chat?roomName=${encodeURIComponent(item.roomName)}`);
+    if (item.roomName) {
+      router.push(`/chat?roomName=${encodeURIComponent(item.roomName)}`);
+      return;
+    }
+
+    // 2. Fallback: Route to category if roomName is missing but id/swapProceedId exists
+    const categoryId = item.swapProceedId || item.id;
+    if (categoryId) {
+      router.push(`/category/${encodeURIComponent(categoryId)}`);
+      return;
+    }
   };
 
   return (
     <Card
-      className={`shadow-none border border-[#E9E9E9] transition-colors mb-2 ${
+      className={`cursor-pointer shadow-none border border-[#E9E9E9] transition-colors mb-2 ${
         hasRoom ? "cursor-pointer hover:border-[#007AFF]/50 hover:bg-[#F8FBFF]" : ""
       }`}
       onClick={handleCardClick}
@@ -149,11 +165,7 @@ const SwapCardItem: FC<SwapCardItemProps> = ({ item, getStatusColor: getColor = 
             className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center shrink-0 bg-white"
             onClick={(e) => e.stopPropagation()}
           >
-            <button
-              type="button"
-              className="flex items-center gap-1"
-              onClick={handleCardClick}
-            >
+            <button type="button" className="flex items-center gap-1" onClick={handleCardClick}>
               <p className="font-medium text-xs text-[#222222]">Open Chat</p>
               <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
                 <ArrowRight size={12} color="#fff" />

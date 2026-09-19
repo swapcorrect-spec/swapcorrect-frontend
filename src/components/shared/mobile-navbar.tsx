@@ -2,7 +2,7 @@
 
 import { Menu, X, LayoutDashboard, ArrowLeftRight, ListCheck, Flag, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import Logo from "@/app/assets/images/svgs/logo_mobile.svg";
+import Logo from "@/app/assets/images/svgs/logo.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
 import HomeOutline from "@/app/assets/images/svgs/home_outline.svg";
 import HomeFilled from "@/app/assets/images/svgs/home_filled.svg";
@@ -203,18 +203,16 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
   return (
     <header className="w-full bg-white">
       <nav className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
           <button
             onClick={() => setIsOpen(true)}
             className="p-2 rounded-md hover:bg-gray-100 transition"
           >
             <Menu className="h-6 w-6 text-gray-700" />
           </button>
-          <Link
-            href={isLoggedIn ? PATHS.DASHBOARD : "/"}
-            className="flex items-center gap-2"
-          >
-            <Logo />
+          <Link href={isLoggedIn ? PATHS.DASHBOARD : "/"} className="flex items-center gap-2">
+            <Logo className="text-white mr-0" />
+            <p className={`font-bold transition-colors text-black`}>SwapCorrect</p>
           </Link>
         </div>
 
@@ -236,7 +234,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                   }}
                   className="relative"
                 >
-                  <Bell />
+                  <Bell className="text-gray-400" />
 
                   {!isFetching && unreadCount?.result !== 0 && (
                     <div className="absolute top-[-3px] right-[-2px] text-white bg-[#E42222] w-4 h-4 rounded-full flex items-center justify-center text-xs">
