@@ -1,5 +1,5 @@
 "use client";
-import { FC, useEffect, useMemo, useRef, useState } from "react";
+import { FC, Suspense, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormik } from "formik";
@@ -30,13 +30,14 @@ import {
 } from "@/app/_hooks/queries/auth/auth.type";
 
 type formStep = "email" | "code" | "password";
+const FORGOT_PASSWORD_EMAIL_SESSION_KEY = "forgot-password-confirmed-email";
 
-const ForgotPassword: FC = () => {
+const ForgotPasswordForm: FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromUrl = searchParams.get("email") ?? "";
-  const submittedEmail = useRef(emailFromUrl);
-  const [formStep, setFormStep] = useState<formStep>(emailFromUrl ? "code" : "email");
+  const submittedEmail = useRef("");
+  const [formStep, setFormStep] = useState<formStep>("email");
   const [secondsRemaining, setSecondsRemaining] = useState(60);
 
   const validationSchemas = useMemo(() => getValidationSchema(formStep), [formStep]);
@@ -54,6 +55,7 @@ const ForgotPassword: FC = () => {
   const { mutate, isPending } = useForgotPassword({
     onSuccess(_val: { result: string }) {
       toast.success(_val.result);
+      sessionStorage.setItem(FORGOT_PASSWORD_EMAIL_SESSION_KEY, submittedEmail.current);
       router.replace(`/forgot-password?email=${encodeURIComponent(submittedEmail.current)}`);
       setSecondsRemaining(60);
       setFormStep("code");
@@ -76,6 +78,7 @@ const ForgotPassword: FC = () => {
 
   const { mutate: mutateResetPassword, isPending: isPendingResetPassword } = useResetPassword({
     onSuccess(_val: { result: string }) {
+      sessionStorage.removeItem(FORGOT_PASSWORD_EMAIL_SESSION_KEY);
       toast.success(_val.result, {
         onAutoClose: () => {
           router.push(`${PATHS.LOGIN}`);
@@ -90,6 +93,7 @@ const ForgotPassword: FC = () => {
   });
 
   const handleForgotPassword = (data: ForgotPasswordProp) => {
+    sessionStorage.removeItem(FORGOT_PASSWORD_EMAIL_SESSION_KEY);
     submittedEmail.current = data.email;
     mutate({
       payload: {
@@ -99,8 +103,12 @@ const ForgotPassword: FC = () => {
   };
 
   const handleResendForgetPasswordEmail = () => {
-    if (!emailFromUrl || isResendingEmail) return;
-    resendForgetPasswordEmail({ payload: { email: emailFromUrl } });
+    if (!submittedEmail.current || isResendingEmail) return;
+    resendForgetPasswordEmail({ payload: { email: submittedEmail.current } });
+  };
+
+  const handleVerifyCode = () => {
+    setFormStep("password");
   };
 
   const handleResetPassword = (data: ResetPassword) => {
@@ -109,7 +117,7 @@ const ForgotPassword: FC = () => {
     mutateResetPassword({
       payload: {
         token,
-        email: emailFromUrl || data.email,
+        email: submittedEmail.current || data.email,
         password: data.password,
       },
     });
@@ -117,13 +125,18 @@ const ForgotPassword: FC = () => {
 
   const formik = useFormik({
     initialValues: {
-      email: emailFromUrl,
+      email: "",
       token: ["", "", "", "", "", ""],
       password: "",
       confirm_password: "",
     },
 
-    onSubmit: formStep === "email" ? handleForgotPassword : handleResetPassword,
+    onSubmit:
+      formStep === "email"
+        ? handleForgotPassword
+        : formStep === "code"
+          ? handleVerifyCode
+          : handleResetPassword,
     validateOnBlur: false,
     validationSchema: validationSchemas,
   });
@@ -138,6 +151,16 @@ const ForgotPassword: FC = () => {
     setFieldValue,
     resetForm,
   } = formik;
+
+  useEffect(() => {
+    const confirmedEmail = sessionStorage.getItem(FORGOT_PASSWORD_EMAIL_SESSION_KEY);
+
+    if (emailFromUrl && emailFromUrl === confirmedEmail) {
+      submittedEmail.current = confirmedEmail;
+      setFieldValue("email", confirmedEmail, false);
+      setFormStep("code");
+    }
+  }, [emailFromUrl, setFieldValue]);
 
   return (
     <AuthForm title="" subtitle="">
@@ -157,7 +180,7 @@ const ForgotPassword: FC = () => {
               Input Email Verification Code
             </h1>
             <p className="text-[#737373] text-base font-normal text-left mt-2 mb-8 leading-tight">
-              Enter the 6 digits code sent to {emailFromUrl || values.email}
+              Enter the 6 digits code sent to {submittedEmail.current}
             </p>
           </>
         ) : (
@@ -192,9 +215,6 @@ const ForgotPassword: FC = () => {
               onChange={(_, __, values) => {
                 setFieldValue("token", values);
               }}
-              onComplete={() => {
-                setFormStep("password");
-              }}
               containerClassName="justify-between"
               size="md"
               id="code"
@@ -220,7 +240,7 @@ const ForgotPassword: FC = () => {
                   <button
                     type="button"
                     onClick={handleResendForgetPasswordEmail}
-                    disabled={!emailFromUrl || isResendingEmail}
+                    disabled={!submittedEmail.current || isResendingEmail}
                     className="font-medium text-[#007AFF] hover:underline disabled:cursor-not-allowed disabled:opacity-60"
                   >
                     {isResendingEmail ? "Sending..." : "Resend email"}
@@ -261,7 +281,11 @@ const ForgotPassword: FC = () => {
           type="submit"
           loading={isPending || isPendingResetPassword}
         >
-          {formStep === "password" ? "Reset Password" : "Verify"}
+          {formStep === "email"
+            ? "Reset Password"
+            : formStep === "password"
+              ? "Reset Password"
+              : "Continue"}
         </Button>
         <p className="text-center pb-10 md:pb-0">
           Continue to{" "}
@@ -273,5 +297,11 @@ const ForgotPassword: FC = () => {
     </AuthForm>
   );
 };
+
+const ForgotPassword: FC = () => (
+  <Suspense fallback={<div className="min-h-[50vh]" />}>
+    <ForgotPasswordForm />
+  </Suspense>
+);
 
 export default ForgotPassword;

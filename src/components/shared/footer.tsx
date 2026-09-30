@@ -62,7 +62,7 @@ const Footer = () => {
               rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
-              FAQs
+              FAQ
             </Link>
           </div>
         </div>

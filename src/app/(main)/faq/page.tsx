@@ -382,7 +382,7 @@ export default function FaqPage() {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 placeholder="Search questions or keywords..."
-                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-[#007aff] text-sm transition-all"
+                className="w-full pl-10 pr-4 py-3 bg-white border border-gray-300 rounded-xl shadow-sm focus:outline-none focus:ring-2 focus:border-[#007aff] text-sm transition-all"
               />
               <Search className="absolute left-3.5 top-5 h-4 w-4 text-gray-400" />
             </div>
@@ -392,7 +392,9 @@ export default function FaqPage() {
           <div className="space-y-8">
             {filteredCategories.length === 0 ? (
               <div className="text-center py-12 bg-white rounded-2xl shadow-sm border border-gray-100">
-                <p className="text-gray-500">No questions found matching "{searchQuery}".</p>
+                <p className="text-gray-500">
+                  No questions found matching &quot;{searchQuery}&quot;.
+                </p>
               </div>
             ) : (
               filteredCategories.map((category, idx) => {
