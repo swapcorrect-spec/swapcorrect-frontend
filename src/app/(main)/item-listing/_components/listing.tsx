@@ -23,6 +23,7 @@ import { Avatar, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
   DropdownMenuTrigger,
+  DropdownMenuPortal,
   DropdownMenuContent,
   DropdownMenuItem,
 } from "@radix-ui/react-dropdown-menu";
@@ -218,7 +219,7 @@ const Listing: FC<Props> = ({
             View
           </Button>
         )}
-        {status !== "Pending" && (
+        {status === "Approved" && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button className="!h-8 text-xs px-3 flex items-center gap-1.5" variant={"outline"}>
@@ -227,35 +228,38 @@ const Listing: FC<Props> = ({
               </Button>
             </DropdownMenuTrigger>
 
-            <DropdownMenuContent
-              align="end"
-              className="w-48 bg-white border border-[#E9E9E9] p-1 shadow-lg rounded-xl"
-            >
-              <DropdownMenuItem asChild className="cursor-pointer">
-                <a
-                  href={whatsappUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-2 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-lg"
-                >
-                  <WhatsAppIcon />
-                  <span>WhatsApp (Status & Chat)</span>
-                </a>
-              </DropdownMenuItem>
-
-              {/* Copy Link Option */}
-              <DropdownMenuItem
-                onClick={handleCopyLink}
-                className="flex items-center gap-2 px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50 rounded-lg cursor-pointer"
+            <DropdownMenuPortal>
+              <DropdownMenuContent
+                align="end"
+                sideOffset={4}
+                className="z-50 w-48 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-lg"
               >
-                {copied ? (
-                  <Check className="w-4 h-4 text-emerald-600" />
-                ) : (
-                  <Copy className="w-4 h-4 text-slate-500" />
-                )}
-                <span>{copied ? "Copied!" : "Copy Link"}</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
+                <DropdownMenuItem asChild className="cursor-pointer">
+                  <a
+                    href={whatsappUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                  >
+                    <WhatsAppIcon />
+                    <span>WhatsApp (Status & Chat)</span>
+                  </a>
+                </DropdownMenuItem>
+
+                {/* Copy Link Option */}
+                <DropdownMenuItem
+                  onClick={handleCopyLink}
+                  className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                >
+                  {copied ? (
+                    <Check className="h-4 w-4 text-emerald-600" />
+                  ) : (
+                    <Copy className="h-4 w-4 text-slate-500" />
+                  )}
+                  <span>{copied ? "Copied!" : "Copy Link"}</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenuPortal>
           </DropdownMenu>
         )}
 

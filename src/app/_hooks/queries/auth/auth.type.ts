@@ -77,6 +77,24 @@ export interface IFogotPasswordResponse {
   errorMessages: null | string;
 }
 
+export interface IResendForgetPasswordEmailResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string | string[];
+}
+
+export type ConfirmEmail = {
+  email: string;
+};
+
+export interface IConfirmEmailResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: string;
+  errorMessages: null | string | string[];
+}
+
 export type ResetPassword = {
   email: string;
   token: string | string[];

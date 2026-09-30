@@ -1,5 +1,5 @@
 "use client";
-import { FC, useState } from "react";
+import { FC, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useFormik } from "formik";
@@ -20,7 +20,7 @@ import { PATHS } from "@/app/_constants/paths";
 
 import { loginPayload, validationSchema } from "@/app/(auth)/login/_validation";
 
-import { useLogin } from "@/app/_hooks/queries/auth/auth";
+import { useConfirmEmail, useLogin } from "@/app/_hooks/queries/auth/auth";
 import { useAuth } from "@/app/_context/auth-context";
 import { ILoginResponse } from "@/app/_hooks/queries/auth/auth.type";
 
@@ -29,8 +29,18 @@ const Login: FC = () => {
   const { setAuthTokens } = useAuth();
 
   const [showPassword, setShowPassword] = useState(false);
+  const submittedEmail = useRef("");
 
   const toggleVisibility = () => setShowPassword((prev) => !prev);
+
+  const { mutate: confirmEmail } = useConfirmEmail({
+    onSuccess() {
+      router.push(`/confirm-email?email=${encodeURIComponent(submittedEmail.current)}`);
+    },
+    onError(_error) {
+      toast.error(_error);
+    },
+  });
 
   const { mutate, isPending } = useLogin({
     onSuccess(_val: ILoginResponse) {
@@ -41,12 +51,34 @@ const Login: FC = () => {
         },
       });
     },
-    onError(_err) {
+    onError(_err, rawError) {
+      const error = rawError as {
+        statusCode?: number;
+        errorMessages?: unknown;
+        response?: {
+          status?: number;
+          data?: { statusCode?: number; errorMessages?: unknown };
+        };
+      };
+      const responseData = error?.response?.data ?? error;
+      const statusCode = error?.response?.status ?? responseData.statusCode;
+      const errorMessages = responseData.errorMessages;
+
+      if (
+        statusCode === 400 &&
+        Array.isArray(errorMessages) &&
+        errorMessages.includes("Please confirm your email address")
+      ) {
+        confirmEmail({ payload: { email: submittedEmail.current } });
+        return;
+      }
+
       toast.error(_err);
     },
   });
 
   const handleLogin = (data: loginPayload) => {
+    submittedEmail.current = data.email;
     mutate({
       payload: {
         email: data.email,
