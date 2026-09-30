@@ -1,7 +1,8 @@
 "use client";
 
-import { FC, useState } from "react";
+import { FC, useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useFormik } from "formik";
 import { toast } from "sonner";
 import PhoneInput from "react-phone-input-2";
@@ -21,12 +22,17 @@ import PasswordIcon from "@/app/assets/images/svgs/Password.svg";
 import EyeClosedIcon from "@/app/assets/images/svgs/Eye_Closed.svg";
 import EyeOpenIcon from "@/app/assets/images/svgs/Eye_Open.svg";
 import { signupPayload, validationSchema } from "@/app/(auth)/signup/_validation";
-import { useRegister } from "@/app/_hooks/queries/auth/auth";
+import { useConfirmEmail, useRegister } from "@/app/_hooks/queries/auth/auth";
 import { SelectFilter } from "@/components/shared/filters/select";
 import { countries } from "@/app/_constants/countries";
 import { ROLES } from "@/app/_constants/roles";
 
 const Signup: FC = () => {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const emailFromUrl = searchParams.get("email") ?? "";
+  const submittedEmail = useRef(emailFromUrl);
+  const [secondsRemaining, setSecondsRemaining] = useState(60);
   const [isTogglePassword, setIsTogglePassword] = useState({
     password: false,
     confirm_password: false,
@@ -40,13 +46,42 @@ const Signup: FC = () => {
   };
 
   const { mutate, isPending, isSuccess } = useRegister({
-    onSuccess() {},
+    onSuccess() {
+      router.replace(`/signup?email=${encodeURIComponent(submittedEmail.current)}`);
+      setSecondsRemaining(60);
+    },
     onError(_err) {
       toast.error(_err);
     },
   });
 
+  const { mutate: resendConfirmationEmail, isPending: isResendingEmail } = useConfirmEmail({
+    onSuccess() {
+      toast.success("A new confirmation email has been sent.");
+      setSecondsRemaining(60);
+    },
+    onError(_err) {
+      toast.error(_err);
+    },
+  });
+
+  useEffect(() => {
+    if (!isSuccess || secondsRemaining === 0) return;
+
+    const countdown = window.setTimeout(() => {
+      setSecondsRemaining((remaining) => Math.max(remaining - 1, 0));
+    }, 1000);
+
+    return () => window.clearTimeout(countdown);
+  }, [isSuccess, secondsRemaining]);
+
+  const handleResendConfirmationEmail = () => {
+    if (!emailFromUrl || isResendingEmail) return;
+    resendConfirmationEmail({ payload: { email: emailFromUrl } });
+  };
+
   const handleLogin = (data: signupPayload) => {
+    submittedEmail.current = data.email;
     mutate({
       payload: {
         firstName: data.firstname,
@@ -271,9 +306,31 @@ const Signup: FC = () => {
           </form>
         </AuthForm>
       ) : (
-        <div className="text-center">
-          <p>A verification link has been sent to your email</p>
-          <p className="text-center pb-10 md:pb-0">
+        <div className="mx-auto flex w-full max-w-lg flex-col items-center px-5 py-8 text-center">
+          <h1 className="text-2xl font-semibold text-[#222222]">Check your email</h1>
+          <p className="mt-3 text-sm leading-6 text-[#737373]">
+            A verification link has been sent to{" "}
+            <span className="font-medium text-[#222222]">
+              {emailFromUrl || submittedEmail.current}
+            </span>
+            . Please follow the link to confirm your email address.
+          </p>
+          <p className="mt-5 text-sm text-[#737373]" aria-live="polite">
+            {secondsRemaining > 0
+              ? `Didn’t receive the email? You can request another in ${secondsRemaining} seconds.`
+              : "Didn’t receive the email?"}
+          </p>
+          {secondsRemaining === 0 && (
+            <button
+              type="button"
+              onClick={handleResendConfirmationEmail}
+              disabled={!emailFromUrl || isResendingEmail}
+              className="mt-4 inline-flex h-10 items-center justify-center rounded-full bg-[#007AFF] px-8 text-sm font-medium text-white hover:bg-[#0062cc] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isResendingEmail ? "Sending..." : "Resend confirmation email"}
+            </button>
+          )}
+          <p className="mt-5 text-center pb-10 md:pb-0">
             Continue to{" "}
             <Link href={PATHS.LOGIN} className="text-blue-500">
               Log in

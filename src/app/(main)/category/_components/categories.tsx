@@ -90,6 +90,7 @@ const Categories = () => {
       value: "abuja",
     },
   ];
+  console.log(userId, "pop");
   return (
     <div className="w-full md:w-[80%] h-full min-w-0 overflow-y-auto overflow-x-hidden hide-scrollbar">
       <div className="p-4 sm:p-6">
@@ -118,9 +119,11 @@ const Categories = () => {
         ) : data && data.length > 0 ? (
           <>
             <div className="grid lg:grid-cols-3 md:grid-cols-3 sm:grid-cols-2 gap-4 items-stretch">
-              {data.map((item: any) => (
-                <ProductDetails key={item.listingId} {...item} />
-              ))}
+              {data
+                .filter((item) => item.userId !== userId)
+                .map((item: any) => (
+                  <ProductDetails key={item.listingId} {...item} />
+                ))}
             </div>
             <div className="flex justify-center mt-8 w-full min-w-0">
               <ReactPaginate

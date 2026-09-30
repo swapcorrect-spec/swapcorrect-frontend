@@ -102,10 +102,6 @@ const Navbar: React.FC<Props> = ({
 
   const notifications = notificationsResponse?.pages.flatMap((page) => page.result.items) ?? [];
 
-  const handleLogin = () => {
-    router.push(`/${PATHS.LOGIN}`);
-  };
-
   const handleGetStarted = () => {
     router.push(PATHS.SIGNUP);
   };
@@ -493,10 +489,10 @@ const Navbar: React.FC<Props> = ({
       ) : (
         <div className="flex items-center gap-2">
           <Button
-            className={`rounded-full px-8 bg-[#007AFF] hover:bg-[#0062cc] shadow-blue-500/25 hover:scale-[1.02] transition-all duration-200`}
-            onClick={handleLogin}
+            asChild
+            className="rounded-full bg-[#007AFF] px-8 shadow-blue-500/25 transition-all duration-200 hover:scale-[1.02] hover:bg-[#0062cc]"
           >
-            Login
+            <Link href={`/${PATHS.LOGIN}`}>Login</Link>
           </Button>
           <Button
             variant="link"
@@ -505,9 +501,9 @@ const Navbar: React.FC<Props> = ({
                 ? "text-[#007AFF] hover:text-[#007AFF] hover:border-[#007AFF]"
                 : "text-[#007AFF] hover:border-[#007AFF]"
             }`}
-            onClick={handleGetStarted}
+            asChild
           >
-            Get started
+            <Link href={`/${PATHS.SIGNUP}`}>Get started</Link>
           </Button>
         </div>
       )}

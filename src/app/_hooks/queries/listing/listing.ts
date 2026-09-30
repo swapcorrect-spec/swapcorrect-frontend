@@ -25,6 +25,7 @@ import {
   IUpdateListingPayload,
   IUpdateListingResponse,
   IDeleteListingResponse,
+  ICloseListingResponse,
   SwitchSwapStatusPayload,
   ISwitchSwapStatusResponse,
 } from "./listing.type";
@@ -361,6 +362,43 @@ export const useDeleteListing = (props?: { onSuccess?: () => void }) => {
 
   return {
     deleteListing: mutate,
+    isPending,
+    isError,
+    error,
+  };
+};
+
+export const useCloseListing = (props?: { onSuccess?: () => void }) => {
+  const { onSuccess } = props || {};
+
+  const { mutate, isPending, isError, error } = useMutation({
+    mutationFn: (listingId: string) =>
+      putRequest<Record<string, never>, ICloseListingResponse>({
+        url: `/listing_item/close-listing?listingId=${encodeURIComponent(listingId)}`,
+        payload: {},
+      }),
+    onSuccess: (response) => {
+      const successMessage =
+        (typeof response.result === "string" && response.result) ||
+        response.displayMessage ||
+        "Listing closed successfully!";
+      toast.success(successMessage, {
+        onAutoClose: () => {
+          if (onSuccess) onSuccess();
+        },
+      });
+    },
+    onError: (err: any) => {
+      const errorMessage =
+        err?.response?.data?.errorMessages?.[0] ||
+        err?.message ||
+        "Failed to close listing. Please try again.";
+      toast.error(errorMessage);
+    },
+  });
+
+  return {
+    closeListing: mutate,
     isPending,
     isError,
     error,
