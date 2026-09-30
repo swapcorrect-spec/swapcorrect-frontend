@@ -149,6 +149,13 @@ export interface IDeleteListingResponse {
   errorMessages: string | null;
 }
 
+export interface ICloseListingResponse {
+  statusCode: number;
+  displayMessage: string;
+  result: unknown;
+  errorMessages: string | null;
+}
+
 export type SwitchSwapStatus = {
   swapId: string;
   status: string;

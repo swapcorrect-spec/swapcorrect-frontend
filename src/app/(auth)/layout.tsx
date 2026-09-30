@@ -4,6 +4,8 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import { useRef } from "react";
 import { Autoplay, Pagination, Navigation } from "swiper/modules";
 import Logo from "@/app/assets/images/svgs/logo_full.svg";
+import BannerFallback from "@/app/assets/images/pngs/banner_one.png";
+import Image from "next/image";
 
 import "swiper/css";
 import "swiper/css/pagination";
@@ -30,7 +32,15 @@ const AuthLayout = ({
   return (
     <div className="">
       <div className="relative w-[90%] mx-auto flex flex-col items-center md:flex-row gap-8 py-12">
-        <div className="hidden md:block w-1/2">
+        <div className="relative hidden h-[90vh] w-1/2 overflow-hidden rounded-[30px] md:block">
+          <Image
+            src={BannerFallback}
+            alt=""
+            fill
+            priority
+            sizes="(min-width: 768px) 45vw, 0px"
+            className="rounded-[30px] object-cover"
+          />
           <Swiper
             spaceBetween={30}
             centeredSlides={false}
@@ -42,7 +52,7 @@ const AuthLayout = ({
             navigation={false}
             modules={[Autoplay, Pagination, Navigation]}
             onAutoplayTimeLeft={onAutoplayTimeLeft}
-            className="mySwiper h-full"
+            className="mySwiper relative z-10 h-full"
           >
             <SwiperSlide>
               <div className="relative bg-[url(../app/assets/images/pngs/banner_one.png)] rounded-[30px] bg-cover bg-no-repeat h-[90vh]">
@@ -51,7 +61,8 @@ const AuthLayout = ({
                     Turn Your Items Into Instant Value!
                   </h2>
                   <p className="text-white font-normal text-lg leading-tight w-full pt-4">
-                    No be only buy and sell — swap your way to something better. List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade
+                    smart.
                   </p>
                 </div>
               </div>
@@ -59,9 +70,12 @@ const AuthLayout = ({
             <SwiperSlide>
               <div className="relative bg-[url(../app/assets/images/pngs/banner_three.png)] rounded-[30px]  bg-cover bg-no-repeat h-[90vh]">
                 <div className="absolute bottom-14 w-[80%] px-8">
-                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">Swap. Correct. Shine!</h2>
+                  <h2 className="text-white text-[40px] font-bold leading-none w-[80%]">
+                    Swap. Correct. Shine!
+                  </h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
-                    No be only buy and sell — swap your way to something better. List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade
+                    smart.
                   </p>
                 </div>
               </div>
@@ -74,7 +88,8 @@ const AuthLayout = ({
                   </h2>
                   <p className="text-white font-normal text-lg leading-tight w-[100%] pt-4">
                     {" "}
-                    No be only buy and sell — swap your way to something better. List now, trade smart.
+                    No be only buy and sell — swap your way to something better. List now, trade
+                    smart.
                   </p>
                 </div>
               </div>

@@ -48,7 +48,8 @@ import {
   DropdownMenuTrigger,
 } from "../../../../components/ui/dropdown-menu";
 import Link from "next/link";
-import { useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
+import { useCloseListing, useSwitchSwapStatus } from "@/app/_hooks/queries/listing/listing";
+import { PATHS } from "@/app/_constants/paths";
 import { truncateName } from "@/app/_utils/truncate";
 import { useReportUser } from "@/app/_hooks/queries/report/report";
 import RateUserModal from "@/components/shared/rate-user-modal";
@@ -201,7 +202,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
   const isMobile = useIsMobile();
 
   const [modalType, setModalType] = useState<
-    "swap" | "closeSwap" | "viewImage" | "infoDrawer" | "reportUser" | null
+    "swap" | "closeSwap" | "closeListing" | "viewImage" | "infoDrawer" | "reportUser" | null
   >(null);
   const [swapType, setSwapType] = useState<string>("");
   const [imageError, setImageError] = useState(false);
@@ -338,6 +339,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
 
   const swappingProceeding = data?.result?.swappingProceeding;
   const swapId = swappingProceeding?.id;
+  const listingId = swappingProceeding?.listId as string | undefined;
   const isSwapper = data?.result?.isSwapper;
 
   const { closeSwap, isPending: isClosingSwap } = useCloseSwap({
@@ -347,6 +349,19 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
       refetchRoomMessages();
     },
   });
+
+  const { closeListing, isPending: isClosingListing } = useCloseListing();
+
+  const handleCloseListing = () => {
+    if (!listingId) return;
+
+    closeListing(listingId, {
+      onSuccess: () => {
+        setModalType(null);
+        router.push(PATHS.CATEGORY);
+      },
+    });
+  };
 
   // Sync GET request data with messages state
   // Only update if we don't have messages or if this is initial load
@@ -1114,6 +1129,17 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                         </DropdownMenuItem>
                       </>
                     )} */}
+                  {isSwapper && swappingProceeding?.status != null && (
+                    <DropdownMenuItem asChild>
+                      <div
+                        className="text-green-700 cursor-pointer"
+                        onClick={() => setModalType("closeListing")}
+                        title="Complete Swap"
+                      >
+                        Close Listing
+                      </div>
+                    </DropdownMenuItem>
+                  )}
                   {swappingProceeding !== null &&
                     Object.keys(swappingProceeding || {}).length > 0 &&
                     !isSwapper &&
@@ -1612,6 +1638,40 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                   </div>
                 );
 
+              case "closeListing":
+                return (
+                  <div className="p-6">
+                    <DialogHeader>
+                      <DialogTitle className="text-xl font-medium text-[#222222]">
+                        Close Listing
+                      </DialogTitle>
+                      <DialogDescription className="mt-2 text-sm text-[#737373]">
+                        Are you sure you want to close this listing? It will no longer be available
+                        to other users.
+                      </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-6 gap-2 sm:gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setModalType(null)}
+                        disabled={isClosingListing}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="button"
+                        className="bg-[#E42222] text-white hover:bg-[#CC1E1E]"
+                        onClick={handleCloseListing}
+                        disabled={!listingId || isClosingListing}
+                        loading={isClosingListing}
+                      >
+                        Confirm Close
+                      </Button>
+                    </DialogFooter>
+                  </div>
+                );
+
               case "viewImage":
                 return (
                   <div className="relative w-full h-full flex items-center justify-center">
@@ -1901,6 +1961,9 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
             swapType,
             selectedImageUrl,
             isClosingSwap,
+            isClosingListing,
+            listingId,
+            handleCloseListing,
             swapId,
             closeSwap,
             profileImageSrc,

@@ -111,14 +111,17 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <section className={cn("flex w-full min-w-0 overflow-x-hidden")}>
+      <section className={cn("flex h-screen w-full min-w-0 overflow-hidden")}>
         {isOpen && isAuthenticated && !isMobile && (
-          <Sidebar
-            handleToggleMenu={handleToggleMenu}
-            role={data?.result.userRole[0] as "Visitor" | "Swapper"}
-          />
+          <>
+            <Sidebar
+              handleToggleMenu={handleToggleMenu}
+              role={data?.result.userRole[0] as "Visitor" | "Swapper"}
+            />
+            <div className="w-[99px] shrink-0" aria-hidden="true" />
+          </>
         )}
-        <section className="flex-1 min-w-0 h-screen overflow-y-auto overflow-x-hidden">
+        <section className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
           {isMobile ? (
             <MobileNavbar
               data={data}

@@ -102,7 +102,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
   };
 
   return (
-    <section className="max-w-[99px] w-full border border-[#D9D9D9] bg-white z-50 h-screen py-7 relative top-0 flex flex-col overflow-hidden">
+    <section className="fixed left-0 top-0 z-50 h-screen w-[99px] shrink-0 border border-[#D9D9D9] bg-white py-7 flex flex-col overflow-hidden">
       <div className="mb-8 flex items-center justify-center shrink-0">
         <X className="cursor-pointer" onClick={handleToggleMenu} />
       </div>

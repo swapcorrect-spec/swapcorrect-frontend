@@ -393,24 +393,26 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                     </a>
                   );
                 })}
-              {role === "Visitor" ? (
-                <Button
-                  variant={"default"}
-                  className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full"
-                  size={"sm"}
-                  onClick={() => {
-                    setIsOpen(false);
-                    handleToggleSwapperUpgrade?.();
-                  }}
-                >
-                  Upgrade to Swapper <SwapperUpgradeLogo />
-                </Button>
-              ) : (
-                <div className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
-                  <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
-                  Swapper
-                </div>
-              )}
+              {isAuthenticated &&
+                (role === "Visitor" ? (
+                  <Button
+                    variant={"default"}
+                    className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full"
+                    size={"sm"}
+                    onClick={() => {
+                      setIsOpen(false);
+                      handleToggleSwapperUpgrade?.();
+                    }}
+                  >
+                    Upgrade to Swapper <SwapperUpgradeLogo />
+                  </Button>
+                ) : (
+                  <div className="inline-flex w-fit items-center gap-1.5 px-3 py-1 rounded-full bg-blue-100 text-blue-700 text-xs font-medium">
+                    <span className="w-1.5 h-1.5 rounded-full bg-blue-600" />
+                    Swapper
+                  </div>
+                ))}
+
               {isLoggedIn ? (
                 <Button
                   variant="outline"
