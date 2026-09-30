@@ -1,13 +1,13 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { useConfirmEmail } from "@/app/_hooks/queries/auth/auth";
 import { MailCheck } from "lucide-react";
 import Link from "next/link";
 
-export default function ConfirmEmailPage() {
+function ConfirmEmailContent() {
   const searchParams = useSearchParams();
   const email = searchParams.get("email") ?? "";
   const [secondsRemaining, setSecondsRemaining] = useState(60);
@@ -72,5 +72,13 @@ export default function ConfirmEmailPage() {
         Back to Login
       </Link>
     </main>
+  );
+}
+
+export default function ConfirmEmailPage() {
+  return (
+    <Suspense fallback={<main className="min-h-[50vh]" />}>
+      <ConfirmEmailContent />
+    </Suspense>
   );
 }

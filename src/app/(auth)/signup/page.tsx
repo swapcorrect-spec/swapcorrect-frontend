@@ -1,6 +1,6 @@
 "use client";
 
-import { FC, useEffect, useRef, useState } from "react";
+import { FC, Suspense, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useFormik } from "formik";
@@ -27,7 +27,7 @@ import { SelectFilter } from "@/components/shared/filters/select";
 import { countries } from "@/app/_constants/countries";
 import { ROLES } from "@/app/_constants/roles";
 
-const Signup: FC = () => {
+const SignupForm: FC = () => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const emailFromUrl = searchParams.get("email") ?? "";
@@ -341,5 +341,11 @@ const Signup: FC = () => {
     </>
   );
 };
+
+const Signup: FC = () => (
+  <Suspense fallback={<div className="min-h-[50vh]" />}>
+    <SignupForm />
+  </Suspense>
+);
 
 export default Signup;
