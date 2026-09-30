@@ -1134,7 +1134,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                       <div
                         className="text-green-700 cursor-pointer"
                         onClick={() => setModalType("closeListing")}
-                        title="Complete Swap"
+                        title="Close Listing"
                       >
                         Close Listing
                       </div>
