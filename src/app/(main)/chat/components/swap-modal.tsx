@@ -18,79 +18,86 @@ const SwapModalContent: React.FC<iProps> = ({
   handlePayment,
 }) => {
   return (
+    // uncomment this whole line when advance mode is about to be added
+    // <section>
+    //   <h6 className="text-[#222222] font-medium text-xl mb-3 text-center">Select Swap mode</h6>
+    //   <p className="text-[#737373] text-sm text-center mb-5">
+    //     Choose your desired swap mode for the trade, you can adjust your options later
+    //   </p>
+    //   <div className="flex  flex-col gap-4 mt-6 w-full">
+    //     <RadioGroup value={swapType} onValueChange={setSwapType} className="space-y-4">
+    //       {/* <div className="text-center lg:text-left flex flex-col items-start">
+    //         <label
+    //           htmlFor="basic"
+    //           className={`p-3 rounded-xl border border-[#EEEEEE] ${
+    //             swapType === "basic" ? "shadow-md bg-[#FAFCFF]" : ""
+    //           } flex gap-4 items-center justify-center cursor-pointer w-full`}
+    //         >
+    //           <div className="flex-1">
+    //             <div className="flex gap-3 items-center">
+    //               <CircleStar />
+    //               <h4 className="text-[#222222] font-medium text-base mb-1">
+    //                 Basic
+    //               </h4>
+    //             </div>
+    //             <p className="text-xs text-[#737373]">
+    //               This swap does not include protection or escrow.You’ll need to
+    //               trust the other Swapper to follow through.{" "}
+    //             </p>
+    //           </div>
+    //           <div className="w-fit">
+    //             <RadioGroupItem value="basic" id="basic" />
+    //           </div>
+    //         </label>
+    //       </div> */}
+    //       <div className="text-center lg:text-left flex flex-col items-start">
+    //         <label
+    //           htmlFor="advanced"
+    //           className={`p-3 rounded-xl border border-[#EEEEEE]  ${
+    //             swapType === "advanced" ? "shadow-md bg-[#FAFCFF]" : ""
+    //           } flex gap-4 items-center justify-center cursor-pointer w-full`}
+    //         >
+    //           <div className="flex-1">
+    //             <div className="flex gap-3 items-center">
+    //               <ShieldStar />
+    //               <h4 className="text-[#222222] font-medium text-base mb-1">Advanced</h4>
+    //             </div>
+    //             <p className="text-xs text-[#737373]">
+    //               {/* Advanced swaps include escrow protection and verified shipping. Both parties must
+    //               confirm receipt before the swap is complete */}
+    //               To access Advanced Mode, a non-refundable protection fee is required. This fee
+    //               helps ensure a more secure and guaranteed swap experience by providing additional
+    //               protection for both parties during the exchange process.
+    //             </p>
+    //           </div>
+    //           <div className="w-fit">
+    //             <RadioGroupItem value="advanced" id="advanced" />
+    //           </div>
+    //         </label>
+    //       </div>
+    //     </RadioGroup>
+    //   </div>
+    //   <div className="flex gap-4 mt-10">
+    //     <Button
+    //       className="!h-10 rounded-xl font-medium w-full bg-white text-black border border-black hover:bg-white hover:border-black"
+    //       onClick={handleClose}
+    //     >
+    //       Cancel
+    //     </Button>
+    //     <Button
+    //       className="!h-10 rounded-xl font-medium w-full"
+    //       onClick={handlePayment}
+    //       disabled={!swapType}
+    //     >
+    //       Request Advanced Swap
+    //     </Button>
+    //   </div>
+    // </section>
     <section>
-      <h6 className="text-[#222222] font-medium text-xl mb-3 text-center">Select Swap mode</h6>
-      <p className="text-[#737373] text-sm text-center mb-5">
-        Choose your desired swap mode for the trade, you can adjust your options later
-      </p>
-      <div className="flex  flex-col gap-4 mt-6 w-full">
-        <RadioGroup value={swapType} onValueChange={setSwapType} className="space-y-4">
-          {/* <div className="text-center lg:text-left flex flex-col items-start">
-            <label
-              htmlFor="basic"
-              className={`p-3 rounded-xl border border-[#EEEEEE] ${
-                swapType === "basic" ? "shadow-md bg-[#FAFCFF]" : ""
-              } flex gap-4 items-center justify-center cursor-pointer w-full`}
-            >
-              <div className="flex-1">
-                <div className="flex gap-3 items-center">
-                  <CircleStar />
-                  <h4 className="text-[#222222] font-medium text-base mb-1">
-                    Basic
-                  </h4>
-                </div>
-                <p className="text-xs text-[#737373]">
-                  This swap does not include protection or escrow.You’ll need to
-                  trust the other Swapper to follow through.{" "}
-                </p>
-              </div>
-              <div className="w-fit">
-                <RadioGroupItem value="basic" id="basic" />
-              </div>
-            </label>
-          </div> */}
-          <div className="text-center lg:text-left flex flex-col items-start">
-            <label
-              htmlFor="advanced"
-              className={`p-3 rounded-xl border border-[#EEEEEE]  ${
-                swapType === "advanced" ? "shadow-md bg-[#FAFCFF]" : ""
-              } flex gap-4 items-center justify-center cursor-pointer w-full`}
-            >
-              <div className="flex-1">
-                <div className="flex gap-3 items-center">
-                  <ShieldStar />
-                  <h4 className="text-[#222222] font-medium text-base mb-1">Advanced</h4>
-                </div>
-                <p className="text-xs text-[#737373]">
-                  {/* Advanced swaps include escrow protection and verified shipping. Both parties must
-                  confirm receipt before the swap is complete */}
-                  To access Advanced Mode, a non-refundable protection fee is required. This fee
-                  helps ensure a more secure and guaranteed swap experience by providing additional
-                  protection for both parties during the exchange process.
-                </p>
-              </div>
-              <div className="w-fit">
-                <RadioGroupItem value="advanced" id="advanced" />
-              </div>
-            </label>
-          </div>
-        </RadioGroup>
-      </div>
-      <div className="flex gap-4 mt-10">
-        <Button
-          className="!h-10 rounded-xl font-medium w-full bg-white text-black border border-black hover:bg-white hover:border-black"
-          onClick={handleClose}
-        >
-          Cancel
-        </Button>
-        <Button
-          className="!h-10 rounded-xl font-medium w-full"
-          onClick={handlePayment}
-          disabled={!swapType}
-        >
-          Request Advanced Swap
-        </Button>
-      </div>
+      <p className="text-center mb-8">Coming soon</p>
+      <Button className="w-full bg-[#007AFF] hover:bg-[#0062cc]" onClick={handleClose}>
+        Close
+      </Button>
     </section>
   );
 };
