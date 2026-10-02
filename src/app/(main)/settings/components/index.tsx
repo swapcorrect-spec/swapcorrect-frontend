@@ -5,9 +5,22 @@ import Security from "./security";
 import PersonalInfo from "./personal-info";
 import Account from "./account";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
+import { useEffect } from "react";
+import { useAuth } from "@/app/_context/auth-context";
+import { useRouter } from "next/navigation";
+import { PATHS } from "@/app/_constants/paths";
 
 const Settings: React.FC = () => {
+  const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
+
   const { data } = useGetUserInfo({ enabler: true });
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
 
   const settingsTabList = [
     {
@@ -26,7 +39,9 @@ const Settings: React.FC = () => {
   return (
     <section className="p-6">
       <h6 className="text-[#007AFF] font-medium mb-3 text-xl">ACCOUNT SETTINGS</h6>
-      <p className="text-xl font-medium text-[#222222] mb-8">All your settings and swap records in one place.</p>
+      <p className="text-xl font-medium text-[#222222] mb-8">
+        All your settings and swap records in one place.
+      </p>
       <Tabs defaultValue="personal-info" className="w-full !rounded-[26px]">
         <TabsList className="grid w-full grid-cols-3 mb-5">
           {settingsTabList.map((_, index) => (

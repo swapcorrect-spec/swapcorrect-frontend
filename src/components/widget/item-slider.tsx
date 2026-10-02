@@ -56,12 +56,8 @@ const ItemSliderContent: React.FC<iProps> = ({
         </div>
         <div>
           <div className="flex justify-between items-center mb-4">
-            <h6 className="text-xl font-medium">
-              {productName || "Gently used Nike shoe"}
-            </h6>
-            <p className="font-medium text-[#007AFF]">
-              $ {price || "75,000"} Est.
-            </p>
+            <h6 className="text-xl font-medium">{productName || "Gently used Nike shoe"}</h6>
+            <p className="font-medium text-[#007AFF]">$ {price || "75,000"} Est.</p>
           </div>
           <div className="flex items-start gap-2 mb-3">
             <h6 className="text-[#222222] text-sm font-medium">Wants:</h6>
@@ -79,16 +75,14 @@ const ItemSliderContent: React.FC<iProps> = ({
             )}
           </div>
           <div className="rounded-xl mb-6 text-[#222222] gap-2 px-2 p-2 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-            <p className="font-medium me-auto">
-              {vendorName || "Jenny Franklin"}
-            </p>
+            <p className="font-medium me-auto">{vendorName || "Jenny Franklin"}</p>
             <p className="flex items-center gap-1">
               {displayRating(rating)} <Rating />
             </p>
           </div>
           <Button
             variant={"default"}
-            className="rounded-full font-medium text-sm py-3 w-full"
+            className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full font-medium text-sm py-3 w-full"
             size={"lg"}
           >
             Swap Now

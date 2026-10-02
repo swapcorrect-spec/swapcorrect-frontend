@@ -2,11 +2,21 @@
 
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useState, useEffect } from "react";
 import { Plus, X, Upload } from "lucide-react";
-import { useUpdateListing, useGetListingDetails, useGetAllCategories } from "@/app/_hooks/queries/listing/listing";
+import {
+  useUpdateListing,
+  useGetListingDetails,
+  useGetAllCategories,
+} from "@/app/_hooks/queries/listing/listing";
 import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
@@ -40,12 +50,19 @@ const EditItemListing = () => {
     itemCondition: "",
     location: "",
   });
-  
+
   const [requestedItems, setRequestedItems] = useState<string[]>([""]);
-  const [uploadedMedia, setUploadedMedia] = useState<{ mediaType: string; url: string } | null>(null);
+  const [uploadedMedia, setUploadedMedia] = useState<{ mediaType: string; url: string } | null>(
+    null
+  );
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const { data: listingData, isLoading, isError, error } = useGetListingDetails({
+  const {
+    data: listingData,
+    isLoading,
+    isError,
+    error,
+  } = useGetListingDetails({
     enabler: !!listingId,
     listingId: listingId || "",
   });
@@ -56,15 +73,15 @@ const EditItemListing = () => {
       // Invalidate queries to refresh data
       queryClient.invalidateQueries({ queryKey: [SEARCH_ITEMS] });
       queryClient.invalidateQueries({ queryKey: [LISTING_DETAILS, listingId] });
-      router.push('/item-listing');
-    }
+      router.push("/item-listing");
+    },
   });
 
   // Populate form when listing data loads
   useEffect(() => {
     if (listingData?.result && categoriesData) {
       const data = listingData.result;
-      
+
       // Map categoryName to categoryId
       const category = categoriesData.find((cat: any) => cat.categoryName === data.categoryName);
       const mappedCategoryId = category?.id || "";
@@ -92,14 +109,14 @@ const EditItemListing = () => {
         const firstMedia = data.media[0];
         setUploadedMedia({
           url: firstMedia.url,
-          mediaType: firstMedia.mediaType === "Video" ? "Video" : "Image"
+          mediaType: firstMedia.mediaType === "Video" ? "Video" : "Image",
         });
       }
     }
   }, [listingData, categoriesData]);
 
   const handleInputChange = (field: string, value: string | number) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleRequestedItemChange = (index: number, value: string) => {
@@ -153,7 +170,11 @@ const EditItemListing = () => {
       const data = await response.json();
       return {
         url: data.secure_url,
-        mediaType: file.type.startsWith("image/") ? "Image" : file.type.startsWith("video/") ? "Video" : "File"
+        mediaType: file.type.startsWith("image/")
+          ? "Image"
+          : file.type.startsWith("video/")
+            ? "Video"
+            : "File",
       };
     } catch (error) {
       console.error("Error uploading:", error);
@@ -167,12 +188,12 @@ const EditItemListing = () => {
 
     const file = files[0];
     setIsUploading(true);
-    
+
     const result = await uploadToCloudinary(file);
     if (result) {
       setUploadedMedia(result);
     }
-    
+
     setIsUploading(false);
     if (e.target) e.target.value = "";
   };
@@ -182,7 +203,12 @@ const EditItemListing = () => {
   };
 
   const handleSubmit = () => {
-    if (!formData.itemName || !formData.categoryId || !formData.itemCondition || !formData.location) {
+    if (
+      !formData.itemName ||
+      !formData.categoryId ||
+      !formData.itemCondition ||
+      !formData.location
+    ) {
       toast.error("Please fill all required fields!");
       return;
     }
@@ -212,9 +238,7 @@ const EditItemListing = () => {
       <div className="">
         <div className="border border-[#E9E9E9] px-8 py-4">
           <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
-          <p className="text-[#222222] font-medium text-xl">
-            Edit Item Listing
-          </p>
+          <p className="text-[#222222] font-medium text-xl">Edit Item Listing</p>
         </div>
         <div className="grid grid-cols-[25%_40%_30%] justify-between gap-2 w-[95%] mx-auto my-8">
           <div className="flex flex-col gap-3">
@@ -242,13 +266,11 @@ const EditItemListing = () => {
       <div className="">
         <div className="border border-[#E9E9E9] px-8 py-4">
           <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
-          <p className="text-[#222222] font-medium text-xl">
-            Edit Item Listing
-          </p>
+          <p className="text-[#222222] font-medium text-xl">Edit Item Listing</p>
         </div>
         <div className="w-[95%] mx-auto my-8 p-8 text-center">
           <p className="text-red-500 mb-4">Failed to load listing details</p>
-          <Button variant="outline" onClick={() => router.push('/item-listing')}>
+          <Button variant="outline" onClick={() => router.push("/item-listing")}>
             Back to Listings
           </Button>
         </div>
@@ -260,9 +282,7 @@ const EditItemListing = () => {
     <div className="">
       <div className="border border-[#E9E9E9] px-8 py-4">
         <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
-        <p className="text-[#222222] font-medium text-xl">
-          Edit Item Listing
-        </p>
+        <p className="text-[#222222] font-medium text-xl">Edit Item Listing</p>
       </div>
       <div className="grid grid-cols-[25%_40%_30%] justify-between gap-2 w-[95%] mx-auto my-8">
         {/* Media Upload Section */}
@@ -294,7 +314,11 @@ const EditItemListing = () => {
             ) : (
               <div className="relative border rounded-lg overflow-hidden h-64">
                 {uploadedMedia.mediaType === "Image" ? (
-                  <img src={uploadedMedia.url} alt="Preview" className="w-full h-full object-cover" />
+                  <img
+                    src={uploadedMedia.url}
+                    alt="Preview"
+                    className="w-full h-full object-cover"
+                  />
                 ) : (
                   <video src={uploadedMedia.url} controls className="w-full h-full object-cover" />
                 )}
@@ -318,7 +342,7 @@ const EditItemListing = () => {
             value={formData.itemName}
             onChange={(e) => handleInputChange("itemName", e.target.value)}
           />
-          
+
           <div>
             <label className="text-sm font-medium mb-2 block">Brief Description *</label>
             <Textarea
@@ -331,13 +355,18 @@ const EditItemListing = () => {
 
           <div>
             <label className="text-sm font-medium mb-2 block">Currency *</label>
-            <Select value={formData.estimatedCurrency} onValueChange={(value) => handleInputChange("estimatedCurrency", value)}>
+            <Select
+              value={formData.estimatedCurrency}
+              onValueChange={(value) => handleInputChange("estimatedCurrency", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
               <SelectContent>
-                {CURRENCIES.map(currency => (
-                  <SelectItem key={currency.code} value={currency.code}>{currency.name}</SelectItem>
+                {CURRENCIES.map((currency) => (
+                  <SelectItem key={currency.code} value={currency.code}>
+                    {currency.name}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -353,13 +382,18 @@ const EditItemListing = () => {
 
           <div>
             <label className="text-sm font-medium mb-2 block">Item Condition *</label>
-            <Select value={formData.itemCondition} onValueChange={(value) => handleInputChange("itemCondition", value)}>
+            <Select
+              value={formData.itemCondition}
+              onValueChange={(value) => handleInputChange("itemCondition", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select condition" />
               </SelectTrigger>
               <SelectContent>
-                {ITEM_CONDITIONS.map(condition => (
-                  <SelectItem key={condition} value={condition}>{condition}</SelectItem>
+                {ITEM_CONDITIONS.map((condition) => (
+                  <SelectItem key={condition} value={condition}>
+                    {condition}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -367,13 +401,18 @@ const EditItemListing = () => {
 
           <div>
             <label className="text-sm font-medium mb-2 block">Category *</label>
-            <Select value={formData.categoryId} onValueChange={(value) => handleInputChange("categoryId", value)}>
+            <Select
+              value={formData.categoryId}
+              onValueChange={(value) => handleInputChange("categoryId", value)}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select category" />
               </SelectTrigger>
               <SelectContent>
                 {categoriesData?.map((cat: any) => (
-                  <SelectItem key={cat.id} value={cat.id}>{cat.categoryName}</SelectItem>
+                  <SelectItem key={cat.id} value={cat.id}>
+                    {cat.categoryName}
+                  </SelectItem>
                 ))}
               </SelectContent>
             </Select>
@@ -388,7 +427,9 @@ const EditItemListing = () => {
           />
 
           <div>
-            <label className="text-sm font-medium mb-2 block">Requested Items for Swap (up to 3)</label>
+            <label className="text-sm font-medium mb-2 block">
+              Requested Items for Swap (up to 3)
+            </label>
             {requestedItems.map((item, index) => (
               <div key={index} className="flex gap-2 mb-2">
                 <Input
@@ -397,23 +438,14 @@ const EditItemListing = () => {
                   onChange={(e) => handleRequestedItemChange(index, e.target.value)}
                 />
                 {requestedItems.length > 1 && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => removeRequestedItem(index)}
-                  >
+                  <Button variant="outline" size="sm" onClick={() => removeRequestedItem(index)}>
                     <X size={16} />
                   </Button>
                 )}
               </div>
             ))}
             {requestedItems.length < 3 && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={addRequestedItem}
-                className="w-full"
-              >
+              <Button variant="outline" size="sm" onClick={addRequestedItem} className="w-full">
                 <Plus size={16} className="mr-2" /> Add Item
               </Button>
             )}
@@ -421,21 +453,21 @@ const EditItemListing = () => {
         </div>
         <div>
           <div className="border border-[#EEEEEE] rounded-xl p-4">
-            <p className="text-[#222222] font-medium text-xl">
-              Listing Fee Summary
-            </p>
+            <p className="text-[#222222] font-medium text-xl">Listing Fee Summary</p>
             <div className="flex items-center justify-between my-8">
               <p>Listing Fee:</p>
               <p>----</p>
             </div>
-            
+
             <div className="mb-4 text-sm">
-              <p className="text-gray-600">Media: {uploadedMedia ? '1 file' : 'No file'}</p>
-              <p className="text-gray-600">Items to swap: {requestedItems.filter(i => i.trim()).length}</p>
+              <p className="text-gray-600">Media: {uploadedMedia ? "1 file" : "No file"}</p>
+              <p className="text-gray-600">
+                Items to swap: {requestedItems.filter((i) => i.trim()).length}
+              </p>
             </div>
 
-            <Button 
-              className={"rounded-full w-full"} 
+            <Button
+              className={"rounded-full w-full"}
               size={"lg"}
               onClick={handleSubmit}
               disabled={isPending}
@@ -457,4 +489,3 @@ const EditItemListing = () => {
 };
 
 export default EditItemListing;
-

@@ -50,7 +50,7 @@ const VerifyClient = ({ searchParams }: Props) => {
         <p>An error occurred while verying email address</p>
         <Button
           variant="default"
-          className="rounded-full py-6 mt-2 md:mt-4"
+          className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full py-6 mt-2 md:mt-4"
           onClick={() => {
             // TODO: Add resend functionality here
           }}
@@ -70,7 +70,11 @@ const VerifyClient = ({ searchParams }: Props) => {
       {isSuccess && (
         <div className="text-center flex flex-col items-center justify-center">
           <p>Email Address Verified</p>
-          <Button variant="default" className="rounded-full py-6 mt-2 md:mt-4" onClick={handleLogin}>
+          <Button
+            variant="default"
+            className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full py-6 mt-2 md:mt-4"
+            onClick={handleLogin}
+          >
             Proceed to Login
           </Button>
         </div>

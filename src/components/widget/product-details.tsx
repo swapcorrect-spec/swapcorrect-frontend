@@ -5,11 +5,16 @@ import HotPick from "@/app/assets/images/svgs/hot_pick.svg";
 import { Button } from "@/components/ui/button";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Info, Flag } from "lucide-react";
+import { Heart, Info, Flag, ShieldCheck, Share2, Check, Copy } from "lucide-react";
 import { useRouter } from "next/navigation";
 import ReactPlayer from "react-player";
 import { useState } from "react";
-import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, displayRating } from "@/lib/utils";
+import {
+  formatCurrency,
+  createImageErrorHandler,
+  getImageSrcWithFallback,
+  displayRating,
+} from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import {
   useAddToFavourite,
@@ -17,11 +22,34 @@ import {
 } from "@/app/_hooks/queries/favourite/favourite";
 import * as Popover from "@radix-ui/react-popover";
 import { Avatar, AvatarImage } from "../ui/avatar";
+import LoginRequiredModal from "../shared/login-required-modal";
+import { useAuth } from "@/app/_context/auth-context";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuPortal,
+  DropdownMenuTrigger,
+} from "@radix-ui/react-dropdown-menu";
 
 interface MediaItem {
   mediaType: "Image" | "Video" | "Img";
   url: string;
 }
+
+const WhatsAppIcon = () => (
+  <svg className="h-4 w-4 fill-[#25D366]" viewBox="0 0 24 24" aria-hidden="true">
+    <path d="M12.012 2c-5.506 0-9.989 4.478-9.99 9.984a9.964 9.964 0 001.333 4.993L2 22l5.233-1.237a9.994 9.994 0 004.779 1.217h.004c5.505 0 9.988-4.478 9.989-9.984 0-2.669-1.038-5.176-2.925-7.062A9.925 9.925 0 0012.012 2zm5.835 14.167c-.247.692-1.228 1.282-1.996 1.347-.525.044-1.212.08-3.504-.863-2.931-1.206-4.821-4.18-4.968-4.375-.146-.195-1.196-1.593-1.196-3.039 0-1.446.757-2.158 1.026-2.451.27-.293.585-.366.78-.366.195 0 .39.002.56.01.182.008.427-.069.668.51.248.595.845 2.062.918 2.21.073.148.122.321.024.516-.098.195-.147.317-.293.488-.146.171-.307.382-.439.513-.146.146-.298.305-.128.597.171.293.758 1.25 1.626 2.023 1.115.992 2.057 1.301 2.35 1.447.293.146.463.122.634-.073.171-.195.731-.853.926-1.146.195-.293.39-.244.658-.146.268.098 1.706.804 2.001.951.293.146.488.22.56.341.073.122.073.707-.174 1.399z" />
+  </svg>
+);
 
 interface iProps {
   listingId?: string | number;
@@ -83,8 +111,15 @@ const ProductDetails: React.FC<iProps> = ({
   isFlagged = false,
 }) => {
   const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
+
   const [imageError, setImageError] = useState(false);
   const [profileImageError, setProfileImageError] = useState(false);
+  const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showSwapSafetyModal, setShowSwapSafetyModal] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  // const loggedIn = isHydrated && isAuthenticated;
 
   const { startSwap, isPending: isStartingSwap } = useStartSwap({
     listingId: listingId?.toString() || "",
@@ -130,12 +165,42 @@ const ProductDetails: React.FC<iProps> = ({
   const displayPhoto =
     profilePicture ||
     "https://images.unsplash.com/vector-1742875355318-00d715aec3e8?q=80&w=1480&auto=format&fit=crop";
+  const productUrl =
+    typeof window !== "undefined" && listingId
+      ? `${window.location.origin}/listing/${listingId}`
+      : "";
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(
+    `Check out "${displayName}" for swap on SwapCorrect!\n${productUrl}`
+  )}`;
 
   const handleImageError = createImageErrorHandler(setImageError);
   const handleProfileImageError = createImageErrorHandler(setProfileImageError);
 
+  const handleCopyLink = async () => {
+    if (!productUrl) return;
+
+    try {
+      await navigator.clipboard.writeText(productUrl);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // Clipboard access can be unavailable in insecure contexts.
+    }
+  };
+
   const handleSwapNow = () => {
     if (isFlagged) return;
+    if (!isAuthenticated) {
+      setShowLoginModal(true);
+      return;
+    }
+    if (listingId) {
+      setShowSwapSafetyModal(true);
+    }
+  };
+
+  const handleProceedWithSwap = () => {
+    setShowSwapSafetyModal(false);
     if (listingId) {
       startSwap();
     }
@@ -147,201 +212,341 @@ const ProductDetails: React.FC<iProps> = ({
     }
   };
 
-  return (
-    <Card className="bg-white w-full h-full flex flex-col p-2.5 cursor-pointer border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] rounded-xl">
-      <CardContent className="h-full flex flex-col flex-grow p-0">
-        <div
-          className="mb-2 w-full h-[150px] md:h-[220px] relative transition-all duration-200 rounded-xl shrink-0"
-          onClick={handleViewDetails}
-          role="button"
-          tabIndex={listingId ? 0 : -1}
-          onKeyDown={(e) => {
-            if (e.key === "Enter" || e.key === " ") {
-              e.preventDefault();
-              handleViewDetails();
-            }
-          }}
-          aria-label="View listing details"
-        >
-          {isVideo ? (
-            <ReactPlayer
-              src={typeof mediaUrl === "string" ? mediaUrl : ""}
-              width="100%"
-              height="100%"
-              controls={true}
-              className="rounded-xl overflow-hidden"
-              style={{ borderRadius: "12px" }}
-            />
-          ) : (
-            <Image
-              alt="Product Preview"
-              fill
-              src={getImageSrcWithFallback(
-                typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
-                imageError
-              )}
-              className="rounded-xl object-cover"
-              onError={handleImageError}
-            />
-          )}
-          <div className=" px-4 w-full absolute top-[16px] flex items-center gap-2">
-            {showHotpick && (
-              <div className="bg-[#FFF6F6] gap-2 flex items-center rounded-xl p-[5px]">
-                <HotPick />
-                <p className="text-[#FF3B30] text-xs"> Hot Picks</p>
-              </div>
-            )}
-            {isFlagged && (
-              <div className="bg-[#FFF6F6] gap-1.5 flex items-center rounded-xl px-2 py-1">
-                <Flag size={12} className="text-[#FF3B30]" />
-                <p className="text-[#FF3B30] text-xs font-medium">Flagged</p>
-              </div>
-            )}
-            <button
-              type="button"
-              aria-label="toggle favourite"
-              disabled={isAddingFav || isRemovingFav || !listingId}
-              onClick={(e) => {
-                e.stopPropagation();
-                if (!listingId) return;
-                // Optimistic update - change UI immediately
-                setIsFav(!isFav);
-                // Then make API call
-                if (isFav) {
-                  removeFromFavourite();
-                } else {
-                  addToFavourite();
-                }
-              }}
-              className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60"
-            >
-              <Heart
-                fill={isFav ? "#ef4444" : "none"}
-                color={isFav ? "#ef4444" : "#6b7280"}
-                size={16}
-              />
-            </button>
-          </div>
-        </div>
-        <div className="flex flex-col flex-1 min-h-0">
-          <div className="flex justify-between items-start gap-2 w-full min-h-[28px]">
-            <h6 className="text-xl font-medium leading-7 truncate min-w-0 flex-1">{displayName}</h6>
+  const handleLogin = () => {
+    setShowLoginModal(false);
+    router.push("/login");
+  };
+  const handleSignup = () => {
+    setShowLoginModal(false);
+    router.push("/signup");
+  };
 
-            <Popover.Root>
-              <Popover.Trigger asChild>
+  return (
+    <>
+      <Card className="bg-white w-full h-full flex flex-col p-2 sm:p-2.5 cursor-pointer border border-[#E9E9E9] shadow-[0_2px_12px_rgba(0,0,0,0.06)] rounded-xl overflow-hidden">
+        <CardContent className="h-full flex flex-col flex-grow p-0">
+          <div
+            className="mb-2 w-full h-[130px] sm:h-[160px] md:h-[220px] relative transition-all duration-200 rounded-xl shrink-0"
+            onClick={handleViewDetails}
+            role="button"
+            tabIndex={listingId ? 0 : -1}
+            onKeyDown={(e) => {
+              if (e.key === "Enter" || e.key === " ") {
+                e.preventDefault();
+                handleViewDetails();
+              }
+            }}
+            aria-label="View listing details"
+          >
+            {isVideo ? (
+              <ReactPlayer
+                src={typeof mediaUrl === "string" ? mediaUrl : ""}
+                width="100%"
+                height="100%"
+                controls={true}
+                className="rounded-xl overflow-hidden"
+                style={{ borderRadius: "12px" }}
+              />
+            ) : (
+              <Image
+                alt="Product Preview"
+                fill
+                src={getImageSrcWithFallback(
+                  typeof mediaUrl === "string" ? mediaUrl : (mediaUrl as any).src || "",
+                  imageError
+                )}
+                className="rounded-xl object-cover"
+                onError={handleImageError}
+              />
+            )}
+            <div className="px-2 sm:px-4 w-full absolute top-[10px] sm:top-[16px] flex justify-between items-start gap-1.5 sm:gap-2">
+              {showHotpick && (
+                <div className="bg-[#FFF6F6] gap-1.5 sm:gap-2 flex items-center rounded-xl px-1.5 py-1 sm:p-[5px]">
+                  <HotPick />
+                  <p className="text-[#FF3B30] text-[10px] sm:text-xs"> Hot Picks</p>
+                </div>
+              )}
+              {isFlagged && (
+                <div className="bg-[#FFF6F6] gap-1 flex items-center rounded-xl px-1.5 py-1">
+                  <Flag size={12} className="text-[#FF3B30]" />
+                  <p className="text-[#FF3B30] text-[10px] sm:text-xs font-medium">Flagged</p>
+                </div>
+              )}
+              <div className="flex flex-col gap-3">
                 <button
                   type="button"
-                  className="text-[#007AFF] font-medium text-sm underline shrink-0 whitespace-nowrap pt-0.5"
+                  aria-label="toggle favourite"
+                  disabled={isAddingFav || isRemovingFav || !listingId}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    if (!listingId) return;
+                    setIsFav(!isFav);
+                    if (isFav) {
+                      removeFromFavourite();
+                    } else {
+                      addToFavourite();
+                    }
+                  }}
+                  className="ml-auto bg-[#FFF6F6] w-7 h-7 rounded-full flex items-center justify-center disabled:opacity-60 shrink-0"
                 >
-                  View Est. Value
-                </button>
-              </Popover.Trigger>
-
-              <Popover.Portal>
-                <Popover.Content
-                  side="left"
-                  align="center"
-                  sideOffset={8}
-                  collisionPadding={12}
-                  className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
-                >
-                  {displayPrice}
-                  <Popover.Arrow className="fill-black" width={12} height={6} />
-                </Popover.Content>
-              </Popover.Portal>
-            </Popover.Root>
-          </div>
-          {categoryName && (
-            <p className="text-[#007AFF] font-medium text-[12px] bg-[#007AFF]/10 px-2 py-1 rounded-full w-fit mb-1.5">
-              {categoryName}
-            </p>
-          )}
-          <div className="flex items-start gap-1 mb-2 min-h-[40px]">
-            <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
-              {displayWants.length > 1 && (
-                <Popover.Root>
-                  <Popover.Trigger asChild>
-                    <button
-                      type="button"
-                      aria-label="Wants information"
-                      className="text-[#007AFF] hover:text-[#0056b3]"
-                    >
-                      <Info size={14} />
-                    </button>
-                  </Popover.Trigger>
-
-                  <Popover.Portal>
-                    <Popover.Content
-                      side="top"
-                      align="start"
-                      sideOffset={6}
-                      collisionPadding={12}
-                      className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
-                    >
-                      <span className="font-semibold">Wants:</span> The user would like to exchange
-                      any of the listed items.
-                      <Popover.Arrow className="fill-black" width={10} height={6} />
-                    </Popover.Content>
-                  </Popover.Portal>
-                </Popover.Root>
-              )}
-              Wants:
-            </span>
-
-            <div className="text-[#737373] min-w-0 flex-1">
-              {displayWants && displayWants.length > 0 ? (
-                <p className="text-sm text-[#737373] leading-5 line-clamp-2 capitalize">
-                  {displayWants.join(", ")}
-                </p>
-              ) : (
-                <p className="text-sm text-[#737373] leading-5">Open to offers</p>
-              )}
-            </div>
-          </div>
-
-          <div className="mt-auto shrink-0">
-            <div className="rounded-xl mb-3 text-[#222222] gap-2 px-2 py-1.5 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
-              <div className="flex items-center gap-2 min-w-0">
-                <Avatar>
-                  <AvatarImage
-                    src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
+                  <Heart
+                    fill={isFav ? "#ef4444" : "none"}
+                    color={isFav ? "#ef4444" : "#6b7280"}
+                    size={16}
                   />
-                </Avatar>
-                <p className="font-medium truncate">{displayAuthor}</p>
+                </button>
+                {reviewStage === "Approved" && (
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Share listing"
+                        disabled={!listingId}
+                        onClick={(event) => event.stopPropagation()}
+                        className="ml-auto flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#FFF6F6] disabled:opacity-60"
+                      >
+                        <Share2 size={16} className="text-[#6b7280]" />
+                      </button>
+                    </DropdownMenuTrigger>
+
+                    <DropdownMenuPortal>
+                      <DropdownMenuContent
+                        align="end"
+                        sideOffset={4}
+                        className="z-50 w-48 rounded-xl border border-[#E9E9E9] bg-white p-1 shadow-lg"
+                        onClick={(event) => event.stopPropagation()}
+                      >
+                        <DropdownMenuItem asChild className="cursor-pointer">
+                          <a
+                            href={whatsappUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="flex items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                          >
+                            <WhatsAppIcon />
+                            <span>WhatsApp (Status & Chat)</span>
+                          </a>
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={(event) => event.stopPropagation()}
+                          onSelect={(event) => {
+                            event.preventDefault();
+                            void handleCopyLink();
+                          }}
+                          className="flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-xs font-medium text-slate-700 hover:bg-slate-50"
+                        >
+                          {copied ? (
+                            <Check className="h-4 w-4 text-emerald-600" />
+                          ) : (
+                            <Copy className="h-4 w-4 text-slate-500" />
+                          )}
+                          <span>{copied ? "Copied!" : "Copy Link"}</span>
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenu>
+                )}
               </div>
-              <p className="flex items-center gap-1 shrink-0">
-                {displayRating(rating)} <Rating />
-              </p>
             </div>
-            {!isFlagged && (
-              <Button
-                onClick={handleSwapNow}
-                disabled={isStartingSwap || !listingId}
-                variant={"default"}
-                className="rounded-lg font-medium text-sm py-2.5 w-full"
-                size={"lg"}
-              >
-                {isStartingSwap ? "Starting..." : "Swap Now"}
-              </Button>
+          </div>
+
+          <div className="flex flex-col flex-1 min-h-0">
+            <div className="flex justify-between items-start gap-1.5 w-full">
+              <h6 className="text-base sm:text-lg md:text-xl font-medium leading-6 sm:leading-7 truncate min-w-0 flex-1">
+                {displayName}
+              </h6>
+
+              <Popover.Root>
+                <Popover.Trigger asChild>
+                  <button
+                    type="button"
+                    className="text-[#007AFF] font-medium text-xs sm:text-sm underline shrink-0 whitespace-nowrap pt-0.5"
+                  >
+                    View Est. Value
+                  </button>
+                </Popover.Trigger>
+
+                <Popover.Portal>
+                  <Popover.Content
+                    side="left"
+                    align="center"
+                    sideOffset={8}
+                    collisionPadding={12}
+                    className="z-50 rounded-md bg-black px-3 py-2 text-sm text-white shadow-lg font-bold"
+                  >
+                    {displayPrice}
+                    <Popover.Arrow className="fill-black" width={12} height={6} />
+                  </Popover.Content>
+                </Popover.Portal>
+              </Popover.Root>
+            </div>
+
+            {categoryName && (
+              <p className="text-[#007AFF] font-medium text-[10px] sm:text-[12px] bg-[#007AFF]/10 px-2 py-0.5 sm:py-1 rounded-full w-fit my-1">
+                {categoryName}
+              </p>
             )}
 
-            <Link
-              href={`/listing/${listingId}`}
-              className={`w-full inline-block ${isFlagged ? "mt-0" : "mt-1.5"}`}
-            >
-              <Button
-                disabled={!listingId}
-                variant={"outline"}
-                className="rounded-lg font-medium text-sm py-2.5 w-full"
-                size={"lg"}
+            <div className="flex items-start gap-1 mb-2">
+              <span className="text-[#222222] font-bold text-xs shrink-0 leading-5 flex items-center gap-1">
+                {displayWants.length > 1 && (
+                  <Popover.Root>
+                    <Popover.Trigger asChild>
+                      <button
+                        type="button"
+                        aria-label="Wants information"
+                        className="text-[#007AFF] hover:text-[#0056b3]"
+                      >
+                        <Info size={14} />
+                      </button>
+                    </Popover.Trigger>
+
+                    <Popover.Portal>
+                      <Popover.Content
+                        side="top"
+                        align="start"
+                        sideOffset={6}
+                        collisionPadding={12}
+                        className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
+                      >
+                        <span className="font-semibold">Wants:</span> The user would like to
+                        exchange any of the listed items.
+                        <Popover.Arrow className="fill-black" width={10} height={6} />
+                      </Popover.Content>
+                    </Popover.Portal>
+                  </Popover.Root>
+                )}
+                Wants:
+              </span>
+
+              <div className="text-[#737373] min-w-0 flex-1">
+                {displayWants && displayWants.length > 0 ? (
+                  <p className="text-xs sm:text-sm text-[#737373] leading-5 line-clamp-2 capitalize">
+                    {displayWants.join(", ")}
+                  </p>
+                ) : (
+                  <p className="text-xs sm:text-sm text-[#737373] leading-5">Open to offers</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-auto shrink-0">
+              <div className="rounded-xl mb-2 text-[#222222] gap-2 px-2 py-1 bg-[#FAFAFA] flex items-center justify-between border border-[#E9E9E9]">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Avatar className="w-6 h-6 sm:w-8 sm:h-8">
+                    <AvatarImage
+                      src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
+                    />
+                  </Avatar>
+                  <p className="font-medium text-xs sm:text-sm truncate">{displayAuthor}</p>
+                </div>
+                <p className="flex items-center gap-1 text-xs shrink-0">
+                  {displayRating(rating)} <Rating />
+                </p>
+              </div>
+
+              {!isFlagged && (
+                <Button
+                  onClick={handleSwapNow}
+                  disabled={isStartingSwap || !listingId}
+                  variant={"default"}
+                  className="bg-[#007AFF] hover:bg-[#0062cc] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  size={"lg"}
+                >
+                  {isStartingSwap ? "Starting..." : "Swap Now"}
+                </Button>
+              )}
+
+              <Link
+                href={`/listing/${listingId}`}
+                className={`w-full inline-block ${isFlagged ? "mt-0" : "mt-1.5"}`}
               >
-                View Details
-              </Button>
-            </Link>
+                <Button
+                  disabled={!listingId}
+                  variant={"outline"}
+                  className="rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  size={"lg"}
+                >
+                  View Details
+                </Button>
+              </Link>
+            </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      <LoginRequiredModal
+        isOpen={showLoginModal}
+        onClose={() => setShowLoginModal(false)}
+        onLogin={handleLogin}
+        onSignup={handleSignup}
+        title="Login Required to Swap"
+        description="You need to be logged in to swap items. Please sign in to continue with your swap and start trading!"
+        actionText="Go to Login"
+      />
+      <Dialog open={showSwapSafetyModal} onOpenChange={setShowSwapSafetyModal}>
+        <DialogContent className="w-[95vw] max-w-lg rounded-xl p-0">
+          <div className="p-6 sm:p-7">
+            <DialogHeader className="space-y-3 text-left">
+              <div className="flex h-11 w-11 items-center justify-center rounded-xl bg-[#007AFF]/10 text-[#007AFF]">
+                <ShieldCheck className="h-6 w-6" />
+              </div>
+              <DialogTitle className="text-xl font-semibold text-[#222222]">
+                Swap Safety Centre
+              </DialogTitle>
+              <DialogDescription className="text-sm leading-6 text-[#555555]">
+                Stay safe when swapping.
+              </DialogDescription>
+            </DialogHeader>
+
+            <div className="mt-5 space-y-3">
+              <h3 className="text-sm font-semibold text-[#222222]">Before you agree to a swap:</h3>
+              <ul className="space-y-2.5">
+                {[
+                  "Check the item and the other user carefully.",
+                  "Ask questions about the item’s condition and ownership.",
+                  "Meet in a safe, public place when possible.",
+                  "Don’t share unnecessary personal or financial information.",
+                  "Never send money or valuables unless you fully understand and agree to the arrangement.",
+                  "If something feels suspicious, don’t proceed.",
+                ].map((item) => (
+                  <li
+                    key={item}
+                    className="flex items-start gap-3 text-sm leading-5 text-[#555555]"
+                  >
+                    <span className="mt-2 h-1.5 w-1.5 shrink-0 rounded-full bg-[#007AFF]" />
+                    <span>{item}</span>
+                  </li>
+                ))}
+              </ul>
+
+              <p className="border-l-2 border-[#007AFF] bg-[#007AFF]/5 py-2 pl-3 text-sm leading-5 text-[#555555]">
+                Swap Correct provides the platform for users to connect, but each swap is agreed and
+                carried out between the users involved.
+              </p>
+            </div>
+
+            <DialogFooter className="mt-6 gap-2 sm:gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                className="rounded-lg"
+                onClick={() => setShowSwapSafetyModal(false)}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                className="rounded-lg bg-[#007AFF] text-white hover:bg-[#0062cc]"
+                onClick={handleProceedWithSwap}
+                disabled={isStartingSwap}
+              >
+                {isStartingSwap ? "Starting..." : "Proceed"}
+              </Button>
+            </DialogFooter>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

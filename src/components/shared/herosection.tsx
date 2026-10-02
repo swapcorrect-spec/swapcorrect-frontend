@@ -10,7 +10,18 @@ import Hero_LeftTwo from "@/app/assets/images/pngs/left_2.png";
 import Circle from "@/app/assets/images/pngs/circle.png";
 import { PATHS } from "@/app/_constants/paths";
 import { useEffect } from "react";
-import { ArrowRight } from "lucide-react";
+import {
+  ArrowRight,
+  ArrowRightLeft,
+  Lock,
+  Repeat,
+  Search,
+  ShieldCheck,
+  Sparkles,
+  Tag,
+  TrendingUp,
+  Zap,
+} from "lucide-react";
 
 const Herosection = () => {
   const router = useRouter();
@@ -21,6 +32,10 @@ const Herosection = () => {
 
   const handleNavigate = () => {
     router.push(`/${PATHS.LOGIN}`);
+  };
+
+  const handleBrowse = () => {
+    router.push(PATHS.CATEGORY);
   };
 
   return (
@@ -50,11 +65,11 @@ const Herosection = () => {
         </p>
         <Button
           variant={"default"}
-          className="mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
+          className="bg-[#007AFF] hover:bg-[#0062cc] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
           size={"lg"}
-          onClick={handleNavigate}
+          onClick={handleBrowse}
         >
-          Swap Now
+          Browse MarketPlace
           <span className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
             <ArrowRight className="text-black" size={20} />
           </span>

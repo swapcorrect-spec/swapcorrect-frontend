@@ -3,16 +3,28 @@
 import SavedItemsEmptyState from "./empty-state";
 import ProductDetails from "@/components/widget/product-details";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useGetUserFavourite } from "@/app/_hooks/queries/favourite/favourite";
 import Title from "@/components/shared/tltle";
+import { useAuth } from "@/app/_context/auth-context";
+import { useRouter } from "next/navigation";
+import { PATHS } from "@/app/_constants/paths";
 
 const SavedItems: React.FC = () => {
+  const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
   const [category, setCategory] = useState<string>("");
   const [location, setLocation] = useState<string>("");
   const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
   const [searchParam, setSearchParam] = useState<string>("");
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
+
   const { data, isLoading, isError, error } = useGetUserFavourite({
     enabler: true,
   });

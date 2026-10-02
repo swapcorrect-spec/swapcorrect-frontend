@@ -405,7 +405,7 @@ const PersonalInfo: React.FC = () => {
           />
           <div className="gap-5 justify-end flex mt-6">
             <Button
-              className="w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]"
+              className="bg-[#007AFF] hover:bg-[#0062cc] w-auto !px-[3rem] py-4 font-bold text-base rounded-[1rem]"
               onClick={form.handleSubmit(handleSave)}
               loading={isPendingProfile || isUploading}
             >

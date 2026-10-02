@@ -14,8 +14,12 @@ import { Auth } from "@/app/_config/auth";
 import { useConfirmPayment } from "@/app/_hooks/queries/payment/payment";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/app/_context/auth-context";
+import { PATHS } from "@/app/_constants/paths";
 
 const ChatRoom: React.FC = () => {
+  const { isAuthenticated, isHydrated } = useAuth();
+
   const currentUser = Auth.getDecodedJwt()?.jti;
 
   const queryClient = useQueryClient();
@@ -33,6 +37,12 @@ const ChatRoom: React.FC = () => {
 
   const [isShowChat, setIsShowChat] = useState(() => !!roomName);
   const [isConfirmingPayment, setIsConfirmingPayment] = useState(false);
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
 
   // Keep mobile pane in sync with URL (deep link, refresh, back, My Swaps → chat)
   useEffect(() => {

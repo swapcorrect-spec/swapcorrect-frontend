@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import ReactPaginate from "react-paginate";
 import FilterMenu from "@/components/shared/filters/menu-dropdown";
 import SwapCardItem, { SwapCardItemData } from "@/components/shared/swap-card-item";
@@ -12,6 +12,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import EmptyItemsState from "@/components/shared/empty-items-state";
 import { getStatusColor } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/app/_context/auth-context";
+import { PATHS } from "@/app/_constants/paths";
 
 const categoryList = [
   {
@@ -61,6 +63,7 @@ const locationList = [
 export default function MySwaps() {
   const search = useSearchParams();
   const router = useRouter();
+  const { isAuthenticated, isHydrated } = useAuth();
 
   const pageNumber = Number(search.get("page") || 1);
 
@@ -76,6 +79,12 @@ export default function MySwaps() {
   const perpageSize = 15;
   // const [lowestRange, setLowestRange] = useState<number | undefined>(undefined);
   // const [highestRange, setHighestRange] = useState<number | undefined>(undefined);
+
+  useEffect(() => {
+    if (isHydrated && !isAuthenticated) {
+      router.replace(`/${PATHS.LOGIN}`);
+    }
+  }, [isHydrated, isAuthenticated, router]);
 
   const { data: currentUserData } = useGetUserInfo({
     enabler: true,

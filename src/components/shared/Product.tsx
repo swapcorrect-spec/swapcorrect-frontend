@@ -8,7 +8,12 @@ import { FC, useState } from "react";
 import { IProduct } from "@/interface/IProduct";
 import LoginRequiredModal from "@/components/shared/login-required-modal";
 import ReactPlayer from "react-player";
-import { formatCurrency, createImageErrorHandler, getImageSrcWithFallback, displayRating } from "@/lib/utils";
+import {
+  formatCurrency,
+  createImageErrorHandler,
+  getImageSrcWithFallback,
+  displayRating,
+} from "@/lib/utils";
 import { useStartSwap } from "@/app/_hooks/queries/listing/listing";
 import {
   useAddToFavourite,
@@ -114,10 +119,10 @@ const Product: FC<Props> = (props) => {
   };
 
   const handleViewDetails = () => {
-    if (!isAuthenticated) {
-      setShowLoginModal(true);
-      return;
-    }
+    // if (!isAuthenticated) {
+    //   setShowLoginModal(true);
+    //   return;
+    // }
     if (listingId) {
       router.push(`/listing/${listingId}`);
     }
@@ -252,8 +257,8 @@ const Product: FC<Props> = (props) => {
                     collisionPadding={12}
                     className="z-50 max-w-[240px] rounded-md bg-black px-3 py-2 text-xs text-white shadow-lg"
                   >
-                    <span className="font-semibold">Wants:</span> The user would like to exchange any
-                    of the listed items.
+                    <span className="font-semibold">Wants:</span> The user would like to exchange
+                    any of the listed items.
                     <Popover.Arrow className="fill-black" width={10} height={6} />
                   </Popover.Content>
                 </Popover.Portal>
@@ -269,7 +274,9 @@ const Product: FC<Props> = (props) => {
         <div className="flex items-center justify-between border border-[#e3e0e0] px-2 py-1.5 rounded-xl mb-3">
           <div className="flex items-center gap-1 min-w-0">
             <Avatar>
-              <AvatarImage src={getImageSrcWithFallback(displayPhoto, profileImageError) as string} />
+              <AvatarImage
+                src={getImageSrcWithFallback(displayPhoto, profileImageError) as string}
+              />
             </Avatar>
             <p className="text-[#222222] font-medium text-[14px] truncate">{displayAuthor}</p>
           </div>
@@ -280,7 +287,7 @@ const Product: FC<Props> = (props) => {
         </div>
         {!isFlagged && (
           <Button
-            className="w-full rounded-lg mb-1.5"
+            className="bg-[#007AFF] hover:bg-[#0062cc] w-full rounded-lg mb-1.5"
             onClick={handleSwap}
             disabled={isStartingSwap || !listingId}
           >

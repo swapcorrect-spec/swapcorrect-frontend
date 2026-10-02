@@ -196,7 +196,7 @@ const Security: React.FC = () => {
           </div>
           <div className="gap-5 justify-start">
             <Button
-              className="w-full md:w-auto py-4 font-medium text-base !rounded-[1rem] md:!px-[3rem]"
+              className="bg-[#007AFF] hover:bg-[#0062cc] w-full md:w-auto py-4 font-medium text-base !rounded-[1rem] md:!px-[3rem]"
               loading={isPending}
               onClick={form.handleSubmit(onSubmit)}
             >

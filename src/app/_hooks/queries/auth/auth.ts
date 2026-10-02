@@ -13,6 +13,7 @@ import { MutationProps } from "@/app/_types/mutation-prop-types";
 import {
   ForgotPasswordPayload,
   IFogotPasswordResponse,
+  IResendForgetPasswordEmailResponse,
   IGetGeneralUserInfoResponseData,
   IGetUserInfoResponseData,
   ILoginResponse,
@@ -30,6 +31,8 @@ import {
   UpdateProfile,
   IChangePasswordResponse,
   ChangePassword,
+  ConfirmEmail,
+  IConfirmEmailResponse,
   DeleteUserPayload,
   IDeleteUserResponse,
   ILogoutResponse,
@@ -123,6 +126,33 @@ export const useForgotPassword = (props: MutationProps) => {
     mutationFn: ({ payload }: ForgotPasswordPayload) =>
       postRequest<ForgotPasswordPayload["payload"], IFogotPasswordResponse>({
         url: "/auth/user/forget_password",
+        payload,
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useResendForgetPasswordEmail = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: ForgotPasswordPayload) =>
+      postRequest<ForgotPasswordPayload["payload"], IResendForgetPasswordEmailResponse>({
+        url: "/auth/user/resend-forget-password-email",
         payload,
       }),
     onSuccess(values) {
@@ -349,6 +379,33 @@ export const useLogout = (props: MutationProps) => {
   return {
     mutate,
     mutateAsync,
+    isError,
+    isSuccess,
+    isPending,
+  };
+};
+
+export const useConfirmEmail = (props: MutationProps) => {
+  const { onSuccess, onError } = props;
+  const { mutate, isError, isSuccess, isPending } = useMutation({
+    mutationFn: ({ payload }: { payload: ConfirmEmail }) =>
+      postRequest<ConfirmEmail, IConfirmEmailResponse>({
+        url: "/auth/user/resend-confirmation-email",
+        payload,
+      }),
+    onSuccess(values) {
+      onSuccess(values);
+    },
+    onError(err) {
+      const msgError = handleApiError(err);
+      if (onError) {
+        onError(msgError, err);
+      }
+    },
+  });
+
+  return {
+    mutate,
     isError,
     isSuccess,
     isPending,
