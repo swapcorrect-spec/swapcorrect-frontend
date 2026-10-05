@@ -427,16 +427,6 @@ export default function RiskAssessmentRegister() {
             amount, dispute time limits, and what happens when both parties dispute the facts.
           </p>
         </section>
-
-        {/* UK-based platform */}
-        <section className="mt-8 break-inside-avoid">
-          <p className="text-[20px] leading-[1.6] text-[#444]">
-            For a UK-based platform, I would also make fraud prevention, consumer protection,
-            privacy/data protection, payments, prohibited goods, and the legal treatment of the
-            holding/protection-fee arrangement separate risk-assessment areas rather than treating
-            them all as ordinary scam risks.
-          </p>
-        </section>
       </div>
 
       {/* Print styling */}
