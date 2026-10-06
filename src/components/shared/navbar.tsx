@@ -498,8 +498,8 @@ const Navbar: React.FC<Props> = ({
             variant="link"
             className={`!no-underline transition-all duration-200 border border-transparent rounded-full px-6 py-2 ${
               isHomePage
-                ? "text-[#007AFF] hover:text-[#007AFF] hover:border-[#007AFF]"
-                : "text-[#007AFF] hover:border-[#007AFF]"
+                ? "text-[#222222] hover:text-[#222222db] hover:border-[#222222]"
+                : "text-[#222222] hover:border-[#222222]"
             }`}
             asChild
           >

@@ -22,7 +22,7 @@ export default function EmptyChatRoom({ hideMarketplaceLink = false }: EmptyChat
         <Link href={`${PATHS.CATEGORY}`} className="w-full rounded-full mb-2 inline-block">
           <Button
             variant="default"
-            className="bg-[#007AFF] hover:bg-[#0062cc] max-w-[185px] w-full rounded-lg mb-2"
+            className="bg-[#222222] hover:bg-[#222222db] max-w-[185px] w-full rounded-lg mb-2"
           >
             Go to Marketplace
           </Button>

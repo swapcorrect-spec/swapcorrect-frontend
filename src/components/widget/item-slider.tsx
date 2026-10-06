@@ -82,7 +82,7 @@ const ItemSliderContent: React.FC<iProps> = ({
           </div>
           <Button
             variant={"default"}
-            className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full font-medium text-sm py-3 w-full"
+            className="bg-[#222222] hover:bg-[#222222db] rounded-full font-medium text-sm py-3 w-full"
             size={"lg"}
           >
             Swap Now

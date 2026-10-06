@@ -259,7 +259,9 @@ const ProductDetails: React.FC<iProps> = ({
                 onError={handleImageError}
               />
             )}
-            <div className="px-2 sm:px-4 w-full absolute top-[10px] sm:top-[16px] flex justify-between items-start gap-1.5 sm:gap-2">
+            <div
+              className={`px-2 sm:px-4 w-full absolute top-[10px] sm:top-[16px] flex ${showHotpick ? "justify-between" : "justify-end"} items-start gap-1.5 sm:gap-2`}
+            >
               {showHotpick && (
                 <div className="bg-[#FFF6F6] gap-1.5 sm:gap-2 flex items-center rounded-xl px-1.5 py-1 sm:p-[5px]">
                   <HotPick />
@@ -450,7 +452,7 @@ const ProductDetails: React.FC<iProps> = ({
                   onClick={handleSwapNow}
                   disabled={isStartingSwap || !listingId}
                   variant={"default"}
-                  className="bg-[#007AFF] hover:bg-[#0062cc] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  className="bg-[#222222] hover:bg-[#222222db] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
                   size={"lg"}
                 >
                   {isStartingSwap ? "Starting..." : "Swap Now"}

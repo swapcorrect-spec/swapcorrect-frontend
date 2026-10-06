@@ -844,7 +844,7 @@ const NewItemListing = () => {
             </div>
 
             <Button
-              className={"bg-[#007AFF] hover:bg-[#0062cc] rounded-full w-full"}
+              className={"bg-[#222222] hover:bg-[#222222db] rounded-full w-full"}
               size={"lg"}
               onClick={handleSubmit}
               disabled={isPending}
