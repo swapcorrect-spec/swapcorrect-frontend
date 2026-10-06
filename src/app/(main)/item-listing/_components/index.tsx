@@ -125,7 +125,7 @@ export default function ItemListing() {
           description="Track, edit, or swap your listed items in one place."
         />
         <Button
-          className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full shrink-0"
+          className="bg-[#222222] hover:bg-[#222222db] rounded-full shrink-0"
           onClick={handleNewListing}
         >
           Create New Listing

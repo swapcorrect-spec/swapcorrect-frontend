@@ -3,6 +3,7 @@
 import CategorySidenav from "@/app/(main)/category/_components/category-sidenav";
 import Categories from "@/app/(main)/category/_components/categories";
 import useIsMobile from "@/app/_hooks/useIsMobile";
+import Footer from "@/components/shared/footer";
 const Category = () => {
   const isMobile = useIsMobile();
   return (
@@ -11,6 +12,7 @@ const Category = () => {
         {!isMobile && <CategorySidenav />}
         <Categories />
       </div>
+      <Footer />
     </>
   );
 };

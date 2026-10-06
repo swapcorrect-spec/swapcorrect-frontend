@@ -65,7 +65,7 @@ const Herosection = () => {
         </p>
         <Button
           variant={"default"}
-          className="bg-[#007AFF] hover:bg-[#0062cc] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
+          className="bg-[#222222] hover:bg-[#222222db] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
           size={"lg"}
           onClick={handleBrowse}
         >

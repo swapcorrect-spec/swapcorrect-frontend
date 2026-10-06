@@ -2035,7 +2035,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
               </Button>
               <Button
                 type="button"
-                className="rounded-lg bg-[#007AFF] text-white hover:bg-[#0062cc]"
+                className="rounded-lg text-white bg-[#222222] hover:bg-[#222222db]"
                 onClick={handleProceedWithSwap}
                 disabled={isStartingSwap}
               >
