@@ -23,6 +23,7 @@ import Hero_RightTwo from "@/app/assets/images/pngs/right_2.png";
 import Hero_LeftOne from "@/app/assets/images/pngs/left_1.png";
 import Hero_LeftTwo from "@/app/assets/images/pngs/left_2.png";
 import Circle from "@/app/assets/images/pngs/circle.png";
+import Footer from "@/components/shared/footer";
 
 const HomePage: FC = () => {
   const router = useRouter();
@@ -91,7 +92,7 @@ const HomePage: FC = () => {
               </p>
               <Button
                 variant={"default"}
-                className="bg-[#007AFF] hover:bg-[#0062cc] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
+                className="bg-[#222222] hover:bg-[#222222db] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
                 size={"lg"}
                 onClick={handleBrowse}
               >
@@ -252,7 +253,7 @@ const HomePage: FC = () => {
         </>
       ) : (
         <>
-          <div className="px-4 mt-3">
+          {/* <div className="px-4 mt-3">
             <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-200">
               <Search className="h-5 w-5 text-gray-500" />
               <input
@@ -262,7 +263,7 @@ const HomePage: FC = () => {
               />
               <Filter className="h-5 w-5 text-gray-500" />
             </div>
-          </div>
+          </div> */}
 
           {/* Hero Banner */}
           <Image src={Banner} className="w-full h-auto max-w-full px-4 py-4" alt="banner" />
@@ -294,6 +295,7 @@ const HomePage: FC = () => {
           />
         </div>
       </div>
+      <Footer />
     </section>
   );
 };

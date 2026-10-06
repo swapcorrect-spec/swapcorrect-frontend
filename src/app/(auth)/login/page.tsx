@@ -144,7 +144,7 @@ const Login: FC = () => {
         </div>
         <Button
           variant={"default"}
-          className="bg-[#007AFF] hover:bg-[#0062cc] rounded-full py-6 mt-2 md:mt-4"
+          className="bg-[#222222] hover:bg-[#222222db] rounded-full py-6 mt-2 md:mt-4"
           type="submit"
           loading={isPending}
         >
