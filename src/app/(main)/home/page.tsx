@@ -4,7 +4,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { FC, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Filter, ArrowRight } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import { HOT_PICKS } from "@/app/mocks/hot-picks";
 import {
   useGetItemByRaterHotPick,
@@ -13,7 +13,6 @@ import {
 } from "@/app/_hooks/queries/listing/listing";
 import Marketplace from "@/components/shared/marketplace";
 import useIsMobile from "@/app/_hooks/useIsMobile";
-import Banner from "@/app/assets/images/pngs/mobile_ad.png";
 import { useAuth } from "@/app/_context/auth-context";
 import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { IProduct } from "@/interface/IProduct";
@@ -63,7 +62,7 @@ const HomePage: FC = () => {
   };
 
   return (
-    <section>
+    <section className="mt-20 md:mt-0">
       {!isMobile ? (
         <>
           <div
@@ -252,22 +251,35 @@ const HomePage: FC = () => {
           </> */}
         </>
       ) : (
-        <>
-          {/* <div className="px-4 mt-3">
-            <div className="flex items-center bg-gray-100 rounded-full px-4 py-2 border border-gray-200">
-              <Search className="h-5 w-5 text-gray-500" />
-              <input
-                type="text"
-                placeholder="What are you looking for?"
-                className="flex-1 bg-transparent outline-none text-gray-700 placeholder:text-gray-400 px-3 text-sm"
+        <div className="relative flex flex-col items-center justify-center overflow-hidden bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-contain bg-bottom bg-no-repeat px-5 py-16 text-center">
+          <h1 className="mb-5 text-5xl font-medium leading-tight text-[#2A2A2A]">
+            E-commerce
+            <br />
+            <span className="relative inline-block">
+              <span className="relative z-10 px-2">Without</span>
+              <Image
+                src={Circle}
+                alt=""
+                className="pointer-events-none absolute inset-0 z-0 h-auto w-full"
               />
-              <Filter className="h-5 w-5 text-gray-500" />
-            </div>
-          </div> */}
-
-          {/* Hero Banner */}
-          <Image src={Banner} className="w-full h-auto max-w-full px-4 py-4" alt="banner" />
-        </>
+            </span>{" "}
+            Cash
+          </h1>
+          <p className="max-w-sm text-base text-[#737373]">
+            The dormant item in your hand could get you a useful item in someone’s home
+          </p>
+          <Button
+            variant="default"
+            className="mt-6 flex h-auto w-fit items-center gap-2 rounded-full bg-[#222222] px-3 py-2 text-sm font-medium hover:bg-[#222222db]"
+            size="lg"
+            onClick={handleBrowse}
+          >
+            Browse MarketPlace
+            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
+              <ArrowRight className="text-black" size={20} />
+            </span>
+          </Button>
+        </div>
       )}
       <div className="w-[90%] max-w-full mx-auto min-w-0">
         <div className="my-8 flex flex-col gap-12">

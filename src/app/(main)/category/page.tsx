@@ -8,7 +8,7 @@ const Category = () => {
   const isMobile = useIsMobile();
   return (
     <>
-      <div className="flex h-[calc(100vh-72px)] min-w-0 overflow-x-hidden">
+      <div className="flex min-w-0 mt-20 md:mt-0">
         {!isMobile && <CategorySidenav />}
         <Categories />
       </div>
