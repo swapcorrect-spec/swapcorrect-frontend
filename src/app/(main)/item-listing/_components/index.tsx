@@ -118,7 +118,7 @@ export default function ItemListing() {
   };
 
   return (
-    <div className="w-full min-w-0 max-w-full px-4 md:px-0 md:w-[90%] mx-auto my-6 md:my-10">
+    <div className="w-full min-w-0 max-w-full px-4 md:px-0 md:w-[90%] mx-auto my-20 md:my-10">
       <div className="flex items-start md:items-end justify-between gap-3 my-2 min-w-0">
         <Title
           title="MY LISTING"

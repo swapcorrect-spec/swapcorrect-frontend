@@ -4,7 +4,7 @@ import Link from "next/link";
 
 const SavedItemsEmptyState: React.FC = () => {
   return (
-    <section className="flex flex-col items-center justify-center text-center mt-20">
+    <section className="absolute inset-0 flex flex-col items-center justify-center text-center">
       <SavedEmpty />
       <p className="text-xl font-medium text-[#222222] mt-8 mb-2">
         Looks like you haven’t saved anything yet

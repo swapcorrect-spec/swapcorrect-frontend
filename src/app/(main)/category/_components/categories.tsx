@@ -41,7 +41,7 @@ const Categories = () => {
     lowestRange: lowestRange,
     highestRange: highestRange,
     pageNumber,
-    perpageSize: 20,
+    perpageSize: 10,
     userId: userId ?? "",
   });
 
@@ -92,7 +92,7 @@ const Categories = () => {
   ];
   console.log(userId, "pop");
   return (
-    <div className="w-full md:w-[80%] h-full min-w-0 overflow-y-auto overflow-x-hidden hide-scrollbar">
+    <div className="w-full md:w-[80%] h-full min-w-0">
       <div className="p-4 sm:p-6">
         <p className="text-[#007AFF] font-medium text-[15px] pb-1">Category</p>
         <p className="text-[#222222] font-medium text-xl capitalize mb-8">

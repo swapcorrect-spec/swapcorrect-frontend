@@ -584,7 +584,7 @@ const NewItemListing = () => {
   };
 
   return (
-    <div className="">
+    <div className="mt-20 md:mt-0">
       <div className="border border-[#E9E9E9] px-8 py-4">
         <p className="text-[#007AFF] font-medium text-sm">Item listing</p>
         <p className="text-[#222222] font-medium text-xl">List a New Item for Swap</p>

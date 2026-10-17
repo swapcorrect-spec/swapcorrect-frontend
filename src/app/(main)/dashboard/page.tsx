@@ -111,7 +111,7 @@ const DashboardPage: FC = () => {
 
   return (
     <>
-      <section className="p-6">
+      <section className="p-4 mt-20 md:mt-0">
         <div className="border border-[#E9E9E9] rounded-lg p-4 md:p-6 mb-6">
           <Title title="Dashboard" description="Overview of your swap activities." />
           <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">

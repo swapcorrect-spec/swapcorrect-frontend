@@ -201,7 +201,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
   };
 
   return (
-    <header className="w-full bg-white">
+    <header className="fixed inset-x-0 top-0 z-30 w-full bg-white">
       <nav className="flex items-center justify-between px-4 py-3 border-b border-gray-200">
         <div className="flex items-center gap-2">
           <button
@@ -435,6 +435,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
         </div>
       )}
 
+      {/* <div aria-hidden="true" className="h-[67px] w-full" /> */}
       <LogoutConfirmModal
         isOpen={isLogoutModalOpen}
         onClose={() => setIsLogoutModalOpen(false)}

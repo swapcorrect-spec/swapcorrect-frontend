@@ -166,7 +166,7 @@ const ChatRoom: React.FC = () => {
   }
   return (
     <>
-      <section className="flex h-[calc(100vh-72px)]">
+      <section className="flex h-[calc(100vh-72px)] mt-20 md:mt-0">
         <div
           className={`
     w-full h-full flex-col border-r border-[#EEEEEE] md:max-w-[426px]
