@@ -63,7 +63,7 @@ const SavedItems: React.FC = () => {
   ];
 
   return (
-    <section className="p-6">
+    <section className="relative min-h-[calc(100dvh-5rem)] w-full p-6 md:min-h-screen ">
       <Title title="SAVED SWAPS" description="All the items you've marked to trade later" />
 
       {/* <div>
@@ -78,22 +78,23 @@ const SavedItems: React.FC = () => {
           onApplyFilters={handleApplyFilters}
         />
       </div> */}
-
-      {isLoading ? (
-        <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
-          {Array.from({ length: 6 }).map((_, index) => (
-            <div key={index} className="bg-gray-200 h-[400px] rounded-xl animate-pulse" />
-          ))}
-        </div>
-      ) : data && data.length > 0 ? (
-        <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
-          {data.map((item: any) => (
-            <ProductDetails key={item.listingId || item.id} {...item} isFavItem={true} />
-          ))}
-        </div>
-      ) : (
-        <SavedItemsEmptyState />
-      )}
+      <div className="mt-10 md:mt-10">
+        {isLoading ? (
+          <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {Array.from({ length: 6 }).map((_, index) => (
+              <div key={index} className="bg-gray-200 h-[400px] rounded-xl animate-pulse" />
+            ))}
+          </div>
+        ) : data && data.length > 0 ? (
+          <div className="grid lg:grid-cols-4 md:grid-cols-3 sm:grid-cols-2 gap-4">
+            {data.map((item: any) => (
+              <ProductDetails key={item.listingId || item.id} {...item} isFavItem={true} />
+            ))}
+          </div>
+        ) : (
+          <SavedItemsEmptyState />
+        )}
+      </div>
     </section>
   );
 };

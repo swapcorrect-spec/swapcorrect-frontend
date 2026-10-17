@@ -161,7 +161,7 @@ export default function MySwaps() {
   };
 
   return (
-    <div className="w-full min-w-0 max-w-full px-4 md:w-[90%] md:mx-auto md:px-0 my-6 md:my-10">
+    <div className="w-full min-w-0 max-w-full px-2 md:w-[90%] md:mx-auto md:px-0 my-6 md:my-10">
       <div className="flex items-end justify-between my-2">
         <Title title="MY SWAP" description="Track all your swap interactions." />
       </div>

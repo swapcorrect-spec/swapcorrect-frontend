@@ -37,7 +37,7 @@ const Settings: React.FC = () => {
     },
   ];
   return (
-    <section className="p-6">
+    <section className="p-6 mt-20 md:mt-0">
       <h6 className="text-[#007AFF] font-medium mb-3 text-xl">ACCOUNT SETTINGS</h6>
       <p className="text-xl font-medium text-[#222222] mb-8">
         All your settings and swap records in one place.

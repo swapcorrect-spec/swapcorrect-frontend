@@ -1830,80 +1830,84 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                 </div>
               </CardContent>
             </Card>
-            {isFetching ? (
-              <>
-                <div className="flex flex-col gap-3 px-4">
-                  <Skeleton className="h-32 w-full rounded-lg" />
-                  <div className="space-y-2">
-                    <Skeleton className="h-4 w-3/4" />
-                    <Skeleton className="h-4 w-1/2" />
-                    <Skeleton className="h-4 w-2/3" />
-                  </div>
-                </div>
-              </>
-            ) : userData?.result.userRole[0] === "Visitor" ||
-              userData?.result.userRole[0] === "Swapper" ? (
-              <>
-                <h6 className="text-[14.87px] md:text-xl mb-3 font-medium">About the Swapper</h6>
-                <Card className="mb-4 2xl:mb-6 shadow-none">
-                  <CardContent className="px-2 py-4 2xl:p-6 flex gap-3 items-center">
-                    <Image
-                      className="h-10 w-10 rounded-full"
-                      src={getImageSrcWithFallback(
-                        listingData?.profilePicture ||
-                          "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80",
-                        profileImageError
-                      )}
-                      height={40}
-                      width={40}
-                      alt="Profile picture"
-                      onError={handleProfileImageError}
-                    />
-                    <div className="me-auto">
-                      <p className="text-[#222222] font-medium text-base">
-                        {listingData?.fullName || listingData?.username || "Unknown User"}
-                      </p>
-                      <div className="flex gap-2 text-[#737373] text-sm items-center">
-                        <p className="flex items-center gap-1">
-                          {displayRating(listingData?.rating)} <Rating />
-                        </p>
-                        <span className="w-1 h-1 rounded-full bg-[#737373]"></span>
-                        <p>{listingData?.swapCount || 0} swaps</p>
-                      </div>
+            {userData?.result.id !== listingData?.userId &&
+              (isFetching ? (
+                <>
+                  <div className="flex flex-col gap-3 px-4">
+                    <Skeleton className="h-32 w-full rounded-lg" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-4 w-3/4" />
+                      <Skeleton className="h-4 w-1/2" />
+                      <Skeleton className="h-4 w-2/3" />
                     </div>
-                    <Link href={`/profile/${listingData?.userId || "unknown"}`}>
-                      <div className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center">
-                        <p className="font-medium text-xs text-[#222222]">View profile</p>
-                        <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
-                          <ArrowRight size={12} color="#fff" />
-                        </span>
+                  </div>
+                </>
+              ) : userData?.result.userRole[0] === "Visitor" ||
+                userData?.result.userRole[0] === "Swapper" ? (
+                <>
+                  <h6 className="text-[14.87px] md:text-xl mb-3 font-medium">About the Swapper</h6>
+                  <Card className="mb-4 2xl:mb-6 shadow-none">
+                    <CardContent className="px-2 py-4 2xl:p-6 flex gap-3 items-center">
+                      <Image
+                        className="h-10 w-10 rounded-full"
+                        src={getImageSrcWithFallback(
+                          listingData?.profilePicture ||
+                            "https://images.unsplash.com/photo-1519744792095-2f2205e87b6f?auto=format&fit=crop&w=800&q=80",
+                          profileImageError
+                        )}
+                        height={40}
+                        width={40}
+                        alt="Profile picture"
+                        onError={handleProfileImageError}
+                      />
+                      <div className="me-auto">
+                        <p className="text-[#222222] font-medium text-base">
+                          {listingData?.fullName || listingData?.username || "Unknown User"}
+                        </p>
+                        <div className="flex gap-2 text-[#737373] text-sm items-center">
+                          <p className="flex items-center gap-1">
+                            {displayRating(listingData?.rating)} <Rating />
+                          </p>
+                          <span className="w-1 h-1 rounded-full bg-[#737373]"></span>
+                          <p>{listingData?.swapCount || 0} swaps</p>
+                        </div>
                       </div>
-                    </Link>
-                  </CardContent>
-                </Card>
-                <Card className="bg-[#F0FFF6] shadow-none">
-                  <CardContent className="py-3 xp-4 2xl:p-6">
-                    <h6 className="text-[#1A9E1C] font-medium text-xl mb-3">Ready to negotiate?</h6>
-                    <p className="text-[#737373] text-sm mb-3">
-                      Start a conversation with{" "}
-                      {listingData?.fullName || listingData?.username || "the swapper"} to discuss
-                      swap details.
-                    </p>
-                    <Button
-                      onClick={handleSwapNow}
-                      disabled={isStartingSwap || !!listingData?.isFlagged}
-                      variant={"default"}
-                      className="rounded-full font-medium text-sm py-3 w-full"
-                      size={"lg"}
-                    >
-                      {isStartingSwap ? "Starting..." : "Negotiate"}
-                    </Button>
-                  </CardContent>
-                </Card>
-              </>
-            ) : (
-              <></>
-            )}
+                      <Link href={`/profile/${listingData?.userId || "unknown"}`}>
+                        <div className="border border-[#E9E9E9] rounded-2xl gap-1 p-[6px] flex items-center">
+                          <p className="font-medium text-xs text-[#222222]">View profile</p>
+                          <span className="w-4 h-4 rounded-full flex items-center justify-center bg-[#222222]">
+                            <ArrowRight size={12} color="#fff" />
+                          </span>
+                        </div>
+                      </Link>
+                    </CardContent>
+                  </Card>
+
+                  <Card className="bg-[#F0FFF6] shadow-none">
+                    <CardContent className="py-3 xp-4 2xl:p-6">
+                      <h6 className="text-[#1A9E1C] font-medium text-xl mb-3">
+                        Ready to negotiate?
+                      </h6>
+                      <p className="text-[#737373] text-sm mb-3">
+                        Start a conversation with{" "}
+                        {listingData?.fullName || listingData?.username || "the swapper"} to discuss
+                        swap details.
+                      </p>
+                      <Button
+                        onClick={handleSwapNow}
+                        disabled={isStartingSwap || !!listingData?.isFlagged}
+                        variant={"default"}
+                        className="rounded-full font-medium text-sm py-3 w-full"
+                        size={"lg"}
+                      >
+                        {isStartingSwap ? "Starting..." : "Negotiate"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                </>
+              ) : (
+                <></>
+              ))}
           </div>
         </div>
 
