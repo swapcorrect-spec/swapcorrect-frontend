@@ -111,7 +111,7 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <section className={cn("flex h-screen w-full min-w-0 overflow-hidden")}>
+      <section className={cn("app-viewport-height flex w-full min-w-0 overflow-hidden")}>
         {isOpen && isAuthenticated && !isMobile && (
           <>
             <Sidebar
