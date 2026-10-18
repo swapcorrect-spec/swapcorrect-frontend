@@ -111,7 +111,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
 
   return (
     <>
-      <section className={cn("flex h-screen w-full min-w-0 overflow-hidden")}>
+      <section
+        className={cn(
+          "w-full min-w-0",
+          isMobile ? "min-h-screen overflow-x-hidden" : "app-viewport-height flex overflow-hidden"
+        )}
+      >
         {isOpen && isAuthenticated && !isMobile && (
           <>
             <Sidebar
@@ -121,7 +126,12 @@ export default function MainLayout({ children }: { children: ReactNode }) {
             <div className="w-[99px] shrink-0" aria-hidden="true" />
           </>
         )}
-        <section className="min-h-0 min-w-0 flex-1 overflow-x-hidden overflow-y-auto overscroll-contain">
+        <section
+          className={cn(
+            "min-w-0 flex-1 overflow-x-hidden",
+            !isMobile && "min-h-0 overflow-y-auto overscroll-contain"
+          )}
+        >
           {isMobile ? (
             <MobileNavbar
               data={data}

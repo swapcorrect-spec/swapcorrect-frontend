@@ -71,6 +71,10 @@ body {
   max-width: 100%;
   overflow-x: hidden;
 }
+.app-viewport-height {
+  height: 100vh;
+  height: 100dvh;
+}
 body {
   background-color: #fff;
 }
