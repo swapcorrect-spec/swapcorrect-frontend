@@ -87,11 +87,11 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
     clearAuth();
     setIsLogoutModalOpen(false);
     setIsOpen(false);
-    router.push(`/${PATHS.LOGIN}`);
+    router.push(`/`);
   };
 
   const handleLogin = () => {
-    router.push(`/${PATHS.LOGIN}`);
+    router.push(`/`);
   };
 
   const isRouteActive = (link: string) => {

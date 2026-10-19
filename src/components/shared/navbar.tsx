@@ -110,7 +110,7 @@ const Navbar: React.FC<Props> = ({
     queryClient.clear();
     clearAuth();
     setIsLogoutModalOpen(false);
-    router.push(`/${PATHS.LOGIN}`);
+    router.push(`/`);
   };
 
   const handleOpenNotifications = () => {
@@ -476,10 +476,13 @@ const Navbar: React.FC<Props> = ({
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-40 bg-white border border-[#E9E9E9]">
               <DropdownMenuGroup>
-                <DropdownMenuItem asChild>
+                <DropdownMenuItem asChild className="cursor-pointer">
                   <Link href="/settings">Settings</Link>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setIsLogoutModalOpen(true)}>
+                <DropdownMenuItem
+                  onClick={() => setIsLogoutModalOpen(true)}
+                  className="cursor-pointer"
+                >
                   Logout
                 </DropdownMenuItem>
               </DropdownMenuGroup>

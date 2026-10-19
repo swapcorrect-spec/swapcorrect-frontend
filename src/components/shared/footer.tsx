@@ -9,35 +9,18 @@ const Footer = () => {
         <div>
           <h6 className="text-white font-medium text-base">ABOUT SWAP CORRECT</h6>
           <div className="flex flex-col gap-2 my-4">
-            <Link
-              href="/about"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-sm font-extralight hover:underline"
-            >
+            <Link href="/about" className="text-white text-sm font-extralight hover:underline">
               About Us
             </Link>
-            <Link
-              href="/contact-us"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-sm font-extralight hover:underline"
-            >
+            <Link href="/contact-us" className="text-white text-sm font-extralight hover:underline">
               Contact Us
             </Link>
 
-            <Link
-              href="https://blog.swapcorrect.com/"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-sm font-extralight hover:underline"
-            >
+            <Link href="#" className="text-white text-sm font-extralight hover:underline">
               Our Blog
             </Link>
             <Link
               href="/terms-and-conditions"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
               Terms & Conditions
@@ -50,18 +33,11 @@ const Footer = () => {
           <div className="flex flex-col gap-2 my-4">
             <Link
               href="/swap-safety-centre"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
               Swap Safety Centre
             </Link>
-            <Link
-              href="/faq"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-white text-sm font-extralight hover:underline"
-            >
+            <Link href="/faq" className="text-white text-sm font-extralight hover:underline">
               FAQ
             </Link>
           </div>
@@ -72,8 +48,6 @@ const Footer = () => {
           <div className="flex flex-col gap-2 my-4">
             <Link
               href="/privacy-policy"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
               Privacy Policy
@@ -81,16 +55,12 @@ const Footer = () => {
 
             <Link
               href="/authentic-item-policy"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
               Authentic Items Policy
             </Link>
             <Link
               href="/risk-assessment-register"
-              target="_blank"
-              rel="noopener noreferrer"
               className="text-white text-sm font-extralight hover:underline"
             >
               Risk Assessment Register
