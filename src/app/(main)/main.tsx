@@ -5,7 +5,6 @@ import { useEffect } from "react";
 import { cn } from "@/lib/utils";
 import Sidebar from "@/components/shared/sidebar";
 import Navbar from "@/components/shared/navbar";
-import { PATHS } from "../_constants/paths";
 import { useAuth } from "@/app/_context/auth-context";
 
 export default function Main({
@@ -18,7 +17,7 @@ export default function Main({
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

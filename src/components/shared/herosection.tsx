@@ -41,8 +41,6 @@ const Herosection = () => {
     router.push(PATHS.CATEGORY);
   };
 
-  console.log("isMobile", isMobile);
-
   if (isMobile === null) {
     return null;
   }

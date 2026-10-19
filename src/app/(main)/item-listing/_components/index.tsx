@@ -11,7 +11,6 @@ import EmptyItemsState from "@/components/shared/empty-items-state";
 import Title from "@/components/shared/tltle";
 import ReactPaginate from "react-paginate";
 import { useAuth } from "@/app/_context/auth-context";
-import { PATHS } from "@/app/_constants/paths";
 
 const categoryList = [
   {
@@ -46,7 +45,7 @@ export default function ItemListing() {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

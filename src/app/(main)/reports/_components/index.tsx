@@ -19,7 +19,6 @@ import {
 import ReportsTable from "./reports-table";
 import { useAuth } from "@/app/_context/auth-context";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/app/_constants/paths";
 
 const ReportsPage = () => {
   const router = useRouter();
@@ -32,7 +31,7 @@ const ReportsPage = () => {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

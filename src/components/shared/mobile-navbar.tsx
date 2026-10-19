@@ -90,10 +90,6 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
     router.push(`/`);
   };
 
-  const handleLogin = () => {
-    router.push(`/`);
-  };
-
   const isRouteActive = (link: string) => {
     if (link === PATHS.HOME) return pathname === link;
     return pathname === link || pathname.startsWith(`${link}/`);
@@ -340,13 +336,8 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
             </div>
           </>
         ) : (
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            className="rounded-2xl shadow-none"
-            onClick={handleLogin}
-          >
-            Log in
+          <Button asChild variant="outline" size="sm" className="rounded-2xl shadow-none">
+            <Link href={`/${PATHS.LOGIN}`}>Log in</Link>
           </Button>
         )}
       </nav>
@@ -423,11 +414,11 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 </Button>
               ) : (
                 <Button
+                  asChild
                   variant="outline"
                   className="mt-6 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
-                  onClick={handleLogin}
                 >
-                  Login
+                  <Link href={`/${PATHS.LOGIN}`}>Login</Link>
                 </Button>
               )}
             </div>
