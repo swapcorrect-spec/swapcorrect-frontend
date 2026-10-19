@@ -12,7 +12,6 @@ import {
   Siren,
   UserRoundCheck,
 } from "lucide-react";
-import useIsMobile from "@/app/_hooks/useIsMobile";
 import Herosection from "@/components/shared/herosection";
 
 const sections = [
@@ -253,8 +252,6 @@ function SafetySection({
 }
 
 export default function SafetyCentrePage() {
-  const isMobile = useIsMobile();
-
   const [activeSection, setActiveSection] = useState("before-you-agree");
 
   useEffect(() => {
@@ -302,7 +299,7 @@ export default function SafetyCentrePage() {
 
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
       <div className="min-h-screen bg-[#f8faf9] text-slate-900">
         <section className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
           <div className="rounded-2xl border border-amber-200 bg-amber-50 p-5 sm:p-6">

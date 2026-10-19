@@ -8,7 +8,6 @@ import { useGetUserFavourite } from "@/app/_hooks/queries/favourite/favourite";
 import Title from "@/components/shared/tltle";
 import { useAuth } from "@/app/_context/auth-context";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/app/_constants/paths";
 
 const SavedItems: React.FC = () => {
   const router = useRouter();
@@ -21,7 +20,7 @@ const SavedItems: React.FC = () => {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

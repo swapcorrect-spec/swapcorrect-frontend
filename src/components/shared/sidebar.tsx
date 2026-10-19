@@ -93,7 +93,7 @@ const Sidebar: React.FC<Props> = ({ handleToggleMenu, role }) => {
     queryClient.clear();
     clearAuth();
     setIsLogoutModalOpen(false);
-    router.push(`/${PATHS.LOGIN}`);
+    router.push(`/`);
   };
 
   const isRouteActive = (link: string) => {

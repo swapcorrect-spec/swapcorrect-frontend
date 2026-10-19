@@ -23,18 +23,18 @@ const DashboardPage: FC = () => {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 
   const { data: currentUserData } = useGetUserInfo({
-    enabler: true,
+    enabler: isHydrated && isAuthenticated,
   });
 
   const currentUserId = currentUserData?.result?.id || "";
 
   const { data: dashboardData, isLoading } = useGetDashboardCard({
-    enabler: true,
+    enabler: isHydrated && isAuthenticated,
   });
 
   const { data: swapsData, isLoading: isLoadingSwaps } = useSearchSwaps({
