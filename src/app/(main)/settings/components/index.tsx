@@ -8,7 +8,6 @@ import { useGetUserInfo } from "@/app/_hooks/queries/auth/auth";
 import { useEffect } from "react";
 import { useAuth } from "@/app/_context/auth-context";
 import { useRouter } from "next/navigation";
-import { PATHS } from "@/app/_constants/paths";
 
 const Settings: React.FC = () => {
   const router = useRouter();
@@ -18,7 +17,7 @@ const Settings: React.FC = () => {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

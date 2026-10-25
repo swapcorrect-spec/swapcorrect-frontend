@@ -302,7 +302,7 @@ const ReportUserModal: FC<ReportUserModalProps> = ({
               Cancel
             </Button>
             <Button
-              className="rounded-xl bg-[#222222] hover:bg-black"
+              className="rounded-xl bg-[#007AFF] hover:bg-[#046ad6]"
               disabled={isReporting || isUploading}
               onClick={handleSubmit}
               loading={isReporting || isUploading}

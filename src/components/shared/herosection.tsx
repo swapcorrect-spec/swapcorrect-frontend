@@ -12,19 +12,22 @@ import { PATHS } from "@/app/_constants/paths";
 import { useEffect } from "react";
 import {
   ArrowRight,
-  ArrowRightLeft,
-  Lock,
-  Repeat,
-  Search,
-  ShieldCheck,
-  Sparkles,
-  Tag,
-  TrendingUp,
-  Zap,
+  // ArrowRightLeft,
+  // Lock,
+  // Repeat,
+  // Search,
+  // ShieldCheck,
+  // Sparkles,
+  // Tag,
+  // TrendingUp,
+  // Zap,
 } from "lucide-react";
+import useIsMobile from "@/app/_hooks/useIsMobile";
 
 const Herosection = () => {
   const router = useRouter();
+
+  const isMobile = useIsMobile();
 
   useEffect(() => {
     router.prefetch(`/${PATHS.LOGIN}`);
@@ -38,63 +41,106 @@ const Herosection = () => {
     router.push(PATHS.CATEGORY);
   };
 
+  if (isMobile === null) {
+    return null;
+  }
+
   return (
-    <div
-      className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-contain bg-bottom bg-no-repeat  flex flex-col items-center justify-center relative py-36`}
-    >
-      <div className="max-w-[839px] w-full mx-auto">
-        {/* <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center leading-tight">
+    <section className="mt-20 md:mt-0">
+      {isMobile ? (
+        <div className="relative flex flex-col items-center justify-center overflow-hidden bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-contain bg-bottom bg-no-repeat px-5 py-16 text-center">
+          <h1 className="mb-5 text-5xl font-medium leading-tight text-[#2A2A2A]">
+            E-commerce
+            <br />
+            <span className="relative inline-block">
+              <span className="relative z-10 px-2">Without</span>
+              <Image
+                src={Circle}
+                alt=""
+                className="pointer-events-none absolute inset-0 z-0 h-auto w-full"
+              />
+            </span>{" "}
+            Cash
+          </h1>
+          <p className="max-w-sm text-base text-[#737373]">
+            The dormant item in your hand could get you a useful item in someone’s home
+          </p>
+          <Button
+            variant="default"
+            className="mt-6 flex h-auto w-fit items-center gap-2 rounded-full bg-[#007AFF] hover:bg-[#046ad6] px-3 py-2 text-sm font-medium"
+            size="lg"
+            onClick={handleBrowse}
+          >
+            Browse MarketPlace
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
+              <ArrowRight className="text-black" size={18} />
+            </span>
+          </Button>
+        </div>
+      ) : (
+        <div
+          className={`bg-[url(../app/assets/images/pngs/onboarding_bg.png)] bg-contain bg-bottom bg-no-repeat  flex flex-col items-center justify-center relative py-36`}
+        >
+          <div className="max-w-[839px] w-full mx-auto">
+            {/* <h1 className="text-[#2A2A2A] mb-8 text-[80px] font-medium text-center leading-tight">
           E-commerce Without Cash
         </h1> */}
-        <h1 className="text-[#2A2A2A] mb-8 text-8xl font-medium text-center leading-tight">
-          E-commerce
-          <br />
-          <span className="relative inline-block">
-            <span className="relative z-0 pr-3">Without</span>
+            <h1 className="text-[#2A2A2A] mb-8 text-8xl font-medium text-center leading-tight">
+              E-commerce
+              <br />
+              <span className="relative inline-block">
+                <span className="relative z-0 pr-3">Without</span>
 
-            <Image
-              src={Circle}
-              alt=""
-              className="absolute inset-0 z-0 w-[75%] h-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
-            />
-          </span>
-          Cash
-        </h1>
-        <p className="text-2xl text-[#737373] text-center w-[85%] mx-auto">
-          The dormant item in your hand could get you a useful item in someone’s home
-        </p>
-        <Button
-          variant={"default"}
-          className="bg-[#222222] hover:bg-[#222222db] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
-          size={"lg"}
-          onClick={handleBrowse}
-        >
-          Browse MarketPlace
-          <span className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
-            <ArrowRight className="text-black" size={20} />
-          </span>
-        </Button>
-      </div>
-      <Image
-        src={Hero_RightOne}
-        alt="product item"
-        width={250}
-        className="absolute -right-1 top-0"
-      />
-      <Image
-        src={Hero_RightTwo}
-        alt="product item"
-        width={250}
-        className="absolute -right-1 bottom-0"
-      />
-      <Image src={Hero_LeftOne} alt="product item" width={250} className="absolute -left-1 top-0" />
-      <Image
-        src={Hero_LeftTwo}
-        alt="product item"
-        width={250}
-        className="absolute -left-1 bottom-0"
-      />
-    </div>
+                <Image
+                  src={Circle}
+                  alt=""
+                  className="absolute inset-0 z-0 w-[75%] h-auto left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none"
+                />
+              </span>
+              Cash
+            </h1>
+            <p className="text-2xl text-[#737373] text-center w-[85%] mx-auto">
+              The dormant item in your hand could get you a useful item in someone’s home
+            </p>
+            <Button
+              variant={"default"}
+              className="bg-[#007AFF] hover:bg-[#046ad6] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
+              size={"lg"}
+              onClick={handleBrowse}
+            >
+              Browse MarketPlace
+              <span className="bg-white w-7 h-7 rounded-full flex items-center justify-center">
+                <ArrowRight className="text-black" size={18} />
+              </span>
+            </Button>
+          </div>
+          <Image
+            src={Hero_RightOne}
+            alt="product item"
+            width={250}
+            className="absolute -right-1 top-0"
+          />
+          <Image
+            src={Hero_RightTwo}
+            alt="product item"
+            width={250}
+            className="absolute -right-1 bottom-0"
+          />
+          <Image
+            src={Hero_LeftOne}
+            alt="product item"
+            width={250}
+            className="absolute -left-1 top-0"
+          />
+          <Image
+            src={Hero_LeftTwo}
+            alt="product item"
+            width={250}
+            className="absolute -left-1 bottom-0"
+          />
+        </div>
+      )}
+    </section>
   );
 };
 

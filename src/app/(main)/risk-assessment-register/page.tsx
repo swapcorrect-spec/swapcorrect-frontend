@@ -1,6 +1,5 @@
 "use client";
 
-import useIsMobile from "@/app/_hooks/useIsMobile";
 import Herosection from "@/components/shared/herosection";
 import React from "react";
 
@@ -250,11 +249,9 @@ const biggestRisks = [
 ];
 
 export default function RiskAssessmentRegister() {
-  const isMobile = useIsMobile();
-
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
 
       <div className="mx-auto w-full max-w-[900px] bg-white px-4 py-6 md:px-8 md:py-8 ...">
         {/* Document title */}

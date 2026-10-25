@@ -68,7 +68,7 @@ export default function PrivacyPolicy() {
 
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
       <section
         className={clsx(
           "p-4 md:p-8 max-w-7xl mx-auto min-h-screen text-[#222222]",

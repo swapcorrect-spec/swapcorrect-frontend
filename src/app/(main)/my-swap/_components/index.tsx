@@ -13,7 +13,6 @@ import EmptyItemsState from "@/components/shared/empty-items-state";
 import { getStatusColor } from "@/lib/utils";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/app/_context/auth-context";
-import { PATHS } from "@/app/_constants/paths";
 
 const categoryList = [
   {
@@ -82,7 +81,7 @@ export default function MySwaps() {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

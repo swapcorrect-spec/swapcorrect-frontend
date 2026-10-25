@@ -1,6 +1,5 @@
 "use client";
 
-import useIsMobile from "@/app/_hooks/useIsMobile";
 import Herosection from "@/components/shared/herosection";
 
 const sections = [
@@ -1911,11 +1910,9 @@ const sections = [
 ];
 
 export default function TermsAndConditionsPage() {
-  const isMobile = useIsMobile();
-
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
 
       <div className="min-h-screen bg-white text-slate-700">
         {/* Header */}

@@ -1,16 +1,11 @@
 "use client";
 
 import Herosection from "@/components/shared/herosection";
-import Link from "next/link";
-import useIsMobile from "../../_hooks/useIsMobile";
-import Navbar from "@/components/shared/navbar";
 
 export default function About() {
-  const isMobile = useIsMobile();
-
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
 
       <div className="w-[85%] mx-auto my-12 space-y-12 text-gray-800 leading-relaxed">
         {/* Header */}

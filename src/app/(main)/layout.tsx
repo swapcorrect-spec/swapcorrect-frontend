@@ -59,7 +59,7 @@ const ConfirmModal = ({
           Cancel
         </Button>
         <Button
-          className="!h-10 rounded-xl font-medium w-full"
+          className="!h-10 rounded-xl font-medium w-full bg-[#007AFF] hover:bg-[#046ad6]"
           onClick={handleUpgradeRole}
           disabled={isPending}
           loading={isPending}

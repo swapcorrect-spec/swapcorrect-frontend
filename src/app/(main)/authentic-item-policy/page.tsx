@@ -1,14 +1,11 @@
 "use client";
 
-import useIsMobile from "@/app/_hooks/useIsMobile";
 import Herosection from "@/components/shared/herosection";
 
 export default function AuthenticItem() {
-  const isMobile = useIsMobile();
-
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
       <div className="min-h-screen bg-white text-gray-800 py-8 px-4 sm:px-6 md:px-12 lg:px-24">
         <div className="max-w-4xl mx-auto space-y-8 sm:space-y-12">
           <header className="text-center space-y-3 pt-4 sm:pt-8">

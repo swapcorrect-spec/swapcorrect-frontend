@@ -15,7 +15,6 @@ import { useConfirmPayment } from "@/app/_hooks/queries/payment/payment";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/app/_context/auth-context";
-import { PATHS } from "@/app/_constants/paths";
 
 const ChatRoom: React.FC = () => {
   const { isAuthenticated, isHydrated } = useAuth();
@@ -40,7 +39,7 @@ const ChatRoom: React.FC = () => {
 
   useEffect(() => {
     if (isHydrated && !isAuthenticated) {
-      router.replace(`/${PATHS.LOGIN}`);
+      router.replace("/");
     }
   }, [isHydrated, isAuthenticated, router]);
 

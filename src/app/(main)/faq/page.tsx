@@ -13,11 +13,9 @@ import {
   RefreshCw,
   MessageSquare,
 } from "lucide-react";
-import useIsMobile from "@/app/_hooks/useIsMobile";
 import Herosection from "@/components/shared/herosection";
 
 export default function FaqPage() {
-  const isMobile = useIsMobile();
   const [searchQuery, setSearchQuery] = useState("");
   const [openItems, setOpenItems] = useState<Record<string, boolean>>({});
 
@@ -363,7 +361,7 @@ export default function FaqPage() {
 
   return (
     <>
-      {!isMobile && <Herosection />}
+      <Herosection />
       <div className="min-h-screen bg-gray-50 text-gray-800 py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-4xl mx-auto space-y-8">
           {/* Header */}

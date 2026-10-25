@@ -1000,7 +1000,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               !isSwapper &&
               ["Negotiation"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="bg-[#222222] hover:bg-[#222222db] !h-9 rounded-xl font-medium hidden md:block"
+                  className="bg-[#007AFF] hover:bg-[#046ad6] !h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Upgrade Swap
@@ -1023,7 +1023,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
               isSwapper &&
               ["AwaitingVendorHoldingFee"].includes(swappingProceeding?.status as string) && (
                 <Button
-                  className="bg-[#222222] hover:bg-[#222222db] !h-9 rounded-xl font-medium hidden md:block"
+                  className="bg-[#007AFF] hover:bg-[#046ad6] !h-9 rounded-xl font-medium hidden md:block"
                   onClick={() => setModalType("swap")}
                 >
                   Upgrade Swap
@@ -1938,7 +1938,7 @@ const MessageRoom: React.FC<MessageRoomProps> = ({
                         Cancel
                       </Button>
                       <Button
-                        className="rounded-xl bg-[#222222] hover:bg-black"
+                        className="rounded-xl  bg-[#007AFF] hover:bg-[#046ad6]"
                         disabled={isReporting || isUploading}
                         onClick={handleManualSubmit}
                         loading={isReporting || isUploading}

@@ -35,7 +35,7 @@ import {
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
 import { useQueryClient } from "@tanstack/react-query";
-import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade_2.svg";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
 import { useAuth } from "@/app/_context/auth-context";
 
@@ -87,11 +87,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
     clearAuth();
     setIsLogoutModalOpen(false);
     setIsOpen(false);
-    router.push(`/${PATHS.LOGIN}`);
-  };
-
-  const handleLogin = () => {
-    router.push(`/${PATHS.LOGIN}`);
+    router.push(`/`);
   };
 
   const isRouteActive = (link: string) => {
@@ -340,13 +336,8 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
             </div>
           </>
         ) : (
-          <Button
-            variant={"outline"}
-            size={"sm"}
-            className="rounded-2xl shadow-none"
-            onClick={handleLogin}
-          >
-            Log in
+          <Button asChild variant="outline" size="sm" className="rounded-2xl shadow-none">
+            <Link href={`/${PATHS.LOGIN}`}>Log in</Link>
           </Button>
         )}
       </nav>
@@ -397,7 +388,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 (role === "Visitor" ? (
                   <Button
                     variant={"default"}
-                    className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full"
+                    className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full bg-[#FFC800] hover:bg-[#f4c92c] text-[#222222]"
                     size={"sm"}
                     onClick={() => {
                       setIsOpen(false);
@@ -423,11 +414,11 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 </Button>
               ) : (
                 <Button
+                  asChild
                   variant="outline"
                   className="mt-6 border-[#007AFF] text-[#007AFF] hover:bg-[#007AFF]/10 rounded-full"
-                  onClick={handleLogin}
                 >
-                  Login
+                  <Link href={`/${PATHS.LOGIN}`}>Login</Link>
                 </Button>
               )}
             </div>

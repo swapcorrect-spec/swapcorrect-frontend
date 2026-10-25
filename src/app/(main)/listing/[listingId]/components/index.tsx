@@ -1674,12 +1674,12 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                         {listingData?.categoryName || "Unknown"}
                       </p>
                     </div>
-                    <div className="flex flex-col gap-2">
+                    {/* <div className="flex flex-col gap-2">
                       <p className="text-sm text-[#737373] font-normal">Date Listed</p>
                       <p className="text-xs font-medium text-[#222222]">
                         {formatDateTime(new Date())}
                       </p>
-                    </div>
+                    </div> */}
                   </TabsContent>
 
                   {/* Swap Guideline Tab */}
@@ -1897,7 +1897,7 @@ const ListingOverview: React.FC<ProductOverviewProps> = ({ listingId }) => {
                         onClick={handleSwapNow}
                         disabled={isStartingSwap || !!listingData?.isFlagged}
                         variant={"default"}
-                        className="rounded-full font-medium text-sm py-3 w-full"
+                        className="rounded-full font-medium text-sm py-3 w-full bg-[#007AFF] hover:bg-[#046ad6]"
                         size={"lg"}
                       >
                         {isStartingSwap ? "Starting..." : "Negotiate"}
