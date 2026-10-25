@@ -287,7 +287,7 @@ const Product: FC<Props> = (props) => {
         </div>
         {!isFlagged && (
           <Button
-            className="bg-[#222222] hover:bg-[#222222db] w-full rounded-lg mb-1.5"
+            className="bg-[#007AFF] hover:bg-[#046ad6] w-full rounded-lg mb-1.5"
             onClick={handleSwap}
             disabled={isStartingSwap || !listingId}
           >

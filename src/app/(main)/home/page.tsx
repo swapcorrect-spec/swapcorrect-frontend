@@ -91,13 +91,13 @@ const HomePage: FC = () => {
               </p>
               <Button
                 variant={"default"}
-                className="bg-[#222222] hover:bg-[#222222db] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
+                className="bg-[#007AFF] hover:bg-[#046ad6] mx-auto mt-8 rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-2 !h-auto w-fit"
                 size={"lg"}
                 onClick={handleBrowse}
               >
                 Browse MarketPlace
-                <span className="bg-white w-8 h-8 rounded-full flex items-center justify-center">
-                  <ArrowRight className="text-black" size={20} />
+                <span className="bg-white w-7 h-7 rounded-full flex items-center justify-center">
+                  <ArrowRight className="text-black" size={18} />
                 </span>
               </Button>
             </div>
@@ -270,13 +270,13 @@ const HomePage: FC = () => {
           </p>
           <Button
             variant="default"
-            className="mt-6 flex h-auto w-fit items-center gap-2 rounded-full bg-[#222222] px-3 py-2 text-sm font-medium hover:bg-[#222222db]"
+            className="mt-6 flex h-auto w-fit items-center gap-2 rounded-full bg-[#007AFF] hover:bg-[#046ad6] px-3 py-2 text-sm font-medium"
             size="lg"
             onClick={handleBrowse}
           >
             Browse MarketPlace
-            <span className="flex h-8 w-8 items-center justify-center rounded-full bg-white">
-              <ArrowRight className="text-black" size={20} />
+            <span className="flex h-7 w-7 items-center justify-center rounded-full bg-white">
+              <ArrowRight className="text-black" size={18} />
             </span>
           </Button>
         </div>

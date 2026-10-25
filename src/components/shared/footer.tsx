@@ -19,12 +19,6 @@ const Footer = () => {
             <Link href="#" className="text-white text-sm font-extralight hover:underline">
               Our Blog
             </Link>
-            <Link
-              href="/terms-and-conditions"
-              className="text-white text-sm font-extralight hover:underline"
-            >
-              Terms & Conditions
-            </Link>
           </div>
         </div>
 
@@ -39,6 +33,12 @@ const Footer = () => {
             </Link>
             <Link href="/faq" className="text-white text-sm font-extralight hover:underline">
               FAQ
+            </Link>
+            <Link
+              href="/terms-and-conditions"
+              className="text-white text-sm font-extralight hover:underline"
+            >
+              Terms & Conditions
             </Link>
           </div>
         </div>

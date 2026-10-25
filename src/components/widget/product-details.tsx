@@ -452,7 +452,7 @@ const ProductDetails: React.FC<iProps> = ({
                   onClick={handleSwapNow}
                   disabled={isStartingSwap || !listingId}
                   variant={"default"}
-                  className="bg-[#222222] hover:bg-[#222222db] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
+                  className="bg-[#007AFF] hover:bg-[#046ad6] rounded-lg font-medium text-xs sm:text-sm !h-8 sm:!h-10 py-1.5 w-full"
                   size={"lg"}
                 >
                   {isStartingSwap ? "Starting..." : "Swap Now"}

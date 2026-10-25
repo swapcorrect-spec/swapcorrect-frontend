@@ -35,7 +35,7 @@ import {
   useReadNotification,
 } from "@/app/_hooks/queries/notification/notification";
 import { useQueryClient } from "@tanstack/react-query";
-import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade_2.svg";
 import LogoutConfirmModal from "@/components/shared/logout-confirm-modal";
 import { useAuth } from "@/app/_context/auth-context";
 
@@ -388,7 +388,7 @@ const MobileNavbar: FC<Props> = ({ data, handleToggleSwapperUpgrade, role }) => 
                 (role === "Visitor" ? (
                   <Button
                     variant={"default"}
-                    className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full"
+                    className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full bg-[#FFC800] hover:bg-[#f4c92c] text-[#222222]"
                     size={"sm"}
                     onClick={() => {
                       setIsOpen(false);

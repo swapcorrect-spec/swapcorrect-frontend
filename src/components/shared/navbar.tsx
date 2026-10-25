@@ -4,7 +4,7 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 import Logo from "@/app/assets/images/svgs/logo.svg";
-import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade.svg";
+import SwapperUpgradeLogo from "@/app/assets/images/svgs/swapper_upgrade_2.svg";
 import Bell from "@/app/assets/images/svgs/Bell.svg";
 // import Search from "@/app/assets/images/svgs/Search.svg";
 import ArrowDown from "@/app/assets/images/svgs/arrow_down.svg";
@@ -370,7 +370,7 @@ const Navbar: React.FC<Props> = ({
           {role === "Visitor" ? (
             <Button
               variant={"default"}
-              className="rounded-full font-medium text-sm py-3 !px-[11px] flex items-center gap-1 !h-auto w-full"
+              className="rounded-full font-medium text-sm py-2 !px-[11px] flex items-center gap-1 !h-auto w-full bg-[#FFC800] hover:bg-[#f4c92c] text-[#222222]"
               size={"lg"}
               onClick={handleToggleSwapperUpgrade}
             >
